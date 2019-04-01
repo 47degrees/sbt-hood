@@ -1,0 +1,73 @@
+language: scala
+jdk:
+  - oraclejdk8
+scala:
+  - 2.11.12
+  - 2.12.8
+before_cache:
+  - du -h -d 1 $HOME/.ivy2/
+  - du -h -d 2 $HOME/.sbt/
+  - du -h -d 4 $HOME/.coursier/
+  - find $HOME/.sbt -name "*.lock" -type f -delete
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
+cache:
+  directories:
+  - "$HOME/.sbt/cache"
+  - "$HOME/.sbt/1.0"
+  - "$HOME/.sbt/boot/"
+  - "$HOME/.sbt/boot/scala*"
+  - "$HOME/.sbt/launchers"
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.ivy2"
+before_install:
+  - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then openssl aes-256-cbc -K $encrypted_8d91199f8619_key -iv $encrypted_8d91199f8619_iv -in secring.gpg.enc -out secring.gpg -d; fi
+install:
+  - rvm use 2.3.0 --install --fuzzy
+  - gem install sass
+  - gem install jekyll -v 3.2.1
+script:
+  - curl -s https://codecov.io/bash > .codecov
+  - sed -i -e 's/TRAVIS_.*_VERSION/^TRAVIS_.*_VERSION=/' .codecov
+  - chmod +x .codecov
+  - if [ $TRAVIS_SCALA_VERSION = "2.12.8" ]; then sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut; fi
+  - if [ $TRAVIS_SCALA_VERSION = "2.12.8" ]; then ./.codecov -X gcov; fi
+  - if [ $TRAVIS_SCALA_VERSION = "2.11.12" ]; then sbt ++$TRAVIS_SCALA_VERSION clean test; fi
+stages:
+- test
+- plugin
+- deploy
+- microsite
+jobs:
+  include:
+    - stage: plugin
+      scala: 2.12.8
+      script:
+        - sbt ++$TRAVIS_SCALA_VERSION sbt-hood-core/test
+        - sbt ++$TRAVIS_SCALA_VERSION sbt-hood-plugin/test
+        - sbt ++$TRAVIS_SCALA_VERSION publishLocal sbt-hood-plugin/publishLocal sbt-hood-plugin/scripted
+    - stage: deploy
+      scala: 2.12.8
+      if: branch = master AND type != pull_request
+      script:
+        - if grep -q "SNAPSHOT" version.sbt; then
+            sbt +publish;
+            sbt sbt-hood-plugin/publish;
+          else
+            sbt orgUpdateDocFiles;
+            git reset --hard HEAD;
+            git clean -f;
+            git checkout master;
+            git pull origin master;
+            sbt ";project sbt-hood-plugin;release";
+            sbt release;
+          fi
+    - stage: microsite
+      scala: 2.12.8
+      if: branch = master AND type != pull_request
+      script:
+        - if grep -q "SNAPSHOT" version.sbt; then
+            echo "Skipping microsite publication, snapshot version";
+          else
+            echo "Not ready yet!";
+            #sbt docs/publishMicrosite;
+          fi
