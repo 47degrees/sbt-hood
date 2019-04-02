@@ -7,7 +7,6 @@ pgpSecretRing := file(s"$gpgFolder/secring.gpg")
 lazy val `sbt-hood-core` = project
   .in(file("modules/core"))
   .settings(moduleName := "sbt-hood-core")
-  .settings(idlGenSettings)
 
 lazy val `sbt-hood-plugin` = project
   .in(file("modules/plugin"))

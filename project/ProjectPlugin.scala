@@ -24,14 +24,12 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-    val scala: String     = "2.12.8"
-    val scalatest: String = "3.0.6"
-    val slf4j: String     = "1.7.26"
+      val kindProjector: String = "0.9.9"
+      val paradise: String      = "2.1.1"
+      val scala: String         = "2.12.8"
+      val scalatest: String     = "3.0.6"
+      val slf4j: String         = "1.7.26"
     }
-
-    lazy val idlGenSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq()
-    )
 
     lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
       scriptedLaunchOpts := {
@@ -96,6 +94,8 @@ object ProjectPlugin extends AutoPlugin {
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
       resolvers ++= Seq(Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots")),
+      addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
+      addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
       libraryDependencies ++= Seq(
         %%("scalatest", V.scalatest) % "test",
         %("slf4j-nop", V.slf4j)      % Test
