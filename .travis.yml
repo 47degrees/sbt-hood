@@ -59,6 +59,5 @@ jobs:
         - if grep -q "SNAPSHOT" version.sbt; then
             echo "Skipping microsite publication, snapshot version";
           else
-            echo "Not ready yet!";
-            #sbt docs/publishMicrosite;
+            echo "Not ready yet! (sbt docs/publishMicrosite)";
           fi
