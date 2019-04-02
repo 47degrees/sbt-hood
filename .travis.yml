@@ -37,7 +37,7 @@ jobs:
     - stage: plugin
       script:
         - sbt ++$TRAVIS_SCALA_VERSION sbt-hood-plugin/test
-        - sbt ++$TRAVIS_SCALA_VERSION publishLocal sbt-hood-plugin/publishLocal sbt-hood-plugin/scripted
+        - sbt ++$TRAVIS_SCALA_VERSION sbt-hood-plugin/scripted
     - stage: deploy
       if: branch = master AND type != pull_request
       script:
