@@ -50,15 +50,6 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val crossSettings: Seq[Def.Setting[_]] = Seq(
-      unmanagedSourceDirectories in Compile += {
-        baseDirectory.value.getParentFile / "shared" / "src" / "main" / "scala"
-      },
-      unmanagedSourceDirectories in Test += {
-        baseDirectory.value.getParentFile / "shared" / "src" / "test" / "scala"
-      }
-    )
-
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
       micrositeName := "sbt-hood",
       micrositeBaseUrl := "/sbthood",
@@ -97,7 +88,7 @@ object ProjectPlugin extends AutoPlugin {
       startYear := Some(2019),
       orgProjectName := "sbt-hood",
       scalaVersion := V.scala,
-      crossScalaVersions := Seq("2.11.12", V.scala),
+      crossScalaVersions := Seq(V.scala),
       scalacOptions ++= scalacAdvancedOptions,
       scalacOptions ~= (_ filterNot Set("-Yliteral-types", "-Xlint").contains),
       Test / fork := true,
@@ -114,13 +105,13 @@ object ProjectPlugin extends AutoPlugin {
       // format: OFF
       orgMaintainersSetting := List(Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
       orgBadgeListSetting := List(
-          GitterBadge.apply(_),
-          TravisBadge.apply(_),
-          CodecovBadge.apply(_),
-          MavenCentralBadge.apply(_),
-          LicenseBadge.apply(_),
-          ScalaLangBadge.apply(_),
-          GitHubIssuesBadge.apply(_)
+          GitterBadge.apply,
+          TravisBadge.apply,
+          CodecovBadge.apply,
+          MavenCentralBadge.apply,
+          LicenseBadge.apply,
+          ScalaLangBadge.apply,
+          GitHubIssuesBadge.apply
       )
     )
   // format: ON
