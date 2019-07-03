@@ -29,6 +29,7 @@ object ProjectPlugin extends AutoPlugin {
       val scala: String         = "2.12.8"
       val scalatest: String     = "3.0.6"
       val slf4j: String         = "1.7.26"
+      val circe:String = "0.11.1"
     }
 
     lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
@@ -97,6 +98,9 @@ object ProjectPlugin extends AutoPlugin {
       addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
       addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
       libraryDependencies ++= Seq(
+        "io.circe"                       %% "circe-generic"           % V.circe,
+        "io.circe"                       %% "circe-core"         % V.circe,
+        "io.circe"                       %% "circe-parser"    % V.circe,
         %%("scalatest", V.scalatest) % "test",
         %("slf4j-nop", V.slf4j)      % Test
       )
