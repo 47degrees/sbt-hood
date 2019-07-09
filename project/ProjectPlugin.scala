@@ -98,8 +98,8 @@ object ProjectPlugin extends AutoPlugin {
       addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
       addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
       libraryDependencies ++= Seq(
-        "io.circe"                       %% "circe-generic"           % V.circe,
-        "io.circe"                       %% "circe-core"         % V.circe,
+        "io.circe"                       %% "circe-generic"   % V.circe,
+        "io.circe"                       %% "circe-core"      % V.circe,
         "io.circe"                       %% "circe-parser"    % V.circe,
         %%("scalatest", V.scalatest) % "test",
         %("slf4j-nop", V.slf4j)      % Test
