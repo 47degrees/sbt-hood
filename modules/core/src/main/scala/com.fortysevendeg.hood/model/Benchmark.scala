@@ -18,40 +18,10 @@ package com.fortysevendeg.hood.model
 
 import io.circe._
 import io.circe.generic.semiauto._
-import cats.syntax.either._
-
-sealed trait BenchmarkMode
-case object Throughput     extends BenchmarkMode
-case object AverageTime    extends BenchmarkMode
-case object SampleTime     extends BenchmarkMode
-case object SingleShotTime extends BenchmarkMode
-case object All            extends BenchmarkMode
-
-object BenchmarkMode {
-  implicit val modeEncoder: Encoder[BenchmarkMode] = new Encoder[BenchmarkMode] {
-    final def apply(mode: BenchmarkMode): Json =
-      Json.fromString(mode match {
-        case Throughput     => "throughput"
-        case AverageTime    => "averageTime"
-        case SampleTime     => "sampleTime"
-        case SingleShotTime => "singleShotTime"
-        case All            => "all"
-      })
-  }
-
-  implicit val modeDecoder: Decoder[BenchmarkMode] = Decoder.decodeString.emap {
-    case "throughput"     => Either.right(Throughput)
-    case "averageTime"    => Either.right(AverageTime)
-    case "sampleTime"     => Either.right(SampleTime)
-    case "singleShotTime" => Either.right(SingleShotTime)
-    case "all"            => Either.right(All)
-    case _                => Either.left("Invalid benchmark mode")
-  }
-}
 
 final case class Benchmark(
     benchmark: String,
-    mode: BenchmarkMode,
+    mode: String,
     primaryMetric: PrimaryMetric
 )
 
