@@ -40,9 +40,10 @@ trait GithubService[F[_]] {
 
 object GithubService {
 
-  def build[F[_]](implicit S: Sync[F]): F[GithubService[F]] = S.delay(new GithubServiceImpl[F])
+  def build[F[_]](implicit S: Sync[F]): GithubService[F] = new GithubServiceImpl[F]
 
-  class GithubServiceImpl[F[_]](implicit S: Sync[F], F: Functor[F]) extends GithubService[F] {
+  class GithubServiceImpl[F[_]: Sync: Functor] extends GithubService[F] {
+
     def publishComment(
         accessToken: String,
         owner: String,
@@ -56,17 +57,13 @@ object GithubService {
           .createComment(owner, repository, pullRequestNumber, comment)
           .exec()
           .onError { case e => logger.error(e)("Found error while accessing GitHub API.") }
-
+          .map { _ =>
+            Right(())
+          }
+        _ <- logger.info("Comment sent to GitHub successfully.")
       } yield result
-
-      F.map(
-        Github(Some(accessToken)).issues
-          .createComment(owner, repository, pullRequestNumber, comment)
-          .exec()) { result =>
-        result
-          .map(_ => ())
-      }
     }
+
   }
 
 }
