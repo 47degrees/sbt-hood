@@ -40,7 +40,7 @@ trait GithubService[F[_]] {
 
 object GithubService {
 
-  def build[F[_]](implicit S: Sync[F], L: Logger[F]): GithubService[F] = new GithubServiceImpl[F]
+  def build[F[_]: Sync: Logger]: GithubService[F] = new GithubServiceImpl[F]
 
   class GithubServiceImpl[F[_]: Sync: Functor](implicit L: Logger[F]) extends GithubService[F] {
 
