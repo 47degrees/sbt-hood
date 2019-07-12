@@ -29,7 +29,10 @@ object ProjectPlugin extends AutoPlugin {
       val scala: String         = "2.12.8"
       val scalatest: String     = "3.0.6"
       val slf4j: String         = "1.7.26"
-      val circe:String = "0.11.1"
+      val circe: String         = "0.11.1"
+      val github4s: String      = "0.20.1"
+      val cats: String          = "2.0.0-M1"
+      val log4cats: String      = "0.4.0-M1"
     }
 
     lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
@@ -98,9 +101,13 @@ object ProjectPlugin extends AutoPlugin {
       addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
       addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
       libraryDependencies ++= Seq(
-        "io.circe"                       %% "circe-generic"   % V.circe,
-        "io.circe"                       %% "circe-core"      % V.circe,
-        "io.circe"                       %% "circe-parser"    % V.circe,
+        "io.circe"          %% "circe-generic"          % V.circe,
+        "io.circe"          %% "circe-core"             % V.circe,
+        "io.circe"          %% "circe-parser"           % V.circe,
+        "com.47deg"         %% "github4s"               % V.github4s,
+        "com.47deg"         %% "github4s-cats-effect"   % V.github4s,
+        "org.typelevel"     %% "cats-effect"            % V.cats,
+        "io.chrisdavenport" %% "log4cats-slf4j"         % V.log4cats,
         %%("scalatest", V.scalatest) % "test",
         %("slf4j-nop", V.slf4j)      % Test
       )

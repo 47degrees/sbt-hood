@@ -26,7 +26,7 @@ final case class Benchmark(
 )
 
 object Benchmark {
-  implicit val benchmarkDecoder: Decoder[Benchmark]  = deriveDecoder[Benchmark]
+  implicit val benchmarkDecoder: Decoder[Benchmark] = deriveDecoder[Benchmark]
   implicit val benchmarkEncoder: Encoder[Benchmark] = deriveEncoder[Benchmark]
 }
 
