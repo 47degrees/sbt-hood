@@ -23,7 +23,7 @@ import github4s.Github
 import github4s.Github._
 import github4s.cats.effect.jvm.Implicits._
 import cats.implicits._
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import io.chrisdavenport.log4cats.Logger
 
 trait GithubService[F[_]] {
 
@@ -40,9 +40,9 @@ trait GithubService[F[_]] {
 
 object GithubService {
 
-  def build[F[_]](implicit S: Sync[F]): GithubService[F] = new GithubServiceImpl[F]
+  def build[F[_]](implicit S: Sync[F], L: Logger[F]): GithubService[F] = new GithubServiceImpl[F]
 
-  class GithubServiceImpl[F[_]: Sync: Functor] extends GithubService[F] {
+  class GithubServiceImpl[F[_]: Sync: Functor](implicit L: Logger[F]) extends GithubService[F] {
 
     def publishComment(
         accessToken: String,
@@ -52,15 +52,14 @@ object GithubService {
         comment: String): F[GithubPublishResult] = {
 
       for {
-        logger <- Slf4jLogger.create[F]
         result <- Github(Some(accessToken)).issues
           .createComment(owner, repository, pullRequestNumber, comment)
           .exec()
-          .onError { case e => logger.error(e)("Found error while accessing GitHub API.") }
+          .onError { case e => L.error(e)("Found error while accessing GitHub API.") }
           .map { _ =>
             Right(())
           }
-        _ <- logger.info("Comment sent to GitHub successfully.")
+        _ <- L.info("Comment sent to GitHub successfully.")
       } yield result
     }
 
