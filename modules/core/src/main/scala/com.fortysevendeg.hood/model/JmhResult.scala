@@ -16,34 +16,24 @@
 
 package com.fortysevendeg.hood.model
 
-import io.circe._
-import io.circe.generic.semiauto._
-
-trait BenchmarkLike[A] {
-  def toBenchmark(src: A): Benchmark
-}
-
-final case class Benchmark(
+case class JmhResult(
     benchmark: String,
     mode: String,
-    primaryMetric: PrimaryMetric
-)
-
-object Benchmark {
-  implicit val benchmarkDecoder: Decoder[Benchmark] = deriveDecoder[Benchmark]
-  implicit val benchmarkEncoder: Encoder[Benchmark] = deriveEncoder[Benchmark]
-}
-
-final case class PrimaryMetric(
+    threads: Int,
+    samples: Int,
     score: Double,
     scoreError: Double,
-    scoreUnit: String,
-    rawData: List[List[Double]]
-)
+    unit: String) {
 
-object PrimaryMetric {
-  implicit val primaryMetricDecode: Decoder[PrimaryMetric] =
-    deriveDecoder[PrimaryMetric]
-  implicit val primaryMetricEncoder: Encoder[PrimaryMetric] =
-    deriveEncoder[PrimaryMetric]
+  def toBenchmark(): Benchmark =
+    Benchmark(
+      benchmark,
+      mode,
+      PrimaryMetric(
+        score,
+        scoreError,
+        unit,
+        List.empty
+      )
+    )
 }
