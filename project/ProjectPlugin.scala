@@ -111,8 +111,8 @@ object ProjectPlugin extends AutoPlugin {
         "org.typelevel"              %% "cats-effect"            % V.cats,
         "io.chrisdavenport"          %% "log4cats-slf4j"         % V.log4cats,
         "ch.qos.logback"              % "logback-classic"        % V.logbackClassic,
-        "com.nrinaudo"              %% "kantan.csv"              % V.kantan,
-        "com.nrinaudo"              %% "kantan.csv-generic"      % V.kantan,
+        "com.nrinaudo"               %% "kantan.csv"             % V.kantan,
+        "com.nrinaudo"               %% "kantan.csv-generic"     % V.kantan,
         %%("scalatest", V.scalatest) % "test",
         %("slf4j-nop", V.slf4j)      % Test
       )
