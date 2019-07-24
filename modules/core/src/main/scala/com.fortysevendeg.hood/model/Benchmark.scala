@@ -19,10 +19,6 @@ package com.fortysevendeg.hood.model
 import io.circe._
 import io.circe.generic.semiauto._
 
-trait BenchmarkLike[A] {
-  def toBenchmark(src: A): Benchmark
-}
-
 final case class Benchmark(
     benchmark: String,
     mode: String,

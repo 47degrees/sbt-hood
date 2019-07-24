@@ -16,52 +16,38 @@
 
 package com.fortysevendeg.hood.benchmark
 
-import cats.effect.Sync
 import com.fortysevendeg.hood.model.Benchmark
+import scala.math.abs
 
-sealed trait BenchmarkComparisonStatus
-case object OK      extends BenchmarkComparisonStatus
-case object Warning extends BenchmarkComparisonStatus
-case object Error   extends BenchmarkComparisonStatus
+sealed trait BenchmarkComparisonStatus extends Product with Serializable
+case object OK                         extends BenchmarkComparisonStatus
+case object Warning                    extends BenchmarkComparisonStatus
+case object Error                      extends BenchmarkComparisonStatus
 
-case class BenchmarkComparisonResult(
+final case class BenchmarkComparisonResult(
     previous: Benchmark,
     current: Benchmark,
     result: BenchmarkComparisonStatus)
 
-trait BenchmarkService[F[_]] {
+object BenchmarkService {
 
   def compare(
       currentBenchmark: Benchmark,
       previousBenchmark: Benchmark,
-      threshold: Double): F[BenchmarkComparisonResult]
+      threshold: Double): BenchmarkComparisonResult = {
 
-}
+    val status =
+      currentBenchmark.primaryMetric.score - previousBenchmark.primaryMetric.score match {
+        case comp if comp > 0               => OK
+        case comp if abs(comp) <= threshold => Warning
+        case _                              => Error
+      }
 
-object BenchmarkService {
-
-  def build[F[_]: Sync]: BenchmarkService[F] = new BenchmarkServiceImpl[F]
-
-  class BenchmarkServiceImpl[F[_]](implicit S: Sync[F]) extends BenchmarkService[F] {
-
-    def compare(
-        currentBenchmark: Benchmark,
-        previousBenchmark: Benchmark,
-        threshold: Double): F[BenchmarkComparisonResult] = S.delay {
-
-      val status =
-        currentBenchmark.primaryMetric.score - previousBenchmark.primaryMetric.score match {
-          case comp if comp > 0           => OK
-          case comp if comp >= -threshold => Warning
-          case _                          => Error
-        }
-
-      BenchmarkComparisonResult(
-        previousBenchmark,
-        currentBenchmark,
-        status
-      )
-    }
+    BenchmarkComparisonResult(
+      previousBenchmark,
+      currentBenchmark,
+      status
+    )
   }
 
 }

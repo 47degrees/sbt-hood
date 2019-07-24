@@ -16,7 +16,7 @@
 
 package com.fortysevendeg.hood.model
 
-case class JmhResult(
+final case class JmhResult(
     benchmark: String,
     mode: String,
     threads: Int,

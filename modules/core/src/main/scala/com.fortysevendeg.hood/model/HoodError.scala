@@ -16,5 +16,5 @@
 
 package com.fortysevendeg.hood.model
 
-sealed trait HoodError
-case class InvalidCsv(message: String) extends HoodError
+sealed trait HoodError                       extends Product with Serializable
+final case class InvalidCsv(message: String) extends HoodError

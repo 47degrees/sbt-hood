@@ -18,7 +18,6 @@ package com.fortysevendeg.hood.csv
 
 import java.io.File
 
-import cats.data.EitherT
 import cats.effect.Sync
 import com.fortysevendeg.hood.model._
 import kantan.csv._
@@ -31,7 +30,7 @@ import scala.io.Source
 
 trait CsvService[F[_]] {
 
-  def parseBenchmark(csvPath: File): F[Either[HoodError, List[Benchmark]]]
+  def parseBenchmark(csvFile: File): F[Either[HoodError, List[Benchmark]]]
 
 }
 
@@ -41,30 +40,31 @@ object CsvService {
 
   class CsvServiceImpl[F[_]](implicit S: Sync[F], L: Logger[F]) extends CsvService[F] {
 
-    def parseBenchmark(csvPath: File): F[Either[HoodError, List[Benchmark]]] =
-      (for {
-        file   <- EitherT.right(S.delay(Source.fromFile(csvPath)))
-        result <- parseCsvLines(file.getLines().drop(1))
-        benchmarks = result.map(_.toBenchmark())
-        _          = file.close()
-      } yield benchmarks).value
+    def parseBenchmark(csvFile: File): F[Either[HoodError, List[Benchmark]]] =
+      for {
+        file <- S.delay(Source.fromFile(csvFile))
+        benchmarks = parseCsvLines(file.getLines().drop(1))
+        _ <- S.delay(file.close())
+      } yield benchmarks
 
-    private[this] def parseCsvLines[F[_]](rawData: Iterator[String])(
-        implicit S: Sync[F],
-        L: Logger[F]): EitherT[F, HoodError, List[JmhResult]] = EitherT {
-      S.delay {
-        val result = rawData
-          .map(_.asCsvReader[JmhResult](rfc.withoutHeader).toList)
-          .toList
-
-        result.flatten.sequence
-          .leftMap[HoodError] { e =>
-            L.error(s"Found error while loading CSV file: ${e.getMessage}")
-            InvalidCsv(e.getMessage)
-          }
-      }
-
+    private[this] def parseCsvLines(
+        rawData: Iterator[String]): Either[HoodError, List[Benchmark]] = {
+      rawData
+        .flatMap(
+          _.asCsvReader[JmhResult](rfc.withoutHeader)
+        )
+        .map(
+          result =>
+            result
+              .map(_.toBenchmark())
+              .leftMap[HoodError] { e =>
+                L.error(s"Found error while loading CSV file: ${e.getMessage}")
+                InvalidCsv(e.getMessage)
+            })
+        .toList
+        .sequence
     }
+
   }
 
 }
