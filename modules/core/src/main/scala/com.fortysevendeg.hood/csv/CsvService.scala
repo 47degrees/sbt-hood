@@ -18,7 +18,7 @@ package com.fortysevendeg.hood.csv
 
 import java.io.File
 
-import cats.effect.Sync
+import cats.effect.{Resource, Sync}
 import com.fortysevendeg.hood.model._
 import kantan.csv._
 import kantan.csv.ops._
@@ -26,7 +26,7 @@ import kantan.csv.generic._
 import cats.implicits._
 import io.chrisdavenport.log4cats.Logger
 
-import scala.io.Source
+import scala.io.{BufferedSource, Source}
 
 trait CsvService[F[_]] {
 
@@ -41,11 +41,13 @@ object CsvService {
   class CsvServiceImpl[F[_]](implicit S: Sync[F], L: Logger[F]) extends CsvService[F] {
 
     def parseBenchmark(csvFile: File): F[Either[HoodError, List[Benchmark]]] =
-      for {
-        file <- S.delay(Source.fromFile(csvFile))
-        benchmarks = parseCsvLines(file.getLines().drop(1))
-        _ <- S.delay(file.close())
-      } yield benchmarks
+      openFile(csvFile).use(data => S.pure(parseCsvLines(data.getLines().drop(1))))
+
+    private[this] def openFile(file: File): Resource[F, BufferedSource] =
+      Resource(S.delay {
+        val fileBuffer = Source.fromFile(file)
+        (fileBuffer, S.delay(fileBuffer.close()))
+      })
 
     private[this] def parseCsvLines(
         rawData: Iterator[String]): Either[HoodError, List[Benchmark]] = {
@@ -58,7 +60,6 @@ object CsvService {
             result
               .map(_.toBenchmark())
               .leftMap[HoodError] { e =>
-                L.error(s"Found error while loading CSV file: ${e.getMessage}")
                 InvalidCsv(e.getMessage)
             })
         .toList
