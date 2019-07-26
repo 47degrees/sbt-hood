@@ -34,6 +34,7 @@ object ProjectPlugin extends AutoPlugin {
       val cats: String            = "2.0.0-M1"
       val log4cats: String        = "0.4.0-M1"
       val logbackClassic: String  = "1.2.3"
+      val kantan: String          = "0.5.1"
     }
 
     lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
@@ -110,6 +111,8 @@ object ProjectPlugin extends AutoPlugin {
         "org.typelevel"              %% "cats-effect"            % V.cats,
         "io.chrisdavenport"          %% "log4cats-slf4j"         % V.log4cats,
         "ch.qos.logback"              % "logback-classic"        % V.logbackClassic,
+        "com.nrinaudo"               %% "kantan.csv"             % V.kantan,
+        "com.nrinaudo"               %% "kantan.csv-generic"     % V.kantan,
         %%("scalatest", V.scalatest) % "test",
         %("slf4j-nop", V.slf4j)      % Test
       )
