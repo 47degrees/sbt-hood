@@ -22,7 +22,7 @@ import github4s.Github._
 import github4s.cats.effect.jvm.Implicits._
 import cats.implicits._
 import github4s.GithubResponses.GHResponse
-import github4s.free.domain.{Comment, Status}
+import github4s.free.domain.Comment
 import io.chrisdavenport.log4cats.Logger
 
 trait GithubService[F[_]] {
@@ -41,11 +41,11 @@ trait GithubService[F[_]] {
       commentId: Int,
       comment: String): F[GHResponse[Comment]]
 
-  /*def createStatus(
-                    accessToken: String,
-                    owner: String,
-                    repository: String,
-                    state: String): F[GHResponse[Status]]*/
+  def listComments(
+      accessToken: String,
+      owner: String,
+      repository: String,
+      pullRequestNumber: Int): F[GHResponse[List[Comment]]]
 
 }
 
@@ -60,8 +60,7 @@ object GithubService {
         owner: String,
         repository: String,
         pullRequestNumber: Int,
-        comment: String): F[GHResponse[Comment]] = {
-
+        comment: String): F[GHResponse[Comment]] =
       for {
         result <- Github(Some(accessToken)).issues
           .createComment(owner, repository, pullRequestNumber, comment)
@@ -69,15 +68,13 @@ object GithubService {
           .onError { case e => L.error(e)("Found error while accessing GitHub API.") }
         _ <- L.info("Comment sent to GitHub successfully.")
       } yield result
-    }
 
     def editComment(
         accessToken: String,
         owner: String,
         repository: String,
         commentId: Int,
-        comment: String): F[GHResponse[Comment]] = {
-
+        comment: String): F[GHResponse[Comment]] =
       for {
         result <- Github(Some(accessToken)).issues
           .editComment(owner, repository, commentId, comment)
@@ -85,22 +82,18 @@ object GithubService {
           .onError { case e => L.error(e)("Found error while accessing GitHub API.") }
         _ <- L.info("Comment edited successfully.")
       } yield result
-    }
 
-    /*def createStatus(
-                      accessToken: String,
-                      owner: String,
-                      repository: String,
-                      pullRequestNumber: Int,
-                      state: String): F[GHResponse[Status]] = {
+    def listComments(
+        accessToken: String,
+        owner: String,
+        repository: String,
+        pullRequestNumber: Int): F[GHResponse[List[Comment]]] =
       for {
-        pull <- Github(Some(accessToken)).pullRequests.get(owner, repository, pullRequestNumber)
-        lastSha = pull.map(_.result.)
-
-
-      } yield ()
-
-    }*/
+        result <- Github(Some(accessToken)).issues
+          .listComments(owner, repository, pullRequestNumber)
+          .exec()
+          .onError { case e => L.error(e)("Found error while accessing GitHub API.") }
+      } yield result
 
   }
 
