@@ -32,7 +32,12 @@ class CsvServiceTests extends FlatSpec with Matchers {
   "CsvService" should "parse a correct CSV file" in {
     val dataFile = new File(getClass.getResource("/jmh.csv").getPath)
 
-    val result = CsvService.build[IO].parseBenchmark(dataFile).unsafeRunSync()
+    val result = CsvService
+      .build[IO]
+      .parseBenchmark("Benchmark", "Mode", "Score", "Score Error (99.9%)", "Unit")(dataFile)
+      .unsafeRunSync()
+
+    println(s"Result: ${result}")
 
     result.isRight shouldBe true
     result.map { list =>
@@ -43,7 +48,10 @@ class CsvServiceTests extends FlatSpec with Matchers {
   it should "return an error when loading an invalid CSV file" in {
     val dataFile = new File(getClass.getResource("/invalid_jmh.csv").getPath)
 
-    val result = CsvService.build[IO].parseBenchmark(dataFile).unsafeRunSync()
+    val result = CsvService
+      .build[IO]
+      .parseBenchmark("Benchmark", "Mode", "Score", "Score Error (99.9%)", "Unit")(dataFile)
+      .unsafeRunSync()
 
     result.isLeft shouldBe true
     result.leftMap(_.isInstanceOf[InvalidCsv] shouldBe true)

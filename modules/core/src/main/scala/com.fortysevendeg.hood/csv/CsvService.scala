@@ -30,7 +30,12 @@ import scala.io.{BufferedSource, Source}
 
 trait CsvService[F[_]] {
 
-  def parseBenchmark(csvFile: File): F[Either[HoodError, List[Benchmark]]]
+  def parseBenchmark(
+      keyCol: String,
+      modeCol: String,
+      compareCol: String,
+      thresholdCol: String,
+      unitsCol: String)(csvFile: File): F[Either[HoodError, List[Benchmark]]]
 
 }
 
@@ -40,8 +45,15 @@ object CsvService {
 
   class CsvServiceImpl[F[_]](implicit S: Sync[F], L: Logger[F]) extends CsvService[F] {
 
-    def parseBenchmark(csvFile: File): F[Either[HoodError, List[Benchmark]]] =
-      openFile(csvFile).use(data => S.pure(parseCsvLines(data.getLines().drop(1))))
+    def parseBenchmark(
+        keyCol: String,
+        modeCol: String,
+        compareCol: String,
+        thresholdCol: String,
+        unitsCol: String)(csvFile: File): F[Either[HoodError, List[Benchmark]]] =
+      openFile(csvFile).use(data =>
+        S.pure(
+          parseCsvLinesHeaders(data.mkString, keyCol, modeCol, compareCol, thresholdCol, unitsCol)))
 
     private[this] def openFile(file: File): Resource[F, BufferedSource] =
       Resource(S.delay {
@@ -49,12 +61,26 @@ object CsvService {
         (fileBuffer, S.delay(fileBuffer.close()))
       })
 
-    private[this] def parseCsvLines(
-        rawData: Iterator[String]): Either[HoodError, List[Benchmark]] = {
+    private[this] def parseCsvLinesHeaders(
+        rawData: String,
+        keyCol: String,
+        modeCol: String,
+        compareCol: String,
+        thresholdCol: String,
+        unitsCol: String
+    ): Either[HoodError, List[Benchmark]] = {
+
+      implicit val decoder: HeaderDecoder[JmhResult] = HeaderDecoder.decoder(
+        keyCol,
+        modeCol,
+        "Threads",
+        "Samples",
+        compareCol,
+        thresholdCol,
+        unitsCol)(JmhResult.apply _)
+
       rawData
-        .flatMap(
-          _.asCsvReader[JmhResult](rfc.withoutHeader)
-        )
+        .asCsvReader[JmhResult](rfc.withHeader)
         .map(
           result =>
             result
