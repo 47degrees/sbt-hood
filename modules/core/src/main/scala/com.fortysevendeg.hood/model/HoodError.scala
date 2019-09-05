@@ -19,3 +19,4 @@ package com.fortysevendeg.hood.model
 sealed trait HoodError                                    extends Product with Serializable
 final case class InvalidCsv(message: String)              extends HoodError
 final case class MissingCurrentBenchmark(message: String) extends HoodError
+final case class BenchmarkLoadingError(message: String)   extends HoodError

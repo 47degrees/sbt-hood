@@ -51,9 +51,19 @@ object CsvService {
         compareCol: String,
         thresholdCol: String,
         unitsCol: String)(csvFile: File): F[Either[HoodError, List[Benchmark]]] =
-      openFile(csvFile).use(data =>
-        S.pure(
-          parseCsvLinesHeaders(data.mkString, keyCol, modeCol, compareCol, thresholdCol, unitsCol)))
+      openFile(csvFile).attempt
+        .use(fileData =>
+          S.pure(for {
+            data <- fileData
+              .leftMap[HoodError](e => BenchmarkLoadingError(e.getMessage))
+            result <- parseCsvLinesHeaders(
+              data.mkString,
+              keyCol,
+              modeCol,
+              compareCol,
+              thresholdCol,
+              unitsCol)
+          } yield result))
 
     private[this] def openFile(file: File): Resource[F, BufferedSource] =
       Resource(S.delay {

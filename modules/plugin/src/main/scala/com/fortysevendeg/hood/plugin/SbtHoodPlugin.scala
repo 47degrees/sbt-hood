@@ -23,7 +23,7 @@ import cats.effect.{Console, IO, Sync}
 import com.fortysevendeg.hood.benchmark.{BenchmarkComparisonResult, BenchmarkService, Warning}
 import com.fortysevendeg.hood.csv.CsvService
 import com.fortysevendeg.hood.model.{Benchmark, HoodError}
-import sbt.{AutoPlugin, Def, PluginTrigger}
+import sbt.{AutoPlugin, Def, PluginTrigger, Task}
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import cats.effect.Console.implicits._
@@ -33,7 +33,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
   override def projectSettings: Seq[Def.Setting[_]] = defaultSettings
   override val trigger: PluginTrigger               = noTrigger
 
-  compareBenchmarks := {
+  def compareBenchmarksTask: Def.Initialize[Task[Unit]] = Def.task {
 
     implicit val logger = Slf4jLogger.getLogger[IO]
 
@@ -47,7 +47,9 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       unitsColumnName.value,
       generalThreshold.value,
       benchmarkThreshold.value
-    ).value
+    ).leftFlatMap(e =>
+        EitherT.left[List[BenchmarkComparisonResult]](logger.error(s"There was an error: $e")))
+      .value
       .unsafeRunSync()
 
     ()

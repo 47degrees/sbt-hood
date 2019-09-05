@@ -18,6 +18,7 @@ package com.fortysevendeg.hood.plugin
 
 import sbt._
 import Keys._
+import com.fortysevendeg.hood.plugin.SbtHoodPlugin._
 
 trait SbtHoodKeys {
 
@@ -71,7 +72,8 @@ trait SbtHoodDefaultSettings extends SbtHoodKeys {
     modeColumnName := "Mode",
     unitsColumnName := "Unit",
     generalThreshold := None,
-    benchmarkThreshold := Map.empty
+    benchmarkThreshold := Map.empty,
+    compareBenchmarks := compareBenchmarksTask.value
   )
 
 }
