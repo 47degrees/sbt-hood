@@ -28,14 +28,17 @@ import io.chrisdavenport.log4cats.Logger
 
 import scala.io.{BufferedSource, Source}
 
+case class BenchmarkColumns(
+    keyCol: String,
+    modeCol: String,
+    compareCol: String,
+    thresholdCol: String,
+    unitsCol: String)
+
 trait CsvService[F[_]] {
 
-  def parseBenchmark(
-      keyCol: String,
-      modeCol: String,
-      compareCol: String,
-      thresholdCol: String,
-      unitsCol: String)(csvFile: File): F[Either[HoodError, List[Benchmark]]]
+  def parseBenchmark(columns: BenchmarkColumns)(
+      csvFile: File): F[Either[HoodError, List[Benchmark]]]
 
 }
 
@@ -45,24 +48,14 @@ object CsvService {
 
   class CsvServiceImpl[F[_]](implicit S: Sync[F], L: Logger[F]) extends CsvService[F] {
 
-    def parseBenchmark(
-        keyCol: String,
-        modeCol: String,
-        compareCol: String,
-        thresholdCol: String,
-        unitsCol: String)(csvFile: File): F[Either[HoodError, List[Benchmark]]] =
+    def parseBenchmark(columns: BenchmarkColumns)(
+        csvFile: File): F[Either[HoodError, List[Benchmark]]] =
       openFile(csvFile).attempt
         .use(fileData =>
           S.pure(for {
             data <- fileData
               .leftMap[HoodError](e => BenchmarkLoadingError(e.getMessage))
-            result <- parseCsvLinesHeaders(
-              data.mkString,
-              keyCol,
-              modeCol,
-              compareCol,
-              thresholdCol,
-              unitsCol)
+            result <- parseCsvLinesHeaders(data.mkString, columns)
           } yield result))
 
     private[this] def openFile(file: File): Resource[F, BufferedSource] =
@@ -73,21 +66,17 @@ object CsvService {
 
     private[this] def parseCsvLinesHeaders(
         rawData: String,
-        keyCol: String,
-        modeCol: String,
-        compareCol: String,
-        thresholdCol: String,
-        unitsCol: String
+        columns: BenchmarkColumns
     ): Either[HoodError, List[Benchmark]] = {
 
       implicit val decoder: HeaderDecoder[JmhResult] = HeaderDecoder.decoder(
-        keyCol,
-        modeCol,
+        columns.keyCol,
+        columns.modeCol,
         "Threads",
         "Samples",
-        compareCol,
-        thresholdCol,
-        unitsCol)(JmhResult.apply _)
+        columns.compareCol,
+        columns.thresholdCol,
+        columns.unitsCol)(JmhResult.apply _)
 
       rawData
         .asCsvReader[JmhResult](rfc.withHeader)

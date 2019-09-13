@@ -18,10 +18,12 @@ package com.fortysevendeg.hood.plugin
 
 import java.io.File
 
+import cats.Monad
 import cats.data.EitherT
+import cats.implicits._
 import cats.effect.{Console, IO, Sync}
 import com.fortysevendeg.hood.benchmark.{BenchmarkComparisonResult, BenchmarkService, Warning}
-import com.fortysevendeg.hood.csv.CsvService
+import com.fortysevendeg.hood.csv.{BenchmarkColumns, CsvService}
 import com.fortysevendeg.hood.model.{Benchmark, HoodError}
 import sbt.{AutoPlugin, Def, PluginTrigger, Task}
 import io.chrisdavenport.log4cats.Logger
@@ -67,16 +69,18 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       benchmarkThreshold: Map[String, Double])(
       implicit L: Logger[F],
       S: Sync[F],
-      C: Console[F]): EitherT[F, HoodError, List[BenchmarkComparisonResult]] = {
+      C: Console[F],
+      M: Monad[F]): EitherT[F, HoodError, List[BenchmarkComparisonResult]] = {
 
     val csvService = CsvService.build[F]
 
     val parseFunction: File => F[Either[HoodError, List[Benchmark]]] = csvService.parseBenchmark(
-      keyColumnName,
-      modeColumnName,
-      compareColumnName,
-      thresholdColumnName,
-      unitsColumnName)
+      BenchmarkColumns(
+        keyColumnName,
+        modeColumnName,
+        compareColumnName,
+        thresholdColumnName,
+        unitsColumnName))
 
     for {
       previousBenchmarks <- EitherT(parseFunction(previousPath)).map(buildBenchmarkMap)
@@ -102,22 +106,27 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       generalThreshold: Option[Double],
       thresholdMap: Map[String, Double])(
       implicit L: Logger[F],
-      S: Sync[F]): F[List[BenchmarkComparisonResult]] =
-    S.delay(previousBenchmarks.map {
-      case (benchmarkKey, previous) =>
-        val threshold =
-          thresholdMap
-            .get(benchmarkKey)
-            .fold(generalThreshold.getOrElse(previous.primaryMetric.scoreError))(identity)
+      S: Sync[F],
+      M: Monad[F]): F[List[BenchmarkComparisonResult]] =
+    previousBenchmarks
+      .map {
+        case (benchmarkKey, previous) =>
+          val threshold =
+            thresholdMap
+              .get(benchmarkKey)
+              .fold(generalThreshold.getOrElse(previous.primaryMetric.scoreError))(identity)
 
-        currentBenchmarks
-          .get(benchmarkKey)
-          .fold({
-            L.error(
-              s"Benchmark $benchmarkKey existing in previous benchmarks is missing from current ones.")
-            BenchmarkComparisonResult(previous, None, Warning, threshold)
-          })(current => BenchmarkService.compare(current, previous, threshold))
-    }.toList)
+          currentBenchmarks
+            .get(benchmarkKey)
+            .fold({
+              M.flatMap(L.error(
+                s"Benchmark $benchmarkKey existing in previous benchmarks is missing from current ones."))(
+                _ => S.delay(BenchmarkComparisonResult(previous, None, Warning, threshold)))
+
+            })(current => S.delay(BenchmarkService.compare(current, previous, threshold)))
+      }
+      .toList
+      .sequence
 
   private[this] def benchmarkOutput(
       benchmarks: List[BenchmarkComparisonResult],
