@@ -28,7 +28,7 @@ import io.chrisdavenport.log4cats.Logger
 
 import scala.io.{BufferedSource, Source}
 
-case class BenchmarkColumns(
+final case class BenchmarkColumns(
     keyCol: String,
     modeCol: String,
     compareCol: String,
@@ -37,7 +37,8 @@ case class BenchmarkColumns(
 
 trait CsvService[F[_]] {
 
-  def parseBenchmark(columns: BenchmarkColumns)(
+  def parseBenchmark(
+      columns: BenchmarkColumns,
       csvFile: File): F[Either[HoodError, List[Benchmark]]]
 
 }
@@ -48,7 +49,8 @@ object CsvService {
 
   class CsvServiceImpl[F[_]](implicit S: Sync[F], L: Logger[F]) extends CsvService[F] {
 
-    def parseBenchmark(columns: BenchmarkColumns)(
+    def parseBenchmark(
+        columns: BenchmarkColumns,
         csvFile: File): F[Either[HoodError, List[Benchmark]]] =
       openFile(csvFile).attempt
         .use(fileData =>

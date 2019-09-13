@@ -31,7 +31,7 @@ final case class BenchmarkComparisonResult(
     current: Option[Benchmark],
     result: BenchmarkComparisonStatus,
     threshold: Double) {
-  def icon(): String = {
+  def icon: String = {
     (result match {
       case OK      => "heavy_check_mark"
       case Warning => "warning"

@@ -34,10 +34,10 @@ class CsvServiceTests extends FlatSpec with Matchers {
 
     val result = CsvService
       .build[IO]
-      .parseBenchmark("Benchmark", "Mode", "Score", "Score Error (99.9%)", "Unit")(dataFile)
+      .parseBenchmark(
+        BenchmarkColumns("Benchmark", "Mode", "Score", "Score Error (99.9%)", "Unit"),
+        dataFile)
       .unsafeRunSync()
-
-    println(s"Result: ${result}")
 
     result.isRight shouldBe true
     result.map { list =>
@@ -50,7 +50,9 @@ class CsvServiceTests extends FlatSpec with Matchers {
 
     val result = CsvService
       .build[IO]
-      .parseBenchmark("Benchmark", "Mode", "Score", "Score Error (99.9%)", "Unit")(dataFile)
+      .parseBenchmark(
+        BenchmarkColumns("Benchmark", "Mode", "Score", "Score Error (99.9%)", "Unit"),
+        dataFile)
       .unsafeRunSync()
 
     result.isLeft shouldBe true
