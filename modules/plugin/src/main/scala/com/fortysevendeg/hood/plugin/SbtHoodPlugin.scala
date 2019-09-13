@@ -132,6 +132,6 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
          |$currentFile|${result.current.map(_.primaryMetric.score.toString).getOrElse("N/A")}
     """.stripMargin
 
-    benchmarks.map(b => outputComparisonResult(b)).mkString("\n\n")
+    benchmarks.map(b => outputComparisonResult(b)).mkString("")
   }
 }

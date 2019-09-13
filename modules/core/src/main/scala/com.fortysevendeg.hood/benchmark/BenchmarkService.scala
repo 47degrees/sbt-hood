@@ -18,7 +18,6 @@ package com.fortysevendeg.hood.benchmark
 
 import com.fortysevendeg.hood.model.Benchmark
 import scala.math.abs
-import com.lightbend.emoji.Emoji.Implicits._
 import com.lightbend.emoji.ShortCodes.Implicits._
 import com.lightbend.emoji.ShortCodes.Defaults._
 
