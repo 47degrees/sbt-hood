@@ -28,9 +28,18 @@ import io.chrisdavenport.log4cats.Logger
 
 import scala.io.{BufferedSource, Source}
 
+final case class BenchmarkColumns(
+    keyCol: String,
+    modeCol: String,
+    compareCol: String,
+    thresholdCol: String,
+    unitsCol: String)
+
 trait CsvService[F[_]] {
 
-  def parseBenchmark(csvFile: File): F[Either[HoodError, List[Benchmark]]]
+  def parseBenchmark(
+      columns: BenchmarkColumns,
+      csvFile: File): F[Either[HoodError, List[Benchmark]]]
 
 }
 
@@ -40,8 +49,16 @@ object CsvService {
 
   class CsvServiceImpl[F[_]](implicit S: Sync[F], L: Logger[F]) extends CsvService[F] {
 
-    def parseBenchmark(csvFile: File): F[Either[HoodError, List[Benchmark]]] =
-      openFile(csvFile).use(data => S.pure(parseCsvLines(data.getLines().drop(1))))
+    def parseBenchmark(
+        columns: BenchmarkColumns,
+        csvFile: File): F[Either[HoodError, List[Benchmark]]] =
+      openFile(csvFile).attempt
+        .use(fileData =>
+          S.pure(for {
+            data <- fileData
+              .leftMap[HoodError](e => BenchmarkLoadingError(e.getMessage))
+            result <- parseCsvLinesHeaders(data.mkString, columns)
+          } yield result))
 
     private[this] def openFile(file: File): Resource[F, BufferedSource] =
       Resource(S.delay {
@@ -49,12 +66,22 @@ object CsvService {
         (fileBuffer, S.delay(fileBuffer.close()))
       })
 
-    private[this] def parseCsvLines(
-        rawData: Iterator[String]): Either[HoodError, List[Benchmark]] = {
+    private[this] def parseCsvLinesHeaders(
+        rawData: String,
+        columns: BenchmarkColumns
+    ): Either[HoodError, List[Benchmark]] = {
+
+      implicit val decoder: HeaderDecoder[JmhResult] = HeaderDecoder.decoder(
+        columns.keyCol,
+        columns.modeCol,
+        "Threads",
+        "Samples",
+        columns.compareCol,
+        columns.thresholdCol,
+        columns.unitsCol)(JmhResult.apply _)
+
       rawData
-        .flatMap(
-          _.asCsvReader[JmhResult](rfc.withoutHeader)
-        )
+        .asCsvReader[JmhResult](rfc.withHeader)
         .map(
           result =>
             result

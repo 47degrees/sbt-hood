@@ -18,6 +18,8 @@ package com.fortysevendeg.hood.benchmark
 
 import com.fortysevendeg.hood.model.Benchmark
 import scala.math.abs
+import com.lightbend.emoji.ShortCodes.Implicits._
+import com.lightbend.emoji.ShortCodes.Defaults._
 
 sealed trait BenchmarkComparisonStatus extends Product with Serializable
 case object OK                         extends BenchmarkComparisonStatus
@@ -26,8 +28,17 @@ case object Error                      extends BenchmarkComparisonStatus
 
 final case class BenchmarkComparisonResult(
     previous: Benchmark,
-    current: Benchmark,
-    result: BenchmarkComparisonStatus)
+    current: Option[Benchmark],
+    result: BenchmarkComparisonStatus,
+    threshold: Double) {
+  def icon: String = {
+    (result match {
+      case OK      => "heavy_check_mark"
+      case Warning => "warning"
+      case _       => "red_circle"
+    }).emoji.toString()
+  }
+}
 
 object BenchmarkService {
 
@@ -45,8 +56,9 @@ object BenchmarkService {
 
     BenchmarkComparisonResult(
       previousBenchmark,
-      currentBenchmark,
-      status
+      Some(currentBenchmark),
+      status,
+      threshold
     )
   }
 

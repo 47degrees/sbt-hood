@@ -21,6 +21,7 @@ lazy val `sbt-hood-plugin` = project
   .settings(publishLocal := publishLocal
     .dependsOn(`sbt-hood-core` / publishLocal)
     .value)
+  .settings(sbtPlugin := true)
   .enablePlugins(SbtPlugin)
 
 lazy val allModules: Seq[ProjectReference] = Seq(`sbt-hood-core`)
