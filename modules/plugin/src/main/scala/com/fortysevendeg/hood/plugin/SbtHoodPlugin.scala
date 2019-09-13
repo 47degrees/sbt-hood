@@ -50,9 +50,9 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       benchmarkThreshold.value
     ).leftFlatMap(e =>
         EitherT.left[List[BenchmarkComparisonResult]](logger.error(s"There was an error: $e")))
+      .void
       .value
       .unsafeRunSync()
-      .void
       .merge
   }
 
