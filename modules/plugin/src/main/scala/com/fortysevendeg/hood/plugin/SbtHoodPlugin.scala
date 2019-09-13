@@ -18,7 +18,6 @@ package com.fortysevendeg.hood.plugin
 
 import java.io.File
 
-import cats.Monad
 import cats.data.EitherT
 import cats.implicits._
 import cats.effect.{Console, IO, Sync}
@@ -69,8 +68,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       benchmarkThreshold: Map[String, Double])(
       implicit L: Logger[F],
       S: Sync[F],
-      C: Console[F],
-      M: Monad[F]): EitherT[F, HoodError, List[BenchmarkComparisonResult]] = {
+      C: Console[F]): EitherT[F, HoodError, List[BenchmarkComparisonResult]] = {
 
     val csvService = CsvService.build[F]
 
