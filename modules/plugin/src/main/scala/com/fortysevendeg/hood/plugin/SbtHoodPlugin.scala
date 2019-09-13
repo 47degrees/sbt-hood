@@ -34,9 +34,9 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
   override def projectSettings: Seq[Def.Setting[_]] = defaultSettings
   override val trigger: PluginTrigger               = noTrigger
 
-  def compareBenchmarksTask: Def.Initialize[Task[Unit]] = Def.task {
+  implicit lazy val logger = Slf4jLogger.getLogger[IO]
 
-    implicit val logger = Slf4jLogger.getLogger[IO]
+  def compareBenchmarksTask: Def.Initialize[Task[Unit]] = Def.task {
 
     benchmarkTask(
       previousBenchmarkPath.value,
