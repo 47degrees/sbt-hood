@@ -18,16 +18,19 @@ package com.fortysevendeg.hood.plugin
 
 import java.io.File
 
-import cats.data.EitherT
+import cats.data.{EitherT, NonEmptyChain}
 import cats.implicits._
 import cats.effect.{Console, IO, Sync}
 import com.fortysevendeg.hood.benchmark.{BenchmarkComparisonResult, BenchmarkService, Warning}
 import com.fortysevendeg.hood.csv.{BenchmarkColumns, CsvService}
-import com.fortysevendeg.hood.model.{Benchmark, HoodError}
+import com.fortysevendeg.hood.model._
 import sbt.{AutoPlugin, Def, PluginTrigger, Task}
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import cats.effect.Console.implicits._
+import com.fortysevendeg.hood.github._
+import com.fortysevendeg.hood.benchmark.Error
+import github4s.GithubResponses.GHException
 
 object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHoodKeys {
 
@@ -49,6 +52,42 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       generalThreshold.value,
       benchmarkThreshold.value
     ).leftFlatMap(e =>
+        EitherT.left[List[BenchmarkComparisonResult]](logger.error(s"There was an error: $e")))
+      .void
+      .value
+      .unsafeRunSync()
+      .merge
+  }
+
+  def compareBenchmarksCITask: Def.Initialize[Task[Unit]] = Def.task {
+    (for {
+      basicBenchmark <- benchmarkTask(
+        previousBenchmarkPath.value,
+        currentBenchmarkPath.value,
+        keyColumnName.value,
+        compareColumnName.value,
+        thresholdColumnName.value,
+        modeColumnName.value,
+        unitsColumnName.value,
+        generalThreshold.value,
+        benchmarkThreshold.value
+      ).leftMap(NonEmptyChain.one)
+      params <- EitherT.fromEither[IO](
+        GitHubParameters.fromParams(
+          gitHubToken.value,
+          repositoryOwner.value,
+          repositoryName.value,
+          pullRequestNumber.value,
+          targetUrl.value)
+      )
+      _ <- submitResultsToGitHub(
+        basicBenchmark,
+        previousBenchmarkPath.value,
+        currentBenchmarkPath.value,
+        params)
+        .leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
+    } yield basicBenchmark)
+      .leftFlatMap(e =>
         EitherT.left[List[BenchmarkComparisonResult]](logger.error(s"There was an error: $e")))
       .void
       .value
@@ -96,6 +135,40 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
 
   }
 
+  private def submitResultsToGitHub[F[_]](
+      benchmarkResult: List[BenchmarkComparisonResult],
+      previousPath: File,
+      currentPath: File,
+      params: GitHubParameters)(
+      implicit L: Logger[F],
+      S: Sync[F]): EitherT[F, GHException, Unit] = {
+    val gh = GithubService.build[F]
+
+    for {
+      _ <- EitherT(
+        gh.publishComment(
+          params.accessToken,
+          params.repositoryOwner,
+          params.repositoryName,
+          params.pullRequestNumber,
+          s"*sbt-hood* benchmark result:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
+        ))
+      comparison = gitHubStateFromBenchmarks(benchmarkResult)
+      _ <- EitherT(
+        gh.createStatus(
+          params.accessToken,
+          params.repositoryOwner,
+          params.repositoryName,
+          params.pullRequestNumber,
+          comparison.state,
+          params.targetUrl,
+          comparison.description,
+          GithubModel.githubStatusContext
+        ))
+    } yield ()
+
+  }
+
   private[this] def buildBenchmarkMap(benchmarks: List[Benchmark]): Map[String, Benchmark] =
     benchmarks.map(b => (b.benchmark, b)).toMap
 
@@ -138,4 +211,13 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
 
     benchmarks.map(outputComparisonResult).mkString("")
   }
+
+  private[this] def gitHubStateFromBenchmarks(
+      benchmarks: List[BenchmarkComparisonResult]
+  ): GithubStatusDescription =
+    if (benchmarks.exists(_.result == Error)) {
+      GithubStatusDescription(GithubStatusError, "Failed benchmark comparison")
+    } else {
+      GithubStatusDescription(GithubStatusSuccess, "Successful benchmark comparison")
+    }
 }
