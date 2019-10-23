@@ -80,7 +80,9 @@ trait SbtHoodDefaultSettings extends SbtHoodKeys {
     repositoryOwner := None,
     repositoryName := None,
     pullRequestNumber := None,
-    compareBenchmarks := compareBenchmarksTask.value
+    targetUrl := None,
+    compareBenchmarks := compareBenchmarksTask.value,
+    compareBenchmarksCI := compareBenchmarksCITask.value
   )
 
 }

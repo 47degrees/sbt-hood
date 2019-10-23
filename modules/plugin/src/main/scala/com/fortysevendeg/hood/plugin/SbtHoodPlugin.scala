@@ -88,7 +88,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         .leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
     } yield basicBenchmark)
       .leftFlatMap(e =>
-        EitherT.left[List[BenchmarkComparisonResult]](logger.error(s"There was an error: $e")))
+        EitherT.left[List[BenchmarkComparisonResult]](
+          logger.error(s"Error(s) found: \n${e.toList.mkString("\n")}")))
       .void
       .value
       .unsafeRunSync()
