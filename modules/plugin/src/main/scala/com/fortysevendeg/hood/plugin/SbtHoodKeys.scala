@@ -46,17 +46,19 @@ trait SbtHoodKeys {
   val benchmarkThreshold: SettingKey[Map[String, Double]] = settingKey(
     "Map with a custom threshold per benchmark key overriding the value coming from `thresholdColumnName` or `generalThreshold`. Optional.")
 
-  val gitHubToken: SettingKey[String] = settingKey(
+  val gitHubToken: SettingKey[Option[String]] = settingKey(
     "GitHub access token required by `compareBenchmarksCI`.")
-  val gitHubUserId: SettingKey[String] = settingKey(
+  val gitHubUserId: SettingKey[Option[String]] = settingKey(
     "GitHub ID for the user publishing the benchmark comments, required by `compareBenchmarksCI`.")
-  val repositoryOwner: SettingKey[String] = settingKey(
+  val repositoryOwner: SettingKey[Option[String]] = settingKey(
     "Owner of the repository where the plugin will post updates, required by `compareBenchmarksCI`.")
-  val repositoryName: SettingKey[String] = settingKey(
+  val repositoryName: SettingKey[Option[String]] = settingKey(
     "Name of the repository where the plugin will post updates, required by `compareBenchmarksCI`.")
-  val pullRequestNumber: SettingKey[Int] = settingKey(
+  val pullRequestNumber: SettingKey[Option[Int]] = settingKey(
     "Pull request number where the plugin will post updates, required by `compareBenchmarksCI`.")
-
+  val targetUrl: SettingKey[Option[String]] = settingKey(
+    "URL to the CI job, used by `compareBenchmarksCI`."
+  )
 }
 
 object SbtHoodKeys extends SbtHoodKeys
@@ -73,7 +75,14 @@ trait SbtHoodDefaultSettings extends SbtHoodKeys {
     unitsColumnName := "Unit",
     generalThreshold := None,
     benchmarkThreshold := Map.empty,
-    compareBenchmarks := compareBenchmarksTask.value
+    gitHubToken := None,
+    gitHubUserId := None,
+    repositoryOwner := None,
+    repositoryName := None,
+    pullRequestNumber := None,
+    targetUrl := None,
+    compareBenchmarks := compareBenchmarksTask.value,
+    compareBenchmarksCI := compareBenchmarksCITask.value
   )
 
 }

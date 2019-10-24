@@ -20,3 +20,5 @@ sealed trait HoodError                                    extends Product with S
 final case class InvalidCsv(message: String)              extends HoodError
 final case class MissingCurrentBenchmark(message: String) extends HoodError
 final case class BenchmarkLoadingError(message: String)   extends HoodError
+final case class MissingGitHubParameter(message: String)  extends HoodError
+final case class GitHubConnectionError(message: String)   extends HoodError

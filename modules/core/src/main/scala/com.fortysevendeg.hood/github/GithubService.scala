@@ -16,13 +16,14 @@
 
 package com.fortysevendeg.hood.github
 
+import cats.data.EitherT
 import cats.effect.Sync
+import cats.implicits._
 import github4s.Github
 import github4s.Github._
 import github4s.cats.effect.jvm.Implicits._
-import cats.implicits._
-import github4s.GithubResponses.GHResponse
-import github4s.free.domain.Comment
+import github4s.GithubResponses.{GHResponse, UnexpectedException}
+import github4s.free.domain.{Comment, Status}
 import io.chrisdavenport.log4cats.Logger
 
 trait GithubService[F[_]] {
@@ -46,6 +47,17 @@ trait GithubService[F[_]] {
       owner: String,
       repository: String,
       pullRequestNumber: Int): F[GHResponse[List[Comment]]]
+
+  def createStatus(
+      accessToken: String,
+      owner: String,
+      repository: String,
+      pullRequestNumber: Int,
+      state: GithubState,
+      targetUrl: Option[String],
+      description: String,
+      context: String
+  ): F[GHResponse[Status]]
 
 }
 
@@ -94,6 +106,40 @@ object GithubService {
           .exec()
           .onError { case e => L.error(e)("Found error while accessing GitHub API.") }
       } yield result
+
+    def createStatus(
+        accessToken: String,
+        owner: String,
+        repository: String,
+        pullRequestNumber: Int,
+        state: GithubState,
+        targetUrl: Option[String],
+        description: String,
+        context: String
+    ): F[GHResponse[Status]] = {
+      val gh = Github(Some(accessToken))
+
+      (for {
+        pr <- EitherT(gh.pullRequests.get(owner, repository, pullRequestNumber).exec())
+        head <- EitherT.fromOption[F](
+          pr.result.head,
+          UnexpectedException("Couldn't find a head SHA for the specified pull request."))
+        sha = head.sha
+        result <- EitherT(
+          gh.repos
+            .createStatus(
+              owner,
+              repository,
+              sha,
+              state.value,
+              targetUrl,
+              description.some,
+              context.some)
+            .exec())
+      } yield result).value.onError {
+        case e => L.error(e)("Found error while accessing GitHub API.")
+      }
+    }
 
   }
 
