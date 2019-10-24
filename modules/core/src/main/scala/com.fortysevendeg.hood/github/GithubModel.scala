@@ -55,16 +55,18 @@ object GitHubParameters {
       pullRequestNumber: Option[Int],
       targetUrl: Option[String]): Either[NonEmptyChain[HoodError], GitHubParameters] =
     (
-      checkOptionalParameter(accessToken, "gitHubToken"),
-      checkOptionalParameter(repositoryOwner, "repositoryOwner"),
-      checkOptionalParameter(repositoryName, "repositoryName"),
-      checkOptionalParameter(pullRequestNumber, "pullRequestNumber")
+      checkMandatoryParameter(accessToken, "gitHubToken"),
+      checkMandatoryParameter(repositoryOwner, "repositoryOwner"),
+      checkMandatoryParameter(repositoryName, "repositoryName"),
+      checkMandatoryParameter(pullRequestNumber, "pullRequestNumber")
     ).mapN {
       case (token, repoOwner, repoName, pull) =>
         GitHubParameters(token, repoOwner, repoName, pull, targetUrl)
     }.toEither
 
-  private[this] def checkOptionalParameter[A](param: Option[A], name: String): ValidationResult[A] =
+  private[this] def checkMandatoryParameter[A](
+      param: Option[A],
+      name: String): ValidationResult[A] =
     param.fold(
       MissingGitHubParameter(s"Missing required parameter for GitHub integration: $name")
         .invalidNec[A])(_.validNec)

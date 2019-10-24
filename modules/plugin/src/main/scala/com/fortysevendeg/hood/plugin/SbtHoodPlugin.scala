@@ -37,7 +37,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
   override def projectSettings: Seq[Def.Setting[_]] = defaultSettings
   override val trigger: PluginTrigger               = noTrigger
 
-  implicit lazy val logger = Slf4jLogger.getLogger[IO]
+  implicit lazy val logger                = Slf4jLogger.getLogger[IO]
+  implicit lazy val gh: GithubService[IO] = GithubService.build[IO]
 
   def compareBenchmarksTask: Def.Initialize[Task[Unit]] = Def.task {
 
@@ -142,12 +143,11 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       currentPath: File,
       params: GitHubParameters)(
       implicit L: Logger[F],
-      S: Sync[F]): EitherT[F, GHException, Unit] = {
-    val gh = GithubService.build[F]
-
+      S: Sync[F],
+      G: GithubService[F]): EitherT[F, GHException, Unit] =
     for {
       _ <- EitherT(
-        gh.publishComment(
+        G.publishComment(
           params.accessToken,
           params.repositoryOwner,
           params.repositoryName,
@@ -156,7 +156,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         ))
       comparison = gitHubStateFromBenchmarks(benchmarkResult)
       _ <- EitherT(
-        gh.createStatus(
+        G.createStatus(
           params.accessToken,
           params.repositoryOwner,
           params.repositoryName,
@@ -167,8 +167,6 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
           GithubModel.githubStatusContext
         ))
     } yield ()
-
-  }
 
   private[this] def buildBenchmarkMap(benchmarks: List[Benchmark]): Map[String, Benchmark] =
     benchmarks.map(b => (b.benchmark, b)).toMap
