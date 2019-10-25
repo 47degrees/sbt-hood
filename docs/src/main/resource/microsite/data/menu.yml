@@ -1,0 +1,6 @@
+options:
+  - title: Getting Started
+    url: docs.html
+
+  - title: GitHub integration
+    url: github.html
