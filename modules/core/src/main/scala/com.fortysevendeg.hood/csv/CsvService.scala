@@ -18,7 +18,7 @@ package com.fortysevendeg.hood.csv
 
 import java.io.File
 
-import cats.effect.{Resource, Sync}
+import cats.effect.Sync
 import com.fortysevendeg.hood.model._
 import kantan.csv._
 import kantan.csv.ops._
@@ -26,8 +26,6 @@ import kantan.csv.generic._
 import cats.implicits._
 import com.fortysevendeg.hood.utils.FileUtils
 import io.chrisdavenport.log4cats.Logger
-
-import scala.io.{BufferedSource, Source}
 
 final case class BenchmarkColumns(
     keyCol: String,

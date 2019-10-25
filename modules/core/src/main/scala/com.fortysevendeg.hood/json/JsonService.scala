@@ -24,7 +24,6 @@ import com.fortysevendeg.hood.model.{Benchmark, BenchmarkLoadingError, HoodError
 import com.fortysevendeg.hood.model.Benchmark._
 import com.fortysevendeg.hood.utils.FileUtils
 import io.chrisdavenport.log4cats.Logger
-import io.circe.generic.semiauto._
 import io.circe.parser._
 import com.fortysevendeg.hood.model.InvalidJson
 

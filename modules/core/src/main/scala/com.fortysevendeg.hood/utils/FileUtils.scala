@@ -48,5 +48,5 @@ object FileUtils {
     } else Unknown
 
   private[this] def fileExtension(file: File): String =
-    file.getName.split('.').lastOption.getOrElse("")
+    file.getName.toLowerCase.split('.').lastOption.getOrElse("")
 }
