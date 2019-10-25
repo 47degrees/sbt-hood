@@ -17,10 +17,11 @@ block a GitHub pull request to be merged.
 ## Standalone use
 
 In order to use *sbt-hood* you simply have to specify what benchmark files do you want to compare,
-and the name of the important columns in the CSV file through the following sbt variables:
+(and the name of the important columns if your benchmark is in CSV format) through the following
+sbt variables:
 
-* `previousBenchmarkPath`: path to the previous JMH benchmark in CSV format. By default: `{project_root}/master.csv`.
-* `currentBenchmarkPath`: path to the current JMH benchmark in CSV format.  By default: ``{project_root}/current.csv`.
+* `previousBenchmarkPath`: path to the previous JMH benchmark in CSV/Json format. By default: `{project_root}/master.csv`.
+* `currentBenchmarkPath`: path to the current JMH benchmark in CSV/Json format.  By default: ``{project_root}/current.csv`.
 * `keyColumnName`: column name to distinguish each benchmark on the comparison. By default: `Benchmark`.
 * `compareColumnName`: column name of the column to compare (values must be `Double`). By default: `Score`.
 * `thresholdColumnName`: column name to get the threshold per benchmark. By default: `Score Error (99.9%)`.
@@ -30,8 +31,8 @@ and the name of the important columns in the CSV file through the following sbt 
 * `benchmarkThreshold`: optional map with a custom threshold per benchmark key overriding the value coming from `thresholdColumnName` or `generalThreshold`.
 
 As you can see all these variables have default values or are optional so you'll just need to adapt
-some of these if your CSV files contain different column names and the like. Once set up, you only
-need to run a benchmark comparison through the following command:
+some of these if your benchmark files are in CSV format and contain different column names. Once set
+up, you only need to run a benchmark comparison through the following command:
 
 ```
 compareBenchmarks
