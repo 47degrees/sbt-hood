@@ -29,27 +29,56 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
 
   implicit val logger = Slf4jLogger.getLogger[IO]
 
-  val previousFile = new File(getClass.getResource("/previous.csv").getPath)
+  val previousFileCsv  = new File(getClass.getResource("/previous.csv").getPath)
+  val previousFileJson = new File(getClass.getResource("/previous.json").getPath)
 
-  "SbtHoodPlugin" should "compare two benchmarks and return a valid result if the current one is better with default settings" in {
+  "SbtHoodPlugin" should "compare two CSV benchmarks and return a valid result if the current one is better with default settings" in {
     val currentFile = new File(getClass.getResource("/current_better.csv").getPath)
 
-    checkComparisonDefaultThreshold(currentFile, benchmarkResultAgainstNiceDefault)
+    checkComparisonDefaultThreshold(previousFileCsv, currentFile, benchmarkResultAgainstNiceDefault)
   }
 
-  it should "compare two benchmarks and return a warning if the current one is worse (but under threshold) with default settings" in {
+  it should "compare two Json benchmarks and return a valid result if the current one is better with default settings" in {
+    val currentFile = new File(getClass.getResource("/current_better.json").getPath)
+
+    checkComparisonDefaultThreshold(
+      previousFileJson,
+      currentFile,
+      benchmarkResultAgainstNiceDefault)
+  }
+
+  it should "compare two Csv benchmarks and return a warning if the current one is worse (but under threshold) with default settings" in {
     val currentFile = new File(getClass.getResource("/current_worse.csv").getPath)
 
-    checkComparisonDefaultThreshold(currentFile, benchmarkResultAgainstNotSoNiceDefault)
+    checkComparisonDefaultThreshold(
+      previousFileCsv,
+      currentFile,
+      benchmarkResultAgainstNotSoNiceDefault)
   }
 
-  it should "compare two benchmarks and return a warning if the current one is worse (and under threshold) with default settings" in {
+  it should "compare two Json benchmarks and return a warning if the current one is worse (but under threshold) with default settings" in {
+    val currentFile = new File(getClass.getResource("/current_worse.json").getPath)
+
+    checkComparisonDefaultThreshold(
+      previousFileJson,
+      currentFile,
+      benchmarkResultAgainstNotSoNiceDefault)
+  }
+
+  it should "compare two Csv benchmarks and return a warning if the current one is worse (and under threshold) with default settings" in {
     val currentFile = new File(getClass.getResource("/current_really_bad.csv").getPath)
 
-    checkComparisonDefaultThreshold(currentFile, benchmarkResultAgainstBadDefault)
+    checkComparisonDefaultThreshold(previousFileCsv, currentFile, benchmarkResultAgainstBadDefault)
+  }
+
+  it should "compare two Json benchmarks and return a warning if the current one is worse (and under threshold) with default settings" in {
+    val currentFile = new File(getClass.getResource("/current_really_bad.json").getPath)
+
+    checkComparisonDefaultThreshold(previousFileJson, currentFile, benchmarkResultAgainstBadDefault)
   }
 
   private[this] def checkComparisonDefaultThreshold(
+      previousFile: File,
       currentFile: File,
       expected: List[BenchmarkComparisonResult]) = {
     val result = SbtHoodPlugin

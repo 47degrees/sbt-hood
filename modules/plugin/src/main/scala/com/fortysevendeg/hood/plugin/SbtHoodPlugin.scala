@@ -30,6 +30,8 @@ import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import cats.effect.Console.implicits._
 import com.fortysevendeg.hood.github._
 import com.fortysevendeg.hood.benchmark.Error
+import com.fortysevendeg.hood.json.JsonService
+import com.fortysevendeg.hood.utils._
 import github4s.GithubResponses.GHException
 
 object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHoodKeys {
@@ -111,8 +113,6 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       S: Sync[F],
       C: Console[F]): EitherT[F, HoodError, List[BenchmarkComparisonResult]] = {
 
-    val csvService = CsvService.build[F]
-
     val columns = BenchmarkColumns(
       keyColumnName,
       modeColumnName,
@@ -120,10 +120,14 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       thresholdColumnName,
       unitsColumnName)
 
+    val csvService: CsvService[F]   = CsvService.build[F]
+    val jsonService: JsonService[F] = JsonService.build[F]
+
     for {
-      previousBenchmarks <- EitherT(csvService.parseBenchmark(columns, previousPath))
+      previousBenchmarks <- EitherT(
+        parseBenchmark[F](columns, previousPath, csvService, jsonService))
         .map(buildBenchmarkMap)
-      currentBenchmarks <- EitherT(csvService.parseBenchmark(columns, currentPath))
+      currentBenchmarks <- EitherT(parseBenchmark[F](columns, currentPath, csvService, jsonService))
         .map(buildBenchmarkMap)
       result <- EitherT.right[HoodError](
         performBenchmarkComparison[F](
@@ -219,4 +223,21 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
     } else {
       GithubStatusDescription(GithubStatusSuccess, "Successful benchmark comparison")
     }
+
+  private[this] def parseBenchmark[F[_]](
+      columns: BenchmarkColumns,
+      file: File,
+      csvService: CsvService[F],
+      jsonService: JsonService[F])(implicit S: Sync[F]): F[Either[HoodError, List[Benchmark]]] = {
+
+    FileUtils.fileType(file) match {
+      case Csv  => csvService.parseBenchmark(columns, file)
+      case Json => jsonService.parseBenchmark(file)
+      case _ =>
+        S.pure(
+          BenchmarkLoadingError(s"Invalid file type for file: ${file.getName}")
+            .asLeft[List[Benchmark]])
+    }
+
+  }
 }

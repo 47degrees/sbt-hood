@@ -24,6 +24,7 @@ import kantan.csv._
 import kantan.csv.ops._
 import kantan.csv.generic._
 import cats.implicits._
+import com.fortysevendeg.hood.utils.FileUtils
 import io.chrisdavenport.log4cats.Logger
 
 import scala.io.{BufferedSource, Source}
@@ -52,19 +53,15 @@ object CsvService {
     def parseBenchmark(
         columns: BenchmarkColumns,
         csvFile: File): F[Either[HoodError, List[Benchmark]]] =
-      openFile(csvFile).attempt
+      FileUtils
+        .openFile(csvFile)
+        .attempt
         .use(fileData =>
           S.pure(for {
             data <- fileData
               .leftMap[HoodError](e => BenchmarkLoadingError(e.getMessage))
             result <- parseCsvLinesHeaders(data.mkString, columns)
           } yield result))
-
-    private[this] def openFile(file: File): Resource[F, BufferedSource] =
-      Resource(S.delay {
-        val fileBuffer = Source.fromFile(file)
-        (fileBuffer, S.delay(fileBuffer.close()))
-      })
 
     private[this] def parseCsvLinesHeaders(
         rawData: String,
