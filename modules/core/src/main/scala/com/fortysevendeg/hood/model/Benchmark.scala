@@ -28,6 +28,10 @@ final case class Benchmark(
 object Benchmark {
   implicit val benchmarkDecoder: Decoder[Benchmark] = deriveDecoder[Benchmark]
   implicit val benchmarkEncoder: Encoder[Benchmark] = deriveEncoder[Benchmark]
+  implicit val benchmarkOrdering: Ordering[Benchmark] = new Ordering[Benchmark] {
+    override def compare(x: Benchmark, y: Benchmark): Int =
+      x.benchmark.compareTo(y.benchmark)
+  }
 }
 
 final case class PrimaryMetric(

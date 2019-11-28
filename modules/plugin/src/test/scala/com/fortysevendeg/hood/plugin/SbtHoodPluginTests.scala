@@ -18,12 +18,16 @@ package scala.com.fortysevendeg.hood.plugin
 
 import java.io.File
 
+import cats.data.EitherT
 import cats.effect.IO
+import cats.effect._
 import com.fortysevendeg.hood.benchmark.BenchmarkComparisonResult
 import com.fortysevendeg.hood.plugin.SbtHoodPlugin
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.scalatest.{FlatSpec, Matchers}
 import cats.effect.Console.implicits._
+import com.fortysevendeg.hood.json.JsonService
+import com.fortysevendeg.hood.model.{Benchmark, HoodError}
 
 class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
 
@@ -77,6 +81,33 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
     checkComparisonDefaultThreshold(previousFileJson, currentFile, benchmarkResultAgainstBadDefault)
   }
 
+  it should "group benchmarks for the two source files in order to produce a correct output file" in {
+    val jsonService = JsonService.build[IO]
+    val currentFile = new File(getClass.getResource("/current_really_bad.json").getPath)
+
+    val grouping = (for {
+      previousBenchmarks <- loadBenchmarkJson(jsonService, previousFileJson)
+      currentBenchmarks  <- loadBenchmarkJson(jsonService, currentFile)
+      result = SbtHoodPlugin.collectBenchmarks(
+        previousFileJson.getName,
+        currentFile.getName,
+        previousBenchmarks,
+        currentBenchmarks)
+    } yield result).value
+      .unsafeRunSync()
+
+    grouping.isRight shouldBe true
+    grouping.fold(
+      e => fail(s"Failed with error: $e"),
+      group => {
+        group.exists(_.benchmark == "test.decoding.previous") &&
+        group.exists(_.benchmark == "test.parsing.previous") &&
+        group.exists(_.benchmark == "test.decoding.current_really_bad") &&
+        group.exists(_.benchmark == "test.parsing.current_really_bad")
+      }
+    )
+  }
+
   private[this] def checkComparisonDefaultThreshold(
       previousFile: File,
       currentFile: File,
@@ -91,7 +122,10 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
         "Mode",
         "Unit",
         None,
-        Map.empty)
+        Map.empty,
+        shouldOutputToFile = false,
+        new File("output.json")
+      )
       .value
       .unsafeRunSync()
 
@@ -100,5 +134,10 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
       resultList.sortBy(_.previous.benchmark) shouldBe expected
     }
   }
+
+  private[this] def loadBenchmarkJson(
+      jsonService: JsonService[IO],
+      file: File): EitherT[IO, HoodError, Map[String, Benchmark]] =
+    EitherT(jsonService.parseBenchmark(file)).map(SbtHoodPlugin.buildBenchmarkMap)
 
 }

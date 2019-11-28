@@ -17,7 +17,8 @@
 package com.fortysevendeg.hood.utils
 
 import cats.effect.{Resource, Sync}
-import java.io.File
+import java.io.{File, PrintWriter}
+import cats.syntax.either._
 
 import scala.io.{BufferedSource, Source}
 
@@ -46,6 +47,15 @@ object FileUtils {
     } else if (Json.extensions.contains(fileExtension(file))) {
       Json
     } else Unknown
+
+  def writeFile[F[_]](file: File, contents: String)(
+      implicit S: Sync[F]): F[Either[Throwable, Unit]] = S.delay {
+    Either.catchNonFatal {
+      val writer = new PrintWriter(file)
+      writer.write(contents)
+      writer.close()
+    }
+  }
 
   private[this] def fileExtension(file: File): String =
     file.getName.toLowerCase.split('.').lastOption.getOrElse("")

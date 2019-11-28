@@ -27,12 +27,14 @@ import com.fortysevendeg.hood.model._
 import sbt.{AutoPlugin, Def, PluginTrigger, Task}
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import io.circe.syntax._
 import cats.effect.Console.implicits._
 import com.fortysevendeg.hood.github._
 import com.fortysevendeg.hood.benchmark.Error
 import com.fortysevendeg.hood.json.JsonService
 import com.fortysevendeg.hood.utils._
 import github4s.GithubResponses.GHException
+import Benchmark._
 
 object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHoodKeys {
 
@@ -53,7 +55,9 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       modeColumnName.value,
       unitsColumnName.value,
       generalThreshold.value,
-      benchmarkThreshold.value
+      benchmarkThreshold.value,
+      outputToFile.value,
+      outputPath.value
     ).leftFlatMap(e =>
         EitherT.left[List[BenchmarkComparisonResult]](logger.error(s"There was an error: $e")))
       .void
@@ -73,7 +77,9 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         modeColumnName.value,
         unitsColumnName.value,
         generalThreshold.value,
-        benchmarkThreshold.value
+        benchmarkThreshold.value,
+        outputToFile.value,
+        outputPath.value
       ).leftMap(NonEmptyChain.one)
       params <- EitherT.fromEither[IO](
         GitHubParameters.fromParams(
@@ -108,7 +114,9 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       modeColumnName: String,
       unitsColumnName: String,
       generalThreshold: Option[Double],
-      benchmarkThreshold: Map[String, Double])(
+      benchmarkThreshold: Map[String, Double],
+      shouldOutputToFile: Boolean,
+      outputFilePath: File)(
       implicit L: Logger[F],
       S: Sync[F],
       C: Console[F]): EitherT[F, HoodError, List[BenchmarkComparisonResult]] = {
@@ -135,6 +143,15 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
           previousBenchmarks,
           generalThreshold,
           benchmarkThreshold))
+      _ <- EitherT(
+        writeOutputFile(
+          shouldOutputToFile,
+          outputFilePath,
+          result,
+          previousPath.getPath,
+          currentPath.getPath,
+          previousBenchmarks,
+          currentBenchmarks))
       outputMessage = benchmarkOutput(result, previousPath.getName, currentPath.getName)
       _ <- EitherT.right(C.putStrLn(outputMessage))
     } yield result
@@ -172,7 +189,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         ))
     } yield ()
 
-  private[this] def buildBenchmarkMap(benchmarks: List[Benchmark]): Map[String, Benchmark] =
+  def buildBenchmarkMap(benchmarks: List[Benchmark]): Map[String, Benchmark] =
     benchmarks.map(b => (b.benchmark, b)).toMap
 
   private[this] def performBenchmarkComparison[F[_]](
@@ -198,6 +215,41 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
                 .as(BenchmarkComparisonResult(previous, None, Warning, threshold))
             )(current => S.delay(BenchmarkService.compare(current, previous, threshold)))
       }
+
+  private[this] def writeOutputFile[F[_]](
+      shouldOutputToFile: Boolean,
+      outputPath: File,
+      benchmarks: List[BenchmarkComparisonResult],
+      previousFile: String,
+      currentFile: String,
+      previousBenchmarks: Map[String, Benchmark],
+      currentBenchmarks: Map[String, Benchmark])(implicit S: Sync[F]): F[Either[HoodError, Unit]] =
+    if (shouldOutputToFile) {
+      val collectedBenchmarks =
+        collectBenchmarks(previousFile, currentFile, previousBenchmarks, currentBenchmarks)
+
+      FileUtils
+        .writeFile(outputPath, collectedBenchmarks.asJson.noSpaces)
+        .map(r => r.leftMap(e => OutputFileError(e.getMessage)))
+    } else S.pure(Either.right(()))
+
+  def collectBenchmarks(
+      previousFile: String,
+      currentFile: String,
+      previousBenchmarks: Map[String, Benchmark],
+      currentBenchmarks: Map[String, Benchmark]
+  ): List[Benchmark] = {
+    def addFilenameName(map: Map[String, Benchmark], filename: String): List[Benchmark] =
+      map.values.map(item => item.copy(benchmark = s"${item.benchmark}.$filename")).toList
+
+    def extractFilename(name: String) =
+      name.split('/').takeRight(1).mkString("").split('.').dropRight(1).mkString(".")
+
+    val groupedCurrent  = addFilenameName(currentBenchmarks, extractFilename(currentFile))
+    val groupedPrevious = addFilenameName(previousBenchmarks, extractFilename(previousFile))
+
+    (groupedPrevious ++ groupedCurrent).sorted
+  }
 
   private[this] def benchmarkOutput(
       benchmarks: List[BenchmarkComparisonResult],
