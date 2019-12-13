@@ -63,20 +63,16 @@ object ProjectPlugin extends AutoPlugin {
       micrositeDescription := "A SBT plugin for comparing benchmarks in your PRs",
       micrositeGithubOwner := "47deg",
       micrositeGithubRepo := "sbt-hood",
+      micrositeDocumentationUrl := "docs",
       micrositeGitterChannelUrl := "47deg/sbthood",
       micrositeOrganizationHomepage := "http://www.47deg.com",
       includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
       micrositePushSiteWith := GitHub4s,
       micrositeGithubToken := sys.env.get(orgGithubTokenSetting.value),
       micrositePalette := Map(
-        "brand-primary"   -> "#de3423",
-        "brand-secondary" -> "#852319",
-        "brand-tertiary"  -> "#381C19",
-        "gray-dark"       -> "#333333",
-        "gray"            -> "#666666",
-        "gray-light"      -> "#EDEDED",
-        "gray-lighter"    -> "#F4F5F9",
-        "white-color"     -> "#E6E7EC"
+        "brand-primary"     -> "#25bc77",
+        "brand-secondary"   -> "#dbf7ea",
+        "white-color"       -> "#FFF"
       )
     )
 
