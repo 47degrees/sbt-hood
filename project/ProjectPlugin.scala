@@ -37,7 +37,6 @@ object ProjectPlugin extends AutoPlugin {
       val kantan: String          = "0.5.1"
       val console4cats: String    = "0.8.0-M1"
       val lightbendEmoji: String  = "1.2.1"
-      val monocleMacro: String    = "2.0.0"
     }
 
     lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
@@ -119,7 +118,6 @@ object ProjectPlugin extends AutoPlugin {
         "com.nrinaudo"               %% "kantan.csv-generic"     % V.kantan,
         "dev.profunktor"             %% "console4cats"           % V.console4cats,
         "com.lightbend"              %% "emoji"                  % V.lightbendEmoji,
-        "com.github.julien-truffaut" %% "monocle-macro"          % V.monocleMacro,
         %%("scalatest", V.scalatest) % "test",
         %("slf4j-nop", V.slf4j)      % Test
       )
