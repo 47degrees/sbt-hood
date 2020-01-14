@@ -44,7 +44,3 @@ lazy val docs = project
   .settings(micrositeSettings: _*)
   .settings(noPublishSettings: _*)
   .enablePlugins(MicrositesPlugin)
-
-
-
-lazy val lel = thisProject.value.autoPlugins

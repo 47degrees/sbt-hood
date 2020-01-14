@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2019-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,20 @@ import com.fortysevendeg.hood.json.JsonService
 import com.fortysevendeg.hood.utils._
 import github4s.GithubResponses.GHException
 import Benchmark._
+import com.lightbend.emoji.ShortCodes.Implicits._
+import com.lightbend.emoji.ShortCodes.Defaults._
 
 object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHoodKeys {
+
+  sealed trait OutputFileFormat
+  case object OutputFileFormatMd   extends OutputFileFormat
+  case object OutputFileFormatJson extends OutputFileFormat
+
+  private[this] def parseOutputFormat(source: String): OutputFileFormat =
+    source.toLowerCase match {
+      case "json" => OutputFileFormatJson
+      case _      => OutputFileFormatMd
+    }
 
   override def projectSettings: Seq[Def.Setting[_]] = defaultSettings
   override val trigger: PluginTrigger               = noTrigger
@@ -57,7 +69,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       generalThreshold.value,
       benchmarkThreshold.value,
       outputToFile.value,
-      outputPath.value
+      outputPath.value,
+      parseOutputFormat(outputFormat.value)
     ).leftFlatMap(e =>
         EitherT.left[List[BenchmarkComparisonResult]](logger.error(s"There was an error: $e")))
       .void
@@ -79,7 +92,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         generalThreshold.value,
         benchmarkThreshold.value,
         outputToFile.value,
-        outputPath.value
+        outputPath.value,
+        parseOutputFormat(outputFormat.value)
       ).leftMap(NonEmptyChain.one)
       params <- EitherT.fromEither[IO](
         GitHubParameters.fromParams(
@@ -116,7 +130,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       generalThreshold: Option[Double],
       benchmarkThreshold: Map[String, Double],
       shouldOutputToFile: Boolean,
-      outputFilePath: File)(
+      outputFilePath: File,
+      outputFileFormat: OutputFileFormat)(
       implicit L: Logger[F],
       S: Sync[F],
       C: Console[F]): EitherT[F, HoodError, List[BenchmarkComparisonResult]] = {
@@ -147,6 +162,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         writeOutputFile(
           shouldOutputToFile,
           outputFilePath,
+          outputFileFormat,
           result,
           previousPath.getPath,
           currentPath.getPath,
@@ -219,28 +235,57 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
   private[this] def writeOutputFile[F[_]](
       shouldOutputToFile: Boolean,
       outputPath: File,
-      benchmarks: List[BenchmarkComparisonResult],
+      outputFileFormat: OutputFileFormat,
+      benchmarksResults: List[BenchmarkComparisonResult],
       previousFile: String,
       currentFile: String,
       previousBenchmarks: Map[String, Benchmark],
       currentBenchmarks: Map[String, Benchmark])(implicit S: Sync[F]): F[Either[HoodError, Unit]] =
     if (shouldOutputToFile) {
       val collectedBenchmarks =
-        collectBenchmarks(previousFile, currentFile, previousBenchmarks, currentBenchmarks)
+        collectBenchmarks(
+          previousFile,
+          currentFile,
+          previousBenchmarks,
+          currentBenchmarks,
+          benchmarksResults)
+
+      val fileContents = outputFileContents(collectedBenchmarks, outputFileFormat)
 
       FileUtils
-        .writeFile(outputPath, collectedBenchmarks.asJson.noSpaces)
+        .writeFile(outputPath, fileContents)
         .map(r => r.leftMap(e => OutputFileError(e.getMessage)))
     } else S.pure(Either.right(()))
+
+  private[this] def outputFileContents(
+      benchmarks: List[Benchmark],
+      format: OutputFileFormat
+  ): String =
+    format match {
+      case OutputFileFormatJson => benchmarks.asJson.noSpaces
+      case OutputFileFormatMd   => outputMarkdownBenchmarks(benchmarks)
+    }
 
   def collectBenchmarks(
       previousFile: String,
       currentFile: String,
       previousBenchmarks: Map[String, Benchmark],
-      currentBenchmarks: Map[String, Benchmark]
+      currentBenchmarks: Map[String, Benchmark],
+      benchmarkResults: List[BenchmarkComparisonResult]
   ): List[Benchmark] = {
+    def benchmarkResultMark(benchmarkName: String): String =
+      benchmarkResults
+        .find(_.previous.benchmark.equalsIgnoreCase(benchmarkName))
+        .map(_.icon)
+        .getOrElse("red_circle".emoji.toString())
+
     def addFilenameName(map: Map[String, Benchmark], filename: String): List[Benchmark] =
-      map.values.map(item => item.copy(benchmark = s"${item.benchmark}.$filename")).toList
+      map.values
+        .map(
+          item =>
+            item.copy(
+              benchmark = s"${benchmarkResultMark(item.benchmark)} ${item.benchmark}.$filename"))
+        .toList
 
     def extractFilename(name: String) =
       name.split('/').takeRight(1).mkString("").split('.').dropRight(1).mkString(".")
@@ -292,4 +337,16 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
     }
 
   }
+
+  private[this] def outputMarkdownBenchmarks(
+      benchmarks: List[Benchmark]
+  ): String =
+    benchmarks.foldLeft("") { (acc, benchmark) =>
+      acc ++
+        s"""
+           |# ${benchmark.benchmark}
+           ||Benchmark|Value
+           |${benchmark.benchmark}|${benchmark.primaryMetric.score.toString}
+         """.stripMargin
+    }
 }

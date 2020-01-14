@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2019-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import cats.effect.Console.implicits._
 import com.fortysevendeg.hood.json.JsonService
 import com.fortysevendeg.hood.model.{Benchmark, HoodError}
+import com.fortysevendeg.hood.plugin.SbtHoodPlugin.OutputFileFormatJson
 
 class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
 
@@ -88,11 +89,27 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
     val grouping = (for {
       previousBenchmarks <- loadBenchmarkJson(jsonService, previousFileJson)
       currentBenchmarks  <- loadBenchmarkJson(jsonService, currentFile)
+      comparisonResult <- SbtHoodPlugin
+        .benchmarkTask(
+          previousFileJson,
+          currentFile,
+          "Benchmark",
+          "Score",
+          "Score Error (99.9%)",
+          "Mode",
+          "Unit",
+          None,
+          Map.empty,
+          shouldOutputToFile = false,
+          new File("output.json"),
+          outputFileFormat = OutputFileFormatJson
+        )
       result = SbtHoodPlugin.collectBenchmarks(
         previousFileJson.getName,
         currentFile.getName,
         previousBenchmarks,
-        currentBenchmarks)
+        currentBenchmarks,
+        comparisonResult)
     } yield result).value
       .unsafeRunSync()
 
@@ -124,7 +141,8 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
         None,
         Map.empty,
         shouldOutputToFile = false,
-        new File("output.json")
+        new File("output.json"),
+        outputFileFormat = OutputFileFormatJson
       )
       .value
       .unsafeRunSync()
@@ -133,6 +151,8 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
     result.map { resultList =>
       resultList.sortBy(_.previous.benchmark) shouldBe expected
     }
+
+    result
   }
 
   private[this] def loadBenchmarkJson(
