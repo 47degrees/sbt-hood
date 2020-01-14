@@ -164,8 +164,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
           outputFilePath,
           outputFileFormat,
           result,
-          previousPath.getPath,
-          currentPath.getPath,
+          previousPath.getName,
+          currentPath.getName,
           previousBenchmarks,
           currentBenchmarks))
       outputMessage = benchmarkOutput(result, previousPath.getName, currentPath.getName)
@@ -250,21 +250,15 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
           currentBenchmarks,
           benchmarksResults)
 
-      val fileContents = outputFileContents(collectedBenchmarks, outputFileFormat)
+      val fileContents = outputFileFormat match {
+        case OutputFileFormatJson => collectedBenchmarks.asJson.noSpaces
+        case OutputFileFormatMd   => benchmarkOutput(benchmarksResults, previousFile, currentFile)
+      }
 
       FileUtils
         .writeFile(outputPath, fileContents)
         .map(r => r.leftMap(e => OutputFileError(e.getMessage)))
     } else S.pure(Either.right(()))
-
-  private[this] def outputFileContents(
-      benchmarks: List[Benchmark],
-      format: OutputFileFormat
-  ): String =
-    format match {
-      case OutputFileFormatJson => benchmarks.asJson.noSpaces
-      case OutputFileFormatMd   => outputMarkdownBenchmarks(benchmarks)
-    }
 
   def collectBenchmarks(
       previousFile: String,
@@ -288,7 +282,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         .toList
 
     def extractFilename(name: String) =
-      name.split('/').takeRight(1).mkString("").split('.').dropRight(1).mkString(".")
+      name.split('.').dropRight(1).mkString(".")
 
     val groupedCurrent  = addFilenameName(currentBenchmarks, extractFilename(currentFile))
     val groupedPrevious = addFilenameName(previousBenchmarks, extractFilename(previousFile))
@@ -302,11 +296,12 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       currentFile: String): String = {
     def outputComparisonResult(result: BenchmarkComparisonResult): String =
       s"""
-         |${result.icon} ${result.previous.benchmark} (Threshold: ${result.threshold})
+         |# ${result.icon} ${result.previous.benchmark} (Threshold: ${result.threshold})
          |
-      |Benchmark|Value
-         |$previousFile|${result.previous.primaryMetric.score.toString}
-         |$currentFile|${result.current.map(_.primaryMetric.score.toString).getOrElse("N/A")}
+         ||Benchmark|Value|
+         ||---------|-----|
+         ||$previousFile|${result.previous.primaryMetric.score.toString}|
+         ||$currentFile|${result.current.map(_.primaryMetric.score.toString).getOrElse("N/A")}|
     """.stripMargin
 
     benchmarks.map(outputComparisonResult).mkString("")
@@ -337,16 +332,4 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
     }
 
   }
-
-  private[this] def outputMarkdownBenchmarks(
-      benchmarks: List[Benchmark]
-  ): String =
-    benchmarks.foldLeft("") { (acc, benchmark) =>
-      acc ++
-        s"""
-           |# ${benchmark.benchmark}
-           ||Benchmark|Value
-           |${benchmark.benchmark}|${benchmark.primaryMetric.score.toString}
-         """.stripMargin
-    }
 }
