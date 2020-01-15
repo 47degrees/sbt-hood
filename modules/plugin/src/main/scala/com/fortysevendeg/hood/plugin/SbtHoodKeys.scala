@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2019-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,12 @@ trait SbtHoodKeys {
     "Common threshold to all benchmarks overriding the value coming from `thresholdColumnName`. Optional.")
   val benchmarkThreshold: SettingKey[Map[String, Double]] = settingKey(
     "Map with a custom threshold per benchmark key overriding the value coming from `thresholdColumnName` or `generalThreshold`. Optional.")
+  val outputToFile: SettingKey[Boolean] = settingKey(
+    "True if sbt-hood should write the benchmark output to a file. By default: `false`.")
+  val outputPath: SettingKey[File] = settingKey(
+    "Path to the output file. By default: `{project_root}/comparison.md`")
+  val outputFormat: SettingKey[String] = settingKey(
+    "Output file format. `MD` and `JSON` are supported. By default: `MD`")
 
   val gitHubToken: SettingKey[Option[String]] = settingKey(
     "GitHub access token required by `compareBenchmarksCI`.")
@@ -75,6 +81,9 @@ trait SbtHoodDefaultSettings extends SbtHoodKeys {
     unitsColumnName := "Unit",
     generalThreshold := None,
     benchmarkThreshold := Map.empty,
+    outputToFile := false,
+    outputPath := baseDirectory.value / "comparison.md",
+    outputFormat := "MD",
     gitHubToken := None,
     gitHubUserId := None,
     repositoryOwner := None,

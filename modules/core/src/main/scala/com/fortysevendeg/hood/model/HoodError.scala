@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2019-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,3 +23,4 @@ final case class MissingCurrentBenchmark(message: String) extends HoodError
 final case class BenchmarkLoadingError(message: String)   extends HoodError
 final case class MissingGitHubParameter(message: String)  extends HoodError
 final case class GitHubConnectionError(message: String)   extends HoodError
+final case class OutputFileError(message: String)         extends HoodError

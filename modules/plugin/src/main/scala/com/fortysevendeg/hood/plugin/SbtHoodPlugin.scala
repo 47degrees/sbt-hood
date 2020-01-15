@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2019-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,28 @@ import com.fortysevendeg.hood.model._
 import sbt.{AutoPlugin, Def, PluginTrigger, Task}
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import io.circe.syntax._
 import cats.effect.Console.implicits._
 import com.fortysevendeg.hood.github._
 import com.fortysevendeg.hood.benchmark.Error
 import com.fortysevendeg.hood.json.JsonService
 import com.fortysevendeg.hood.utils._
 import github4s.GithubResponses.GHException
+import Benchmark._
+import com.lightbend.emoji.ShortCodes.Implicits._
+import com.lightbend.emoji.ShortCodes.Defaults._
 
 object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHoodKeys {
+
+  sealed trait OutputFileFormat
+  case object OutputFileFormatMd   extends OutputFileFormat
+  case object OutputFileFormatJson extends OutputFileFormat
+
+  private[this] def parseOutputFormat(source: String): OutputFileFormat =
+    source.toLowerCase match {
+      case "json" => OutputFileFormatJson
+      case _      => OutputFileFormatMd
+    }
 
   override def projectSettings: Seq[Def.Setting[_]] = defaultSettings
   override val trigger: PluginTrigger               = noTrigger
@@ -53,7 +67,10 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       modeColumnName.value,
       unitsColumnName.value,
       generalThreshold.value,
-      benchmarkThreshold.value
+      benchmarkThreshold.value,
+      outputToFile.value,
+      outputPath.value,
+      parseOutputFormat(outputFormat.value)
     ).leftFlatMap(e =>
         EitherT.left[List[BenchmarkComparisonResult]](logger.error(s"There was an error: $e")))
       .void
@@ -73,7 +90,10 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         modeColumnName.value,
         unitsColumnName.value,
         generalThreshold.value,
-        benchmarkThreshold.value
+        benchmarkThreshold.value,
+        outputToFile.value,
+        outputPath.value,
+        parseOutputFormat(outputFormat.value)
       ).leftMap(NonEmptyChain.one)
       params <- EitherT.fromEither[IO](
         GitHubParameters.fromParams(
@@ -108,7 +128,10 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       modeColumnName: String,
       unitsColumnName: String,
       generalThreshold: Option[Double],
-      benchmarkThreshold: Map[String, Double])(
+      benchmarkThreshold: Map[String, Double],
+      shouldOutputToFile: Boolean,
+      outputFilePath: File,
+      outputFileFormat: OutputFileFormat)(
       implicit L: Logger[F],
       S: Sync[F],
       C: Console[F]): EitherT[F, HoodError, List[BenchmarkComparisonResult]] = {
@@ -135,6 +158,16 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
           previousBenchmarks,
           generalThreshold,
           benchmarkThreshold))
+      _ <- EitherT(
+        writeOutputFile(
+          shouldOutputToFile,
+          outputFilePath,
+          outputFileFormat,
+          result,
+          previousPath.getName,
+          currentPath.getName,
+          previousBenchmarks,
+          currentBenchmarks))
       outputMessage = benchmarkOutput(result, previousPath.getName, currentPath.getName)
       _ <- EitherT.right(C.putStrLn(outputMessage))
     } yield result
@@ -172,7 +205,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         ))
     } yield ()
 
-  private[this] def buildBenchmarkMap(benchmarks: List[Benchmark]): Map[String, Benchmark] =
+  def buildBenchmarkMap(benchmarks: List[Benchmark]): Map[String, Benchmark] =
     benchmarks.map(b => (b.benchmark, b)).toMap
 
   private[this] def performBenchmarkComparison[F[_]](
@@ -199,17 +232,76 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
             )(current => S.delay(BenchmarkService.compare(current, previous, threshold)))
       }
 
+  private[this] def writeOutputFile[F[_]](
+      shouldOutputToFile: Boolean,
+      outputPath: File,
+      outputFileFormat: OutputFileFormat,
+      benchmarksResults: List[BenchmarkComparisonResult],
+      previousFile: String,
+      currentFile: String,
+      previousBenchmarks: Map[String, Benchmark],
+      currentBenchmarks: Map[String, Benchmark])(implicit S: Sync[F]): F[Either[HoodError, Unit]] =
+    if (shouldOutputToFile) {
+      val collectedBenchmarks =
+        collectBenchmarks(
+          previousFile,
+          currentFile,
+          previousBenchmarks,
+          currentBenchmarks,
+          benchmarksResults)
+
+      val fileContents = outputFileFormat match {
+        case OutputFileFormatJson => collectedBenchmarks.asJson.noSpaces
+        case OutputFileFormatMd   => benchmarkOutput(benchmarksResults, previousFile, currentFile)
+      }
+
+      EitherT(FileUtils.writeFile(outputPath, fileContents))
+        .leftMap[HoodError](e => OutputFileError(e.getMessage))
+        .value
+    } else S.pure(Either.right(()))
+
+  def collectBenchmarks(
+      previousFile: String,
+      currentFile: String,
+      previousBenchmarks: Map[String, Benchmark],
+      currentBenchmarks: Map[String, Benchmark],
+      benchmarkResults: List[BenchmarkComparisonResult]
+  ): List[Benchmark] = {
+    def benchmarkResultMark(benchmarkName: String): String =
+      benchmarkResults
+        .find(_.previous.benchmark.equalsIgnoreCase(benchmarkName))
+        .map(_.icon)
+        .getOrElse("red_circle".emoji.toString())
+
+    def addFilenameName(map: Map[String, Benchmark], filename: String): List[Benchmark] =
+      map.values
+        .map(
+          item =>
+            item.copy(
+              benchmark = s"${benchmarkResultMark(item.benchmark)} ${item.benchmark}.$filename"))
+        .toList
+
+    def extractFilename(name: String) =
+      name.split('.').dropRight(1).mkString(".")
+
+    val groupedCurrent  = addFilenameName(currentBenchmarks, extractFilename(currentFile))
+    val groupedPrevious = addFilenameName(previousBenchmarks, extractFilename(previousFile))
+
+    (groupedPrevious ++ groupedCurrent).sorted
+  }
+
   private[this] def benchmarkOutput(
       benchmarks: List[BenchmarkComparisonResult],
       previousFile: String,
       currentFile: String): String = {
     def outputComparisonResult(result: BenchmarkComparisonResult): String =
       s"""
-         |${result.icon} ${result.previous.benchmark} (Threshold: ${result.threshold})
+         |# ${result.icon} ${result.previous.benchmark} (Threshold: ${result.threshold})
          |
-      |Benchmark|Value
-         |$previousFile|${result.previous.primaryMetric.score.toString}
-         |$currentFile|${result.current.map(_.primaryMetric.score.toString).getOrElse("N/A")}
+         ||Benchmark|Value|
+         ||---------|-----|
+         ||$previousFile|${result.previous.primaryMetric.score.toString}|
+         ||$currentFile|${result.current.map(_.primaryMetric.score.toString).getOrElse("N/A")}|
     """.stripMargin
 
     benchmarks.map(outputComparisonResult).mkString("")

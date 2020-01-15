@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2019-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 package com.fortysevendeg.hood.utils
 
 import cats.effect.{Resource, Sync}
-import java.io.File
+import java.io.{File, PrintWriter}
+import cats.implicits._
 
 import scala.io.{BufferedSource, Source}
 
@@ -46,6 +47,12 @@ object FileUtils {
     } else if (Json.extensions.contains(fileExtension(file))) {
       Json
     } else Unknown
+
+  def writeFile[F[_]](file: File, contents: String)(
+      implicit S: Sync[F]): F[Either[Throwable, Unit]] =
+    S.attempt(
+      S.bracket(S.delay(new PrintWriter(file)))(writer => S.delay(writer.write(contents)))(writer =>
+        S.delay(writer.close())))
 
   private[this] def fileExtension(file: File): String =
     file.getName.toLowerCase.split('.').lastOption.getOrElse("")
