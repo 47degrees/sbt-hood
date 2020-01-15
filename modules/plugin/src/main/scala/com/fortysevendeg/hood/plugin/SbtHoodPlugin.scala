@@ -255,9 +255,9 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         case OutputFileFormatMd   => benchmarkOutput(benchmarksResults, previousFile, currentFile)
       }
 
-      FileUtils
-        .writeFile(outputPath, fileContents)
-        .map(r => r.leftMap(e => OutputFileError(e.getMessage)))
+      EitherT(FileUtils.writeFile(outputPath, fileContents))
+        .leftMap[HoodError](e => OutputFileError(e.getMessage))
+        .value
     } else S.pure(Either.right(()))
 
   def collectBenchmarks(

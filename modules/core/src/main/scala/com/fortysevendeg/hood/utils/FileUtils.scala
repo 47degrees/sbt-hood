@@ -49,13 +49,10 @@ object FileUtils {
     } else Unknown
 
   def writeFile[F[_]](file: File, contents: String)(
-      implicit S: Sync[F]): F[Either[Throwable, Unit]] = S.delay {
-    Either.catchNonFatal {
-      val writer = new PrintWriter(file)
-      writer.write(contents)
-      writer.close()
-    }
-  }
+      implicit S: Sync[F]): F[Either[Throwable, Unit]] =
+    S.attempt(
+      S.bracket(S.pure(new PrintWriter(file)))(writer => S.pure(writer.write(contents)))(writer =>
+        S.pure(writer.close())))
 
   private[this] def fileExtension(file: File): String =
     file.getName.toLowerCase.split('.').lastOption.getOrElse("")
