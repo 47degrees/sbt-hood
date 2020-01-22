@@ -43,7 +43,8 @@ case class GitHubParameters(
     repositoryOwner: String,
     repositoryName: String,
     pullRequestNumber: Int,
-    targetUrl: Option[String])
+    targetUrl: Option[String]
+)
 
 object GitHubParameters {
   type ValidationResult[A] = ValidatedNec[HoodError, A]
@@ -53,7 +54,8 @@ object GitHubParameters {
       repositoryOwner: Option[String],
       repositoryName: Option[String],
       pullRequestNumber: Option[Int],
-      targetUrl: Option[String]): Either[NonEmptyChain[HoodError], GitHubParameters] =
+      targetUrl: Option[String]
+  ): Either[NonEmptyChain[HoodError], GitHubParameters] =
     (
       checkMandatoryParameter(accessToken, "gitHubToken"),
       checkMandatoryParameter(repositoryOwner, "repositoryOwner"),
@@ -66,8 +68,10 @@ object GitHubParameters {
 
   private[this] def checkMandatoryParameter[A](
       param: Option[A],
-      name: String): ValidationResult[A] =
+      name: String
+  ): ValidationResult[A] =
     param.fold(
       MissingGitHubParameter(s"Missing required parameter for GitHub integration: $name")
-        .invalidNec[A])(_.validNec)
+        .invalidNec[A]
+    )(_.validNec)
 }

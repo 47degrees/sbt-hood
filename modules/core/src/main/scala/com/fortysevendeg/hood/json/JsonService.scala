@@ -37,23 +37,23 @@ object JsonService {
 
   def build[F[_]: Sync: Logger]: JsonService[F] = new JsonServiceImpl[F]
 
-  class JsonServiceImpl[F[_]](implicit S: Sync[F], L: Logger[F]) extends JsonService[F] {
+  class JsonServiceImpl[F[_]](implicit S: Sync[F]) extends JsonService[F] {
 
     def parseBenchmark(jsonFile: File): F[Either[HoodError, List[Benchmark]]] = {
 
       FileUtils
         .openFile(jsonFile)
         .attempt
-        .use(
-          fileData =>
-            S.pure(
-              fileData
-                .leftMap[HoodError](e => BenchmarkLoadingError(e.getMessage))
-                .flatMap { data =>
-                  decode[List[Benchmark]](data.mkString)
-                    .leftMap[HoodError](e => InvalidJson(e.getMessage))
-                }
-          ))
+        .use(fileData =>
+          S.pure(
+            fileData
+              .leftMap[HoodError](e => BenchmarkLoadingError(e.getMessage))
+              .flatMap { data =>
+                decode[List[Benchmark]](data.mkString)
+                  .leftMap[HoodError](e => InvalidJson(e.getMessage))
+              }
+          )
+        )
     }
   }
 

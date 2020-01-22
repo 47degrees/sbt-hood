@@ -23,7 +23,8 @@ final case class JmhResult(
     samples: Int,
     score: Double,
     scoreError: Double,
-    unit: String) {
+    unit: String
+) {
 
   def toBenchmark(): Benchmark =
     Benchmark(

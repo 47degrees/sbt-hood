@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2019-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,8 @@ class CsvServiceTests extends FlatSpec with Matchers {
       .build[IO]
       .parseBenchmark(
         BenchmarkColumns("Benchmark", "Mode", "Score", "Score Error (99.9%)", "Unit"),
-        dataFile)
+        dataFile
+      )
       .unsafeRunSync()
 
     result.isRight shouldBe true
@@ -52,7 +53,8 @@ class CsvServiceTests extends FlatSpec with Matchers {
       .build[IO]
       .parseBenchmark(
         BenchmarkColumns("Benchmark", "Mode", "Score", "Score Error (99.9%)", "Unit"),
-        dataFile)
+        dataFile
+      )
       .unsafeRunSync()
 
     result.isLeft shouldBe true

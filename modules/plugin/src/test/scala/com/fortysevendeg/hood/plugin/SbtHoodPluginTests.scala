@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2019-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,17 @@ package scala.com.fortysevendeg.hood.plugin
 
 import java.io.File
 
+import cats.data.EitherT
 import cats.effect.IO
+import cats.effect._
 import com.fortysevendeg.hood.benchmark.BenchmarkComparisonResult
 import com.fortysevendeg.hood.plugin.SbtHoodPlugin
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.scalatest.{FlatSpec, Matchers}
 import cats.effect.Console.implicits._
+import com.fortysevendeg.hood.json.JsonService
+import com.fortysevendeg.hood.model.{Benchmark, HoodError}
+import com.fortysevendeg.hood.plugin.SbtHoodPlugin.OutputFileFormatJson
 
 class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
 
@@ -44,7 +49,8 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
     checkComparisonDefaultThreshold(
       previousFileJson,
       currentFile,
-      benchmarkResultAgainstNiceDefault)
+      benchmarkResultAgainstNiceDefault
+    )
   }
 
   it should "compare two Csv benchmarks and return a warning if the current one is worse (but under threshold) with default settings" in {
@@ -53,7 +59,8 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
     checkComparisonDefaultThreshold(
       previousFileCsv,
       currentFile,
-      benchmarkResultAgainstNotSoNiceDefault)
+      benchmarkResultAgainstNotSoNiceDefault
+    )
   }
 
   it should "compare two Json benchmarks and return a warning if the current one is worse (but under threshold) with default settings" in {
@@ -62,7 +69,8 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
     checkComparisonDefaultThreshold(
       previousFileJson,
       currentFile,
-      benchmarkResultAgainstNotSoNiceDefault)
+      benchmarkResultAgainstNotSoNiceDefault
+    )
   }
 
   it should "compare two Csv benchmarks and return a warning if the current one is worse (and under threshold) with default settings" in {
@@ -77,10 +85,55 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
     checkComparisonDefaultThreshold(previousFileJson, currentFile, benchmarkResultAgainstBadDefault)
   }
 
+  it should "group benchmarks for the two source files in order to produce a correct output file" in {
+    val jsonService = JsonService.build[IO]
+    val currentFile = new File(getClass.getResource("/current_really_bad.json").getPath)
+
+    val grouping = (for {
+      previousBenchmarks <- loadBenchmarkJson(jsonService, previousFileJson)
+      currentBenchmarks  <- loadBenchmarkJson(jsonService, currentFile)
+      comparisonResult <- SbtHoodPlugin
+        .benchmarkTask(
+          previousFileJson,
+          currentFile,
+          "Benchmark",
+          "Score",
+          "Score Error (99.9%)",
+          "Mode",
+          "Unit",
+          None,
+          Map.empty,
+          shouldOutputToFile = false,
+          new File("output.json"),
+          outputFileFormat = OutputFileFormatJson
+        )
+      result = SbtHoodPlugin.collectBenchmarks(
+        previousFileJson.getName,
+        currentFile.getName,
+        previousBenchmarks,
+        currentBenchmarks,
+        comparisonResult
+      )
+    } yield result).value
+      .unsafeRunSync()
+
+    grouping.isRight shouldBe true
+    grouping.fold(
+      e => fail(s"Failed with error: $e"),
+      group => {
+        group.exists(_.benchmark == "test.decoding.previous") &&
+          group.exists(_.benchmark == "test.parsing.previous") &&
+          group.exists(_.benchmark == "test.decoding.current_really_bad") &&
+          group.exists(_.benchmark == "test.parsing.current_really_bad")
+      }
+    )
+  }
+
   private[this] def checkComparisonDefaultThreshold(
       previousFile: File,
       currentFile: File,
-      expected: List[BenchmarkComparisonResult]) = {
+      expected: List[BenchmarkComparisonResult]
+  ) = {
     val result = SbtHoodPlugin
       .benchmarkTask(
         previousFile,
@@ -91,7 +144,11 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
         "Mode",
         "Unit",
         None,
-        Map.empty)
+        Map.empty,
+        shouldOutputToFile = false,
+        new File("output.json"),
+        outputFileFormat = OutputFileFormatJson
+      )
       .value
       .unsafeRunSync()
 
@@ -99,6 +156,14 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
     result.map { resultList =>
       resultList.sortBy(_.previous.benchmark) shouldBe expected
     }
+
+    result
   }
+
+  private[this] def loadBenchmarkJson(
+      jsonService: JsonService[IO],
+      file: File
+  ): EitherT[IO, HoodError, Map[String, Benchmark]] =
+    EitherT(jsonService.parseBenchmark(file)).map(SbtHoodPlugin.buildBenchmarkMap)
 
 }

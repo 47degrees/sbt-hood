@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2019-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,37 +25,61 @@ trait SbtHoodKeys {
   val compareBenchmarks: TaskKey[Unit] =
     taskKey[Unit]("Compare two benchmarks and show results through the console.")
   val compareBenchmarksCI: TaskKey[Unit] = taskKey[Unit](
-    "Compare two benchmarks and show results through a GitHub comment in a repository.")
+    "Compare two benchmarks and show results through a GitHub comment in a repository."
+  )
 
   val previousBenchmarkPath: SettingKey[File] = settingKey(
-    "Path to the previous JMH benchmark in CSV format. By default: {project_root}/master.csv.")
+    "Path to the previous JMH benchmark in CSV format. By default: {project_root}/master.csv."
+  )
   val currentBenchmarkPath: SettingKey[File] = settingKey(
-    "Path to the current JMH benchmark in CSV format.  By default: {project_root}/current.csv.")
+    "Path to the current JMH benchmark in CSV format.  By default: {project_root}/current.csv."
+  )
   val keyColumnName: SettingKey[String] = settingKey(
-    "Column name to distinguish each benchmark on the comparison. By default: `Benchmark`.")
+    "Column name to distinguish each benchmark on the comparison. By default: `Benchmark`."
+  )
   val compareColumnName: SettingKey[String] = settingKey(
-    "Column name of the column to compare (values must be `Double`). By default: Score.")
+    "Column name of the column to compare (values must be `Double`). By default: Score."
+  )
   val thresholdColumnName: SettingKey[String] = settingKey(
-    "Column name to get the threshold per benchmark. By default: `Score Error (99.9%)`.")
+    "Column name to get the threshold per benchmark. By default: `Score Error (99.9%)`."
+  )
   val modeColumnName: SettingKey[String] = settingKey(
-    "Column name to get the benchmark mode. By default: `Mode`.")
+    "Column name to get the benchmark mode. By default: `Mode`."
+  )
   val unitsColumnName: SettingKey[String] = settingKey(
-    "Column name to get the benchmark mode. By default: `Unit`.")
+    "Column name to get the benchmark mode. By default: `Unit`."
+  )
   val generalThreshold: SettingKey[Option[Double]] = settingKey(
-    "Common threshold to all benchmarks overriding the value coming from `thresholdColumnName`. Optional.")
+    "Common threshold to all benchmarks overriding the value coming from `thresholdColumnName`. Optional."
+  )
   val benchmarkThreshold: SettingKey[Map[String, Double]] = settingKey(
-    "Map with a custom threshold per benchmark key overriding the value coming from `thresholdColumnName` or `generalThreshold`. Optional.")
+    "Map with a custom threshold per benchmark key overriding the value coming from `thresholdColumnName` or `generalThreshold`. Optional."
+  )
+  val outputToFile: SettingKey[Boolean] = settingKey(
+    "True if sbt-hood should write the benchmark output to a file. By default: `false`."
+  )
+  val outputPath: SettingKey[File] = settingKey(
+    "Path to the output file. By default: `{project_root}/comparison.md`"
+  )
+  val outputFormat: SettingKey[String] = settingKey(
+    "Output file format. `MD` and `JSON` are supported. By default: `MD`"
+  )
 
   val gitHubToken: SettingKey[Option[String]] = settingKey(
-    "GitHub access token required by `compareBenchmarksCI`.")
+    "GitHub access token required by `compareBenchmarksCI`."
+  )
   val gitHubUserId: SettingKey[Option[String]] = settingKey(
-    "GitHub ID for the user publishing the benchmark comments, required by `compareBenchmarksCI`.")
+    "GitHub ID for the user publishing the benchmark comments, required by `compareBenchmarksCI`."
+  )
   val repositoryOwner: SettingKey[Option[String]] = settingKey(
-    "Owner of the repository where the plugin will post updates, required by `compareBenchmarksCI`.")
+    "Owner of the repository where the plugin will post updates, required by `compareBenchmarksCI`."
+  )
   val repositoryName: SettingKey[Option[String]] = settingKey(
-    "Name of the repository where the plugin will post updates, required by `compareBenchmarksCI`.")
+    "Name of the repository where the plugin will post updates, required by `compareBenchmarksCI`."
+  )
   val pullRequestNumber: SettingKey[Option[Int]] = settingKey(
-    "Pull request number where the plugin will post updates, required by `compareBenchmarksCI`.")
+    "Pull request number where the plugin will post updates, required by `compareBenchmarksCI`."
+  )
   val targetUrl: SettingKey[Option[String]] = settingKey(
     "URL to the CI job, used by `compareBenchmarksCI`."
   )
@@ -75,6 +99,9 @@ trait SbtHoodDefaultSettings extends SbtHoodKeys {
     unitsColumnName := "Unit",
     generalThreshold := None,
     benchmarkThreshold := Map.empty,
+    outputToFile := false,
+    outputPath := baseDirectory.value / "comparison.md",
+    outputFormat := "MD",
     gitHubToken := None,
     gitHubUserId := None,
     repositoryOwner := None,

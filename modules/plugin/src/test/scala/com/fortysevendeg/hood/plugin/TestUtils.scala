@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2019-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,8 @@ trait TestUtils {
       prevBenchmarkDecoding,
       Some(notSoNiceBenchmarkDecoding),
       Warning,
-      3.0),
+      3.0
+    ),
     BenchmarkComparisonResult(prevBenchmarkParsing, Some(notSoNiceBenchmarkParsing), Warning, 3.0)
   )
 

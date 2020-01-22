@@ -24,7 +24,7 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val kindProjector: String   = "0.9.9"
+      val kindProjector: String   = "0.11.0"
       val paradise: String        = "2.1.1"
       val scala: String           = "2.12.8"
       val scalatest: String       = "3.0.6"
@@ -92,15 +92,14 @@ object ProjectPlugin extends AutoPlugin {
       orgProjectName := "sbt-hood",
       scalaVersion := V.scala,
       crossScalaVersions := Seq(V.scala),
-      //scalacOptions ++= scalacAdvancedOptions,
-      //scalacOptions ~= (_ filterNot Set("-Yliteral-types", "-Xlint").contains),
-      Test / fork := true,
-      //Tut / scalacOptions -= "-Ywarn-unused-import",
+      scalacOptions ++= scalacAdvancedOptions,
+      scalacOptions ~= (_ filterNot Set("-Yliteral-types", "-Xlint").contains),
+        Test / fork := true,
+      Tut / scalacOptions -= "-Ywarn-unused-import",
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
-      resolvers ++= Seq(Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots"), Resolver.typesafeIvyRepo("releases")),
       addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
-      addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
+      addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.full),
       libraryDependencies ++= Seq(
         "io.circe"                   %% "circe-generic"          % V.circe,
         "io.circe"                   %% "circe-core"             % V.circe,
