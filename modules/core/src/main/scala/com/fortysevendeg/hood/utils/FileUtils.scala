@@ -18,7 +18,6 @@ package com.fortysevendeg.hood.utils
 
 import cats.effect.{Resource, Sync}
 import java.io.{File, PrintWriter}
-import cats.implicits._
 
 import scala.io.{BufferedSource, Source}
 
@@ -49,10 +48,13 @@ object FileUtils {
     } else Unknown
 
   def writeFile[F[_]](file: File, contents: String)(
-      implicit S: Sync[F]): F[Either[Throwable, Unit]] =
+      implicit S: Sync[F]
+  ): F[Either[Throwable, Unit]] =
     S.attempt(
       S.bracket(S.delay(new PrintWriter(file)))(writer => S.delay(writer.write(contents)))(writer =>
-        S.delay(writer.close())))
+        S.delay(writer.close())
+      )
+    )
 
   private[this] def fileExtension(file: File): String =
     file.getName.toLowerCase.split('.').lastOption.getOrElse("")

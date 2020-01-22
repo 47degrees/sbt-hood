@@ -48,7 +48,8 @@ trait TestUtils {
       prevBenchmarkDecoding,
       Some(notSoNiceBenchmarkDecoding),
       Warning,
-      3.0),
+      3.0
+    ),
     BenchmarkComparisonResult(prevBenchmarkParsing, Some(notSoNiceBenchmarkParsing), Warning, 3.0)
   )
 

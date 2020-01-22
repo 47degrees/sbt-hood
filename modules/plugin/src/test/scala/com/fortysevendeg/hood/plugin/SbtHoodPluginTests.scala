@@ -49,7 +49,8 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
     checkComparisonDefaultThreshold(
       previousFileJson,
       currentFile,
-      benchmarkResultAgainstNiceDefault)
+      benchmarkResultAgainstNiceDefault
+    )
   }
 
   it should "compare two Csv benchmarks and return a warning if the current one is worse (but under threshold) with default settings" in {
@@ -58,7 +59,8 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
     checkComparisonDefaultThreshold(
       previousFileCsv,
       currentFile,
-      benchmarkResultAgainstNotSoNiceDefault)
+      benchmarkResultAgainstNotSoNiceDefault
+    )
   }
 
   it should "compare two Json benchmarks and return a warning if the current one is worse (but under threshold) with default settings" in {
@@ -67,7 +69,8 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
     checkComparisonDefaultThreshold(
       previousFileJson,
       currentFile,
-      benchmarkResultAgainstNotSoNiceDefault)
+      benchmarkResultAgainstNotSoNiceDefault
+    )
   }
 
   it should "compare two Csv benchmarks and return a warning if the current one is worse (and under threshold) with default settings" in {
@@ -109,7 +112,8 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
         currentFile.getName,
         previousBenchmarks,
         currentBenchmarks,
-        comparisonResult)
+        comparisonResult
+      )
     } yield result).value
       .unsafeRunSync()
 
@@ -118,9 +122,9 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
       e => fail(s"Failed with error: $e"),
       group => {
         group.exists(_.benchmark == "test.decoding.previous") &&
-        group.exists(_.benchmark == "test.parsing.previous") &&
-        group.exists(_.benchmark == "test.decoding.current_really_bad") &&
-        group.exists(_.benchmark == "test.parsing.current_really_bad")
+          group.exists(_.benchmark == "test.parsing.previous") &&
+          group.exists(_.benchmark == "test.decoding.current_really_bad") &&
+          group.exists(_.benchmark == "test.parsing.current_really_bad")
       }
     )
   }
@@ -128,7 +132,8 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
   private[this] def checkComparisonDefaultThreshold(
       previousFile: File,
       currentFile: File,
-      expected: List[BenchmarkComparisonResult]) = {
+      expected: List[BenchmarkComparisonResult]
+  ) = {
     val result = SbtHoodPlugin
       .benchmarkTask(
         previousFile,
@@ -157,7 +162,8 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
 
   private[this] def loadBenchmarkJson(
       jsonService: JsonService[IO],
-      file: File): EitherT[IO, HoodError, Map[String, Benchmark]] =
+      file: File
+  ): EitherT[IO, HoodError, Map[String, Benchmark]] =
     EitherT(jsonService.parseBenchmark(file)).map(SbtHoodPlugin.buildBenchmarkMap)
 
 }

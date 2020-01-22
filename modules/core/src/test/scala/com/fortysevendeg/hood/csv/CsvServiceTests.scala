@@ -36,7 +36,8 @@ class CsvServiceTests extends FlatSpec with Matchers {
       .build[IO]
       .parseBenchmark(
         BenchmarkColumns("Benchmark", "Mode", "Score", "Score Error (99.9%)", "Unit"),
-        dataFile)
+        dataFile
+      )
       .unsafeRunSync()
 
     result.isRight shouldBe true
@@ -52,7 +53,8 @@ class CsvServiceTests extends FlatSpec with Matchers {
       .build[IO]
       .parseBenchmark(
         BenchmarkColumns("Benchmark", "Mode", "Score", "Score Error (99.9%)", "Unit"),
-        dataFile)
+        dataFile
+      )
       .unsafeRunSync()
 
     result.isLeft shouldBe true

@@ -30,7 +30,8 @@ final case class BenchmarkComparisonResult(
     previous: Benchmark,
     current: Option[Benchmark],
     result: BenchmarkComparisonStatus,
-    threshold: Double) {
+    threshold: Double
+) {
   def icon: String = {
     (result match {
       case OK      => "heavy_check_mark"
@@ -45,7 +46,8 @@ object BenchmarkService {
   def compare(
       currentBenchmark: Benchmark,
       previousBenchmark: Benchmark,
-      threshold: Double): BenchmarkComparisonResult = {
+      threshold: Double
+  ): BenchmarkComparisonResult = {
 
     val status =
       currentBenchmark.primaryMetric.score - previousBenchmark.primaryMetric.score match {

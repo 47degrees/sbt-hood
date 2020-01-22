@@ -33,20 +33,23 @@ trait GithubService[F[_]] {
       owner: String,
       repository: String,
       pullRequestNumber: Int,
-      comment: String): F[GHResponse[Comment]]
+      comment: String
+  ): F[GHResponse[Comment]]
 
   def editComment(
       accessToken: String,
       owner: String,
       repository: String,
       commentId: Int,
-      comment: String): F[GHResponse[Comment]]
+      comment: String
+  ): F[GHResponse[Comment]]
 
   def listComments(
       accessToken: String,
       owner: String,
       repository: String,
-      pullRequestNumber: Int): F[GHResponse[List[Comment]]]
+      pullRequestNumber: Int
+  ): F[GHResponse[List[Comment]]]
 
   def createStatus(
       accessToken: String,
@@ -72,7 +75,8 @@ object GithubService {
         owner: String,
         repository: String,
         pullRequestNumber: Int,
-        comment: String): F[GHResponse[Comment]] =
+        comment: String
+    ): F[GHResponse[Comment]] =
       for {
         result <- Github(Some(accessToken)).issues
           .createComment(owner, repository, pullRequestNumber, comment)
@@ -86,7 +90,8 @@ object GithubService {
         owner: String,
         repository: String,
         commentId: Int,
-        comment: String): F[GHResponse[Comment]] =
+        comment: String
+    ): F[GHResponse[Comment]] =
       for {
         result <- Github(Some(accessToken)).issues
           .editComment(owner, repository, commentId, comment)
@@ -99,7 +104,8 @@ object GithubService {
         accessToken: String,
         owner: String,
         repository: String,
-        pullRequestNumber: Int): F[GHResponse[List[Comment]]] =
+        pullRequestNumber: Int
+    ): F[GHResponse[List[Comment]]] =
       for {
         result <- Github(Some(accessToken)).issues
           .listComments(owner, repository, pullRequestNumber)
@@ -123,7 +129,8 @@ object GithubService {
         pr <- EitherT(gh.pullRequests.get(owner, repository, pullRequestNumber).exec())
         head <- EitherT.fromOption[F](
           pr.result.head,
-          UnexpectedException("Couldn't find a head SHA for the specified pull request."))
+          UnexpectedException("Couldn't find a head SHA for the specified pull request.")
+        )
         sha = head.sha
         result <- EitherT(
           gh.repos
@@ -134,8 +141,10 @@ object GithubService {
               state.value,
               targetUrl,
               description.some,
-              context.some)
-            .exec())
+              context.some
+            )
+            .exec()
+        )
       } yield result).value.onError {
         case e => L.error(e)("Found error while accessing GitHub API.")
       }

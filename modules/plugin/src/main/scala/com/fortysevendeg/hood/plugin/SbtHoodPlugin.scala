@@ -72,7 +72,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       outputPath.value,
       parseOutputFormat(outputFormat.value)
     ).leftFlatMap(e =>
-        EitherT.left[List[BenchmarkComparisonResult]](logger.error(s"There was an error: $e")))
+        EitherT.left[List[BenchmarkComparisonResult]](logger.error(s"There was an error: $e"))
+      )
       .void
       .value
       .unsafeRunSync()
@@ -101,18 +102,21 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
           repositoryOwner.value,
           repositoryName.value,
           pullRequestNumber.value,
-          targetUrl.value)
+          targetUrl.value
+        )
       )
       _ <- submitResultsToGitHub(
         basicBenchmark,
         previousBenchmarkPath.value,
         currentBenchmarkPath.value,
-        params)
-        .leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
+        params
+      ).leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
     } yield basicBenchmark)
       .leftFlatMap(e =>
         EitherT.left[List[BenchmarkComparisonResult]](
-          logger.error(s"Error(s) found: \n${e.toList.mkString("\n")}")))
+          logger.error(s"Error(s) found: \n${e.toList.mkString("\n")}")
+        )
+      )
       .void
       .value
       .unsafeRunSync()
@@ -131,25 +135,28 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       benchmarkThreshold: Map[String, Double],
       shouldOutputToFile: Boolean,
       outputFilePath: File,
-      outputFileFormat: OutputFileFormat)(
+      outputFileFormat: OutputFileFormat
+  )(
       implicit L: Logger[F],
       S: Sync[F],
-      C: Console[F]): EitherT[F, HoodError, List[BenchmarkComparisonResult]] = {
+      C: Console[F]
+  ): EitherT[F, HoodError, List[BenchmarkComparisonResult]] = {
 
     val columns = BenchmarkColumns(
       keyColumnName,
       modeColumnName,
       compareColumnName,
       thresholdColumnName,
-      unitsColumnName)
+      unitsColumnName
+    )
 
     val csvService: CsvService[F]   = CsvService.build[F]
     val jsonService: JsonService[F] = JsonService.build[F]
 
     for {
       previousBenchmarks <- EitherT(
-        parseBenchmark[F](columns, previousPath, csvService, jsonService))
-        .map(buildBenchmarkMap)
+        parseBenchmark[F](columns, previousPath, csvService, jsonService)
+      ).map(buildBenchmarkMap)
       currentBenchmarks <- EitherT(parseBenchmark[F](columns, currentPath, csvService, jsonService))
         .map(buildBenchmarkMap)
       result <- EitherT.right[HoodError](
@@ -157,7 +164,9 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
           currentBenchmarks,
           previousBenchmarks,
           generalThreshold,
-          benchmarkThreshold))
+          benchmarkThreshold
+        )
+      )
       _ <- EitherT(
         writeOutputFile(
           shouldOutputToFile,
@@ -167,7 +176,9 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
           previousPath.getName,
           currentPath.getName,
           previousBenchmarks,
-          currentBenchmarks))
+          currentBenchmarks
+        )
+      )
       outputMessage = benchmarkOutput(result, previousPath.getName, currentPath.getName)
       _ <- EitherT.right(C.putStrLn(outputMessage))
     } yield result
@@ -178,10 +189,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       benchmarkResult: List[BenchmarkComparisonResult],
       previousPath: File,
       currentPath: File,
-      params: GitHubParameters)(
-      implicit L: Logger[F],
-      S: Sync[F],
-      G: GithubService[F]): EitherT[F, GHException, Unit] =
+      params: GitHubParameters
+  )(implicit L: Logger[F], S: Sync[F], G: GithubService[F]): EitherT[F, GHException, Unit] =
     for {
       _ <- EitherT(
         G.publishComment(
@@ -190,7 +199,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
           params.repositoryName,
           params.pullRequestNumber,
           s"*sbt-hood* benchmark result:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
-        ))
+        )
+      )
       comparison = gitHubStateFromBenchmarks(benchmarkResult)
       _ <- EitherT(
         G.createStatus(
@@ -202,7 +212,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
           params.targetUrl,
           comparison.description,
           GithubModel.githubStatusContext
-        ))
+        )
+      )
     } yield ()
 
   def buildBenchmarkMap(benchmarks: List[Benchmark]): Map[String, Benchmark] =
@@ -212,9 +223,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       currentBenchmarks: Map[String, Benchmark],
       previousBenchmarks: Map[String, Benchmark],
       generalThreshold: Option[Double],
-      thresholdMap: Map[String, Double])(
-      implicit L: Logger[F],
-      S: Sync[F]): F[List[BenchmarkComparisonResult]] =
+      thresholdMap: Map[String, Double]
+  )(implicit L: Logger[F], S: Sync[F]): F[List[BenchmarkComparisonResult]] =
     previousBenchmarks.toList
       .traverse {
         case (benchmarkKey, previous) =>
@@ -227,7 +237,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
             .get(benchmarkKey)
             .fold(
               L.error(
-                  s"Benchmark $benchmarkKey existing in previous benchmarks is missing from current ones.")
+                  s"Benchmark $benchmarkKey existing in previous benchmarks is missing from current ones."
+                )
                 .as(BenchmarkComparisonResult(previous, None, Warning, threshold))
             )(current => S.delay(BenchmarkService.compare(current, previous, threshold)))
       }
@@ -240,7 +251,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       previousFile: String,
       currentFile: String,
       previousBenchmarks: Map[String, Benchmark],
-      currentBenchmarks: Map[String, Benchmark])(implicit S: Sync[F]): F[Either[HoodError, Unit]] =
+      currentBenchmarks: Map[String, Benchmark]
+  )(implicit S: Sync[F]): F[Either[HoodError, Unit]] =
     if (shouldOutputToFile) {
       val collectedBenchmarks =
         collectBenchmarks(
@@ -248,7 +260,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
           currentFile,
           previousBenchmarks,
           currentBenchmarks,
-          benchmarksResults)
+          benchmarksResults
+        )
 
       val fileContents = outputFileFormat match {
         case OutputFileFormatJson => collectedBenchmarks.asJson.noSpaces
@@ -275,10 +288,10 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
 
     def addFilenameName(map: Map[String, Benchmark], filename: String): List[Benchmark] =
       map.values
-        .map(
-          item =>
-            item.copy(
-              benchmark = s"${benchmarkResultMark(item.benchmark)} ${item.benchmark}.$filename"))
+        .map(item =>
+          item
+            .copy(benchmark = s"${benchmarkResultMark(item.benchmark)} ${item.benchmark}.$filename")
+        )
         .toList
 
     def extractFilename(name: String) =
@@ -293,7 +306,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
   private[this] def benchmarkOutput(
       benchmarks: List[BenchmarkComparisonResult],
       previousFile: String,
-      currentFile: String): String = {
+      currentFile: String
+  ): String = {
     def outputComparisonResult(result: BenchmarkComparisonResult): String =
       s"""
          |# ${result.icon} ${result.previous.benchmark} (Threshold: ${result.threshold})
@@ -320,7 +334,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       columns: BenchmarkColumns,
       file: File,
       csvService: CsvService[F],
-      jsonService: JsonService[F])(implicit S: Sync[F]): F[Either[HoodError, List[Benchmark]]] = {
+      jsonService: JsonService[F]
+  )(implicit S: Sync[F]): F[Either[HoodError, List[Benchmark]]] = {
 
     FileUtils.fileType(file) match {
       case Csv  => csvService.parseBenchmark(columns, file)
@@ -328,7 +343,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       case _ =>
         S.pure(
           BenchmarkLoadingError(s"Invalid file type for file: ${file.getName}")
-            .asLeft[List[Benchmark]])
+            .asLeft[List[Benchmark]]
+        )
     }
 
   }

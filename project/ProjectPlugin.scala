@@ -24,7 +24,7 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val kindProjector: String   = "0.9.9"
+      val kindProjector: String   = "0.11.0"
       val paradise: String        = "2.1.1"
       val scala: String           = "2.12.8"
       val scalatest: String       = "3.0.6"
@@ -63,20 +63,16 @@ object ProjectPlugin extends AutoPlugin {
       micrositeDescription := "A SBT plugin for comparing benchmarks in your PRs",
       micrositeGithubOwner := "47deg",
       micrositeGithubRepo := "sbt-hood",
+      micrositeDocumentationUrl := "docs",
       micrositeGitterChannelUrl := "47deg/sbthood",
       micrositeOrganizationHomepage := "http://www.47deg.com",
       includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
       micrositePushSiteWith := GitHub4s,
       micrositeGithubToken := sys.env.get(orgGithubTokenSetting.value),
       micrositePalette := Map(
-        "brand-primary"   -> "#de3423",
-        "brand-secondary" -> "#852319",
-        "brand-tertiary"  -> "#381C19",
-        "gray-dark"       -> "#333333",
-        "gray"            -> "#666666",
-        "gray-light"      -> "#EDEDED",
-        "gray-lighter"    -> "#F4F5F9",
-        "white-color"     -> "#E6E7EC"
+        "brand-primary"     -> "#25bc77",
+        "brand-secondary"   -> "#dbf7ea",
+        "white-color"       -> "#FFF"
       )
     )
 
@@ -98,13 +94,13 @@ object ProjectPlugin extends AutoPlugin {
       crossScalaVersions := Seq(V.scala),
       scalacOptions ++= scalacAdvancedOptions,
       scalacOptions ~= (_ filterNot Set("-Yliteral-types", "-Xlint").contains),
-      Test / fork := true,
+        Test / fork := true,
       Tut / scalacOptions -= "-Ywarn-unused-import",
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
-      resolvers ++= Seq(Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots")),
+      resolvers ++= Seq(Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots"), Resolver.typesafeIvyRepo("releases")),
       addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
-      addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
+      addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.full),
       libraryDependencies ++= Seq(
         "io.circe"                   %% "circe-generic"          % V.circe,
         "io.circe"                   %% "circe-core"             % V.circe,

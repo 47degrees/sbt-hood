@@ -19,6 +19,7 @@ package com.fortysevendeg.hood.csv
 import java.io.File
 
 import cats.effect.Sync
+import cats.syntax.either._
 import com.fortysevendeg.hood.model._
 import kantan.csv._
 import kantan.csv.ops._
@@ -32,13 +33,15 @@ final case class BenchmarkColumns(
     modeCol: String,
     compareCol: String,
     thresholdCol: String,
-    unitsCol: String)
+    unitsCol: String
+)
 
 trait CsvService[F[_]] {
 
   def parseBenchmark(
       columns: BenchmarkColumns,
-      csvFile: File): F[Either[HoodError, List[Benchmark]]]
+      csvFile: File
+  ): F[Either[HoodError, List[Benchmark]]]
 
 }
 
@@ -46,11 +49,12 @@ object CsvService {
 
   def build[F[_]: Sync: Logger]: CsvService[F] = new CsvServiceImpl[F]
 
-  class CsvServiceImpl[F[_]](implicit S: Sync[F], L: Logger[F]) extends CsvService[F] {
+  class CsvServiceImpl[F[_]](implicit S: Sync[F]) extends CsvService[F] {
 
     def parseBenchmark(
         columns: BenchmarkColumns,
-        csvFile: File): F[Either[HoodError, List[Benchmark]]] =
+        csvFile: File
+    ): F[Either[HoodError, List[Benchmark]]] =
       FileUtils
         .openFile(csvFile)
         .attempt
@@ -59,7 +63,8 @@ object CsvService {
             data <- fileData
               .leftMap[HoodError](e => BenchmarkLoadingError(e.getMessage))
             result <- parseCsvLinesHeaders(data.mkString, columns)
-          } yield result))
+          } yield result)
+        )
 
     private[this] def parseCsvLinesHeaders(
         rawData: String,
@@ -73,17 +78,18 @@ object CsvService {
         "Samples",
         columns.compareCol,
         columns.thresholdCol,
-        columns.unitsCol)(JmhResult.apply _)
+        columns.unitsCol
+      )(JmhResult.apply _)
 
       rawData
         .asCsvReader[JmhResult](rfc.withHeader)
-        .map(
-          result =>
-            result
-              .map(_.toBenchmark())
-              .leftMap[HoodError] { e =>
-                InvalidCsv(e.getMessage)
-            })
+        .map(result =>
+          result
+            .map(_.toBenchmark())
+            .leftMap[HoodError] { e =>
+              InvalidCsv(e.getMessage)
+            }
+        )
         .toList
         .sequence
     }
