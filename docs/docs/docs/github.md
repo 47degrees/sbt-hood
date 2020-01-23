@@ -1,6 +1,7 @@
 ---
 layout: docs
 title: GitHub integration
+permalink: github-integration/
 ---
 
 # GitHub integration
