@@ -1,0 +1,111 @@
+// Style
+// -----------------------------------------------------
+
+.docs {
+  font-family: $font-family-sans-serif;
+  font-size: $font-size-base;
+  line-height: 1.5;
+  background: $white-color;
+
+  #sidebar-wrapper {
+    background-image: none;
+    background-color: $sidebar-background;
+
+    #sidebar-brand {
+      background-color: $sidebar-active-color;
+
+      a {
+        color: $text-color;
+      }
+    }
+
+    .sidebar-nav {
+
+      .sidebar-nav-item {
+
+        .sub-section {
+          background: $sidebar-active-color;
+
+          a {
+
+            &.active {
+              color: $text-color;
+              box-shadow: 0.25rem 0 #25BC77 inset;
+            }
+          }
+        }
+
+        a, button {
+          @include links($text-color, $text-color, rgba($text-color, 0.8), $text-color);
+        }
+
+        .fa {
+          color: $text-color;
+        }
+
+        &.active {
+          > a, button {
+            box-shadow: 0.25rem 0 #25BC77 inset;
+            background-color: $sidebar-active-color;
+          }
+        }
+
+        &.open {
+          > a, button {
+            background: $sidebar-head-active-color;
+          }
+        }
+      }
+    }
+  }
+
+  #page-content-wrapper {
+
+    .nav {
+      background: #fff;
+
+      a {
+        color: $text-color;
+
+        &:hover {
+          color: rgba($text-color, 0.8);
+        }
+      }
+
+      ul {
+        li {
+          .label {
+            color: $text-color;
+          }
+        }
+      }
+    }
+
+    .sidebar-toggle {
+      color: $text-color;
+
+      &:hover {
+        color: $text-color;
+      }
+    }
+  }
+
+  #content {
+    p {
+      line-height: 1.5;
+    }
+  }
+
+  h1, h2, h3, h4, h5, h6,
+  .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: $headings-font-family;
+    font-weight: $headings-font-weight;
+  }
+}
+
+.close {
+  &::after,
+  &::before {
+    background-color: $text-color;
+  }
+}

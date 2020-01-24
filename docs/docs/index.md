@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Getting Started
-permalink: docs/
+permalink: /
 ---
 
 # Getting started
@@ -51,7 +51,7 @@ If no errors are found, you'll see the comparisons being output in the sbt conso
 |---------|-----|
 |previous.json|5.0|
 |current_better.json|6.0|
-    
+
 # ✔ test.parsing (Threshold: 3.0)
 
 |Benchmark|Value|

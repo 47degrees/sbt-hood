@@ -13,7 +13,6 @@ import sbtrelease.ReleasePlugin.autoImport._
 import scoverage.ScoverageKeys._
 
 import scala.language.reflectiveCalls
-import tut.TutPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
 
@@ -57,28 +56,28 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
-      micrositeName := "sbt-hood",
-      micrositeBaseUrl := "sbthood",
-      micrositeDocumentationUrl := "/sbthood/docs.html",
+      micrositeName := "Sbt-hood",
+      micrositeBaseUrl := "/sbt-hood",
       micrositeDescription := "A SBT plugin for comparing benchmarks in your PRs",
       micrositeGithubOwner := "47deg",
       micrositeGithubRepo := "sbt-hood",
       micrositeDocumentationUrl := "docs",
       micrositeGitterChannelUrl := "47deg/sbthood",
       micrositeOrganizationHomepage := "http://www.47deg.com",
-      includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
+      includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md" | "*.svg",
       micrositePushSiteWith := GitHub4s,
+      micrositeHighlightTheme := "atom-one-light",
       micrositeGithubToken := sys.env.get(orgGithubTokenSetting.value),
       micrositePalette := Map(
         "brand-primary"     -> "#25bc77",
-        "brand-secondary"   -> "#dbf7ea",
+        "brand-secondary"   -> "#25bc77",
         "white-color"       -> "#FFF"
       )
     )
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies += %%("scalatest", V.scalatest),
-      scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
+      scalacOptions ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
     )
 
   }
@@ -95,7 +94,6 @@ object ProjectPlugin extends AutoPlugin {
       scalacOptions ++= scalacAdvancedOptions,
       scalacOptions ~= (_ filterNot Set("-Yliteral-types", "-Xlint").contains),
         Test / fork := true,
-      Tut / scalacOptions -= "-Ywarn-unused-import",
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
       resolvers ++= Seq(Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots"), Resolver.typesafeIvyRepo("releases")),
