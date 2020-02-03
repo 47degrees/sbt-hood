@@ -68,6 +68,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       unitsColumnName.value,
       generalThreshold.value,
       benchmarkThreshold.value,
+      include.value,
+      exclude.value,
       outputToFile.value,
       outputPath.value,
       parseOutputFormat(outputFormat.value)
@@ -92,6 +94,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         unitsColumnName.value,
         generalThreshold.value,
         benchmarkThreshold.value,
+        include.value,
+        exclude.value,
         outputToFile.value,
         outputPath.value,
         parseOutputFormat(outputFormat.value)
@@ -133,6 +137,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       unitsColumnName: String,
       generalThreshold: Option[Double],
       benchmarkThreshold: Map[String, Double],
+      include: Option[String],
+      exclude: Option[String],
       shouldOutputToFile: Boolean,
       outputFilePath: File,
       outputFileFormat: OutputFileFormat
@@ -161,8 +167,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         .map(buildBenchmarkMap)
       result <- EitherT.right[HoodError](
         performBenchmarkComparison[F](
-          currentBenchmarks,
-          previousBenchmarks,
+          filterBenchmarks(currentBenchmarks, include, exclude),
+          filterBenchmarks(previousBenchmarks, include, exclude),
           generalThreshold,
           benchmarkThreshold
         )
@@ -218,6 +224,22 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
 
   def buildBenchmarkMap(benchmarks: List[Benchmark]): Map[String, Benchmark] =
     benchmarks.map(b => (b.benchmark, b)).toMap
+
+  def filterBenchmarks(
+      benchmarks: Map[String, Benchmark],
+      includeRegExpr: Option[String],
+      excludeRegExpr: Option[String]
+  ): Map[String, Benchmark] = {
+    val includedBenchmarks = includeRegExpr.fold(benchmarks)(inc =>
+      benchmarks.filter { case (key, _) => inc.r.pattern.matcher(key).matches }
+    )
+
+    val benchmarksAfterExcludes = excludeRegExpr.fold(includedBenchmarks)(exc =>
+      includedBenchmarks.filterNot { case (key, _) => exc.r.pattern.matcher(key).matches }
+    )
+
+    benchmarksAfterExcludes
+  }
 
   private[this] def performBenchmarkComparison[F[_]](
       currentBenchmarks: Map[String, Benchmark],

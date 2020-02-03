@@ -103,6 +103,8 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
           "Unit",
           None,
           Map.empty,
+          None,
+          None,
           shouldOutputToFile = false,
           new File("output.json"),
           outputFileFormat = OutputFileFormatJson
@@ -129,6 +131,46 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
     )
   }
 
+  it should "exclude benchmarks based in settings" in {
+    val jsonService = JsonService.build[IO]
+
+    val filteredBenchmarks = (for {
+      previousBenchmarks <- loadBenchmarkJson(jsonService, previousFileJson)
+      result = SbtHoodPlugin.filterBenchmarks(
+        previousBenchmarks,
+        None,
+        Some("test.decoding")
+      )
+    } yield result).value
+      .unsafeRunSync()
+
+    filteredBenchmarks.isRight shouldBe true
+    filteredBenchmarks.fold(
+      e => fail(s"Failed with error: $e"),
+      result => result.size shouldBe 1
+    )
+  }
+
+  it should "include benchmarks based in settings" in {
+    val jsonService = JsonService.build[IO]
+
+    val filteredBenchmarks = (for {
+      previousBenchmarks <- loadBenchmarkJson(jsonService, previousFileJson)
+      result = SbtHoodPlugin.filterBenchmarks(
+        previousBenchmarks,
+        Some("test.decoding"),
+        None
+      )
+    } yield result).value
+      .unsafeRunSync()
+
+    filteredBenchmarks.isRight shouldBe true
+    filteredBenchmarks.fold(
+      e => fail(s"Failed with error: $e"),
+      result => result.size shouldBe 1
+    )
+  }
+
   private[this] def checkComparisonDefaultThreshold(
       previousFile: File,
       currentFile: File,
@@ -145,6 +187,8 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
         "Unit",
         None,
         Map.empty,
+        None,
+        None,
         shouldOutputToFile = false,
         new File("output.json"),
         outputFileFormat = OutputFileFormatJson

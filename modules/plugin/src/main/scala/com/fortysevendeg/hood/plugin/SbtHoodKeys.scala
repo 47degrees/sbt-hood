@@ -55,6 +55,12 @@ trait SbtHoodKeys {
   val benchmarkThreshold: SettingKey[Map[String, Double]] = settingKey(
     "Map with a custom threshold per benchmark key overriding the value coming from `thresholdColumnName` or `generalThreshold`. Optional."
   )
+  val include: SettingKey[Option[String]] = settingKey(
+    "Regular expression to include only the benchmarks with a matching key. Optional"
+  )
+  val exclude: SettingKey[Option[String]] = settingKey(
+    "Regular expression to exclude the benchmarks with a matching key. Optional"
+  )
   val outputToFile: SettingKey[Boolean] = settingKey(
     "True if sbt-hood should write the benchmark output to a file. By default: `false`."
   )
@@ -99,6 +105,8 @@ trait SbtHoodDefaultSettings extends SbtHoodKeys {
     unitsColumnName := "Unit",
     generalThreshold := None,
     benchmarkThreshold := Map.empty,
+    exclude := None,
+    include := None,
     outputToFile := false,
     outputPath := baseDirectory.value / "comparison.md",
     outputFormat := "MD",
