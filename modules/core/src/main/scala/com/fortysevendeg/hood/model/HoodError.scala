@@ -24,3 +24,4 @@ final case class BenchmarkLoadingError(message: String)   extends HoodError
 final case class MissingGitHubParameter(message: String)  extends HoodError
 final case class GitHubConnectionError(message: String)   extends HoodError
 final case class OutputFileError(message: String)         extends HoodError
+final case class InputFileError(message: String)          extends HoodError

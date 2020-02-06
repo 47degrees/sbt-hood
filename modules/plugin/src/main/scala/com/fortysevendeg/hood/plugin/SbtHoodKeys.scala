@@ -27,6 +27,8 @@ trait SbtHoodKeys {
   val compareBenchmarksCI: TaskKey[Unit] = taskKey[Unit](
     "Compare two benchmarks and show results through a GitHub comment in a repository."
   )
+  val uploadBenchmark: TaskKey[Unit] =
+    taskKey[Unit]("Uploads the provided list of benchmark output files as a GitHub commit.")
 
   val previousBenchmarkPath: SettingKey[File] = settingKey(
     "Path to the previous JMH benchmark in CSV format. By default: {project_root}/master.csv."
@@ -54,6 +56,12 @@ trait SbtHoodKeys {
   )
   val benchmarkThreshold: SettingKey[Map[String, Double]] = settingKey(
     "Map with a custom threshold per benchmark key overriding the value coming from `thresholdColumnName` or `generalThreshold`. Optional."
+  )
+  val include: SettingKey[Option[String]] = settingKey(
+    "Regular expression to include only the benchmarks with a matching key. Optional"
+  )
+  val exclude: SettingKey[Option[String]] = settingKey(
+    "Regular expression to exclude the benchmarks with a matching key. Optional"
   )
   val outputToFile: SettingKey[Boolean] = settingKey(
     "True if sbt-hood should write the benchmark output to a file. By default: `false`."
@@ -83,6 +91,18 @@ trait SbtHoodKeys {
   val targetUrl: SettingKey[Option[String]] = settingKey(
     "URL to the CI job, used by `compareBenchmarksCI`."
   )
+  val benchmarkFiles: SettingKey[List[File]] = settingKey(
+    "Files to be uploaded, used by `uploadBenchmark`. Default: empty list."
+  )
+  val uploadDirectory: SettingKey[String] = settingKey(
+    "Target path in the repository to upload benchmark files, used by `uploadBenchmark`. By default: `benchmarks`."
+  )
+  val commitMessage: SettingKey[String] = settingKey(
+    "Commit message to include when uploading benchmark files, used by `uploadBenchmark`. By default: `Upload benchmark`."
+  )
+  val branch: SettingKey[String] = settingKey(
+    "Target branch for benchmark files uploads, used by `uploadBenchmark`. By default: `master`."
+  )
 }
 
 object SbtHoodKeys extends SbtHoodKeys
@@ -99,6 +119,8 @@ trait SbtHoodDefaultSettings extends SbtHoodKeys {
     unitsColumnName := "Unit",
     generalThreshold := None,
     benchmarkThreshold := Map.empty,
+    exclude := None,
+    include := None,
     outputToFile := false,
     outputPath := baseDirectory.value / "comparison.md",
     outputFormat := "MD",
@@ -108,8 +130,13 @@ trait SbtHoodDefaultSettings extends SbtHoodKeys {
     repositoryName := None,
     pullRequestNumber := None,
     targetUrl := None,
+    benchmarkFiles := List.empty,
+    uploadDirectory := "benchmarks",
+    commitMessage := "Upload benchmark",
+    branch := "master",
     compareBenchmarks := compareBenchmarksTask.value,
-    compareBenchmarksCI := compareBenchmarksCITask.value
+    compareBenchmarksCI := compareBenchmarksCITask.value,
+    uploadBenchmark := uploadBenchmarkTask.value
   )
 
 }

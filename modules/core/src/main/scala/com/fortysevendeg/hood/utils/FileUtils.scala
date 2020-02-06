@@ -56,6 +56,16 @@ object FileUtils {
       )
     )
 
+  def readFile[F[_]](file: File)(implicit S: Sync[F]): F[Either[Throwable, String]] = {
+    S.attempt(
+      S.bracket(
+        S.delay(
+          Source.fromFile(file)
+        )
+      )(source => S.delay(source.mkString))(source => S.delay(source.close))
+    )
+  }
+
   private[this] def fileExtension(file: File): String =
     file.getName.toLowerCase.split('.').lastOption.getOrElse("")
 }
