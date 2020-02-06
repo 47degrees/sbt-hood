@@ -106,7 +106,9 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
           repositoryOwner.value,
           repositoryName.value,
           pullRequestNumber.value,
-          targetUrl.value
+          targetUrl.value,
+          branch.value,
+          commitMessage.value
         )
       )
       _ <- submitResultsToGitHub(
@@ -127,6 +129,39 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       .merge
   }
 
+  def uploadBenchmarkTask: Def.Initialize[Task[Unit]] = Def.task {
+    (if (benchmarkFiles.value.isEmpty) {
+       logger.error(s"`benchmarkFiles` is empty. Stopping task.")
+     } else {
+       (for {
+         files <- benchmarkFiles.value.traverse(file =>
+           EitherT(FileUtils.readFile[IO](file))
+             .map(content => (s"${uploadDirectory.value}/${file.getName}", content))
+             .leftMap(e => NonEmptyChain.one[HoodError](InputFileError(e.getMessage)))
+         )
+         params <- EitherT.fromEither[IO](
+           GitHubParameters.fromParams(
+             gitHubToken.value,
+             repositoryOwner.value,
+             repositoryName.value,
+             pullRequestNumber.value,
+             targetUrl.value,
+             branch.value,
+             commitMessage.value
+           )
+         )
+         _ <- uploadFilesToGitHub[IO](files, params)
+           .leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
+       } yield ())
+         .leftFlatMap(e =>
+           EitherT.left[Unit](
+             logger.error(s"Error(s) found: \n${e.toList.mkString("\n")}")
+           )
+         )
+         .value
+     }).void.unsafeRunSync()
+
+  }
   def benchmarkTask[F[_]](
       previousPath: File,
       currentPath: File,
@@ -221,6 +256,21 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         )
       )
     } yield ()
+
+  private[this] def uploadFilesToGitHub[F[_]](
+      files: List[(String, String)],
+      params: GitHubParameters
+  )(implicit L: Logger[F], S: Sync[F], G: GithubService[F]): EitherT[F, GHException, Unit] =
+    EitherT(
+      G.commitFilesAndContents(
+        params.accessToken,
+        params.repositoryOwner,
+        params.repositoryName,
+        params.branch,
+        params.commitMessage,
+        files
+      )
+    ).void
 
   def buildBenchmarkMap(benchmarks: List[Benchmark]): Map[String, Benchmark] =
     benchmarks.map(b => (b.benchmark, b)).toMap

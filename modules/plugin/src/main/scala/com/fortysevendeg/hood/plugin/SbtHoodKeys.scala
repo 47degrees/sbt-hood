@@ -27,6 +27,8 @@ trait SbtHoodKeys {
   val compareBenchmarksCI: TaskKey[Unit] = taskKey[Unit](
     "Compare two benchmarks and show results through a GitHub comment in a repository."
   )
+  val uploadBenchmark: TaskKey[Unit] =
+    taskKey[Unit]("Uploads the provided list of benchmark output files as a GitHub commit.")
 
   val previousBenchmarkPath: SettingKey[File] = settingKey(
     "Path to the previous JMH benchmark in CSV format. By default: {project_root}/master.csv."
@@ -89,6 +91,18 @@ trait SbtHoodKeys {
   val targetUrl: SettingKey[Option[String]] = settingKey(
     "URL to the CI job, used by `compareBenchmarksCI`."
   )
+  val benchmarkFiles: SettingKey[List[File]] = settingKey(
+    "Files to be uploaded, used by `uploadBenchmark`. Default: empty list."
+  )
+  val uploadDirectory: SettingKey[String] = settingKey(
+    "Target path in the repository to upload benchmark files, used by `uploadBenchmark`. By default: `benchmarks`."
+  )
+  val commitMessage: SettingKey[String] = settingKey(
+    "Commit message to include when uploading benchmark files, used by `uploadBenchmark`. By default: `Upload benchmark`."
+  )
+  val branch: SettingKey[String] = settingKey(
+    "Target branch for benchmark files uploads, used by `uploadBenchmark`. By default: `master`."
+  )
 }
 
 object SbtHoodKeys extends SbtHoodKeys
@@ -116,8 +130,13 @@ trait SbtHoodDefaultSettings extends SbtHoodKeys {
     repositoryName := None,
     pullRequestNumber := None,
     targetUrl := None,
+    benchmarkFiles := List.empty,
+    uploadDirectory := "benchmarks",
+    commitMessage := "Upload benchmark",
+    branch := "master",
     compareBenchmarks := compareBenchmarksTask.value,
-    compareBenchmarksCI := compareBenchmarksCITask.value
+    compareBenchmarksCI := compareBenchmarksCITask.value,
+    uploadBenchmark := uploadBenchmarkTask.value
   )
 
 }

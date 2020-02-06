@@ -43,7 +43,9 @@ case class GitHubParameters(
     repositoryOwner: String,
     repositoryName: String,
     pullRequestNumber: Int,
-    targetUrl: Option[String]
+    targetUrl: Option[String],
+    branch: String,
+    commitMessage: String
 )
 
 object GitHubParameters {
@@ -54,7 +56,9 @@ object GitHubParameters {
       repositoryOwner: Option[String],
       repositoryName: Option[String],
       pullRequestNumber: Option[Int],
-      targetUrl: Option[String]
+      targetUrl: Option[String],
+      branch: String,
+      commitMessage: String
   ): Either[NonEmptyChain[HoodError], GitHubParameters] =
     (
       checkMandatoryParameter(accessToken, "gitHubToken"),
@@ -63,7 +67,7 @@ object GitHubParameters {
       checkMandatoryParameter(pullRequestNumber, "pullRequestNumber")
     ).mapN {
       case (token, repoOwner, repoName, pull) =>
-        GitHubParameters(token, repoOwner, repoName, pull, targetUrl)
+        GitHubParameters(token, repoOwner, repoName, pull, targetUrl, branch, commitMessage)
     }.toEither
 
   private[this] def checkMandatoryParameter[A](
