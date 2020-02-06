@@ -25,7 +25,7 @@ import github4s.Github
 import github4s.Github._
 import github4s.cats.effect.jvm.Implicits._
 import github4s.GithubResponses._
-import github4s.free.domain.{Comment, Ref, RefCommit, Status, TreeDataBlob, TreeResult}
+import github4s.free.domain._
 import io.chrisdavenport.log4cats.Logger
 
 trait GithubService[F[_]] {
