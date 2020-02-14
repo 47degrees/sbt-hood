@@ -102,7 +102,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       ).leftMap(NonEmptyChain.one)
       params <- EitherT.fromEither[IO](
         GitHubParameters.fromParams(
-          gitHubToken.value,
+          token.value,
           repositoryOwner.value,
           repositoryName.value,
           pullRequestNumber.value,
@@ -141,7 +141,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
          )
          params <- EitherT.fromEither[IO](
            GitHubParameters.fromParams(
-             gitHubToken.value,
+             token.value,
              repositoryOwner.value,
              repositoryName.value,
              pullRequestNumber.value,
@@ -336,8 +336,9 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         )
 
       val fileContents = outputFileFormat match {
-        case OutputFileFormatJson => collectedBenchmarks.asJson.noSpaces
-        case OutputFileFormatMd   => benchmarkOutput(benchmarksResults, previousFile, currentFile)
+        case OutputFileFormatJson =>
+          collectedBenchmarks.asJson.noSpaces
+        case OutputFileFormatMd => benchmarkOutput(benchmarksResults, previousFile, currentFile)
       }
 
       EitherT(FileUtils.writeFile(outputPath, fileContents))

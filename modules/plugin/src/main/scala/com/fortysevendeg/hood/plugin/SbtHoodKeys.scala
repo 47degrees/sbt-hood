@@ -73,11 +73,8 @@ trait SbtHoodKeys {
     "Output file format. `MD` and `JSON` are supported. By default: `MD`"
   )
 
-  val gitHubToken: SettingKey[Option[String]] = settingKey(
+  val token: SettingKey[Option[String]] = settingKey(
     "GitHub access token required by `compareBenchmarksCI`."
-  )
-  val gitHubUserId: SettingKey[Option[String]] = settingKey(
-    "GitHub ID for the user publishing the benchmark comments, required by `compareBenchmarksCI`."
   )
   val repositoryOwner: SettingKey[Option[String]] = settingKey(
     "Owner of the repository where the plugin will post updates, required by `compareBenchmarksCI`."
@@ -124,8 +121,7 @@ trait SbtHoodDefaultSettings extends SbtHoodKeys {
     outputToFile := false,
     outputPath := baseDirectory.value / "comparison.md",
     outputFormat := "MD",
-    gitHubToken := None,
-    gitHubUserId := None,
+    token := None,
     repositoryOwner := None,
     repositoryName := None,
     pullRequestNumber := None,
