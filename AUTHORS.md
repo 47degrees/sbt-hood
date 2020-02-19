@@ -9,4 +9,3 @@ The maintainers of the project are:
 ## Contributors
 
 These are the people that have contributed to the sbt-hood project:
-
