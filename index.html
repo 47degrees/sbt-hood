@@ -1,0 +1,88 @@
+<html><head><title>Sbt-hood: Getting Started</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="47 Degrees" /><meta name="description" content="A SBT plugin for comparing benchmarks in your PRs" /><meta name="og:image" content="/sbt-hood/img/poster.png" /><meta name="image" property="og:image" content="/sbt-hood/img/poster.png" /><meta name="og:title" content="Sbt-hood: Getting Started" /><meta name="title" property="og:title" content="Sbt-hood: Getting Started" /><meta name="og:site_name" content="Sbt-hood" /><meta name="og:url" content="https://47deg.github.io/sbt-hood/" /><meta name="og:type" content="website" /><meta name="og:description" content="A SBT plugin for comparing benchmarks in your PRs" /><link rel="icon" type="image/png" href="/sbt-hood/img/favicon.png" /><meta name="twitter:title" content="Sbt-hood: Getting Started" /><meta name="twitter:image" content="/sbt-hood/img/poster.png" /><meta name="twitter:description" content="A SBT plugin for comparing benchmarks in your PRs" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/sbt-hood/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/sbt-hood/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/sbt-hood/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/sbt-hood/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/sbt-hood/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/sbt-hood/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/sbt-hood/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/sbt-hood/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/sbt-hood/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/sbt-hood/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/sbt-hood/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/sbt-hood/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/sbt-hood/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/sbt-hood/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/sbt-hood/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/sbt-hood/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/sbt-hood/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/sbt-hood/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/sbt-hood/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/sbt-hood/img/favicon310x150.png" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/sbt-hood/highlight/styles/atom-one-light.css" /><link rel="stylesheet" href="/sbt-hood/css/light-style.css" /><link rel="stylesheet" href="/sbt-hood/css/custom.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><div id="sidebar-brand"><a href="/sbt-hood/" class="brand"><div class="brand-wrapper"></div><span>Sbt-hood</span></a><button id="main-toggle" class="sidebar-toggle"><span class="close"></span></button></div><div class="sidebar-nav"> <div class="sidebar-nav-item active "><a href="/" title="Getting Started" class="active">Getting Started</a></div> <div class="sidebar-nav-item  "><a href="/github-integration/" title="GitHub integration" class="">GitHub integration</a></div></div></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li id="gh-eyes-item" class="hidden-xs"><a href="https://github.com/47deg/sbt-hood" target="_blank" rel="noopener noreferrer"><i class="fa fa-eye"></i><span>Watchers<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs"><a href="https://github.com/47deg/sbt-hood" target="_blank" rel="noopener noreferrer"><i class="fa fa-star-o"></i><span>Stars<span id="stars" class="label label-default">--</span></span></a></li></ul></div></div></div></div><div id="content" data-github-owner="47deg" data-github-repo="sbt-hood"><div class="content-wrapper"><section><h1 id="getting-started">Getting started</h1>
+<h2 id="benchmark-comparisons">Benchmark comparisons</h2>
+
+<p><em>sbt-hood</em> is able to perform comparisons based on JMH benchmarks. Providing CSV benchmarks files for
+both the current state of your code and any new changes you want to introduce, <em>sbt-hood</em> will make
+sure your project performs within your expected thresholds.</p>
+
+<p>It can work in a standalone basis or, more interestingly, within your CI pipelines. This allows
+automated comparisons to be performed and, should your performance variables get lower than expected,
+block a GitHub pull request to be merged.</p>
+
+<h2 id="standalone-use">Standalone use</h2>
+
+<p>In order to use <em>sbt-hood</em> you simply have to specify what benchmark files do you want to compare,
+(and the name of the important columns if your benchmark is in CSV format) through the following
+sbt variables:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">previousBenchmarkPath</code>: path to the previous JMH benchmark in CSV/Json format. By default: <code class="highlighter-rouge"><span class="p">{</span><span class="err">project_root</span><span class="p">}</span><span class="err">/master.csv</span></code>.</li>
+  <li><code class="highlighter-rouge">currentBenchmarkPath</code>: path to the current JMH benchmark in CSV/Json format.  By default: ``{project_root}/current.csv`.</li>
+  <li><code class="highlighter-rouge">keyColumnName</code>: column name to distinguish each benchmark on the comparison. By default: <code class="highlighter-rouge">Benchmark</code>.</li>
+  <li><code class="highlighter-rouge">include</code>: regular expression to include only the benchmarks with a matching key. Optional.</li>
+  <li><code class="highlighter-rouge">exclude</code>: regular expression to exclude the benchmarks with a matching key. Optional.</li>
+  <li><code class="highlighter-rouge">compareColumnName</code>: column name of the column to compare (values must be <code class="highlighter-rouge">Double</code>). By default: <code class="highlighter-rouge">Score</code>.</li>
+  <li><code class="highlighter-rouge">thresholdColumnName</code>: column name to get the threshold per benchmark. By default: <code class="highlighter-rouge">Score Error (99.9%)</code>.</li>
+  <li><code class="highlighter-rouge">modeColumnName</code>: column name to get the benchmark mode. By default: <code class="highlighter-rouge">Mode</code>.</li>
+  <li><code class="highlighter-rouge">unitsColumnName</code>: column name to get the benchmark mode. By default: <code class="highlighter-rouge">Unit</code>.</li>
+  <li><code class="highlighter-rouge">generalThreshold</code>: optional common threshold to all benchmarks overriding the value coming from <code class="highlighter-rouge">thresholdColumnName</code>.</li>
+  <li><code class="highlighter-rouge">benchmarkThreshold</code>: optional map with a custom threshold per benchmark key overriding the value coming from <code class="highlighter-rouge">thresholdColumnName</code> or <code class="highlighter-rouge">generalThreshold</code>.</li>
+  <li><code class="highlighter-rouge">outputToFile</code>: set to <code class="highlighter-rouge">true</code> saves the comparison results in a separate file in addition to the console report. By default this setting is disabled.</li>
+  <li><code class="highlighter-rouge">outputPath</code>: path to the comparison report to be generated. By default: <code class="highlighter-rouge"><span class="p">{</span><span class="err">project_root</span><span class="p">}</span><span class="err">/comparison.md</span></code>.</li>
+  <li><code class="highlighter-rouge">outputFormat</code>: file format for the comparison report. <code class="highlighter-rouge">MD</code> and <code class="highlighter-rouge">JSON</code> are supported. By default: <code class="highlighter-rouge">MD</code>.</li>
+</ul>
+
+<p>As you can see all these variables have default values or are optional so you’ll just need to adapt
+some of these if your benchmark files are in CSV format and contain different column names. Once set
+up, you only need to run a benchmark comparison through the following command:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>compareBenchmarks
+</code></pre>
+</div>
+
+<p>If no errors are found, you’ll see the comparisons being output in the sbt console. i.e.:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code># ✔ test.decoding (Threshold: 3.0)
+
+|Benchmark|Value|
+|---------|-----|
+|previous.json|5.0|
+|current_better.json|6.0|
+
+# ✔ test.parsing (Threshold: 3.0)
+
+|Benchmark|Value|
+|---------|-----|
+|previous.json|6.0|
+|current_better.json|7.0|
+</code></pre>
+</div>
+
+<p>For each benchmark (set by the value found under the specified <code class="highlighter-rouge">keyColumnName</code> variable) you’ll see
+a table comparing the values of both files. Results can be of three types (visible by the icon that
+shows in each table):</p>
+
+<ul>
+  <li>Success (✔): the current benchmark is better than the previous one.</li>
+  <li>Warning (⚠): the current benchmark is worse than the previous one, but within the specified threshold.</li>
+  <li>Error (🔴): the current benchmark is worse than the previous one, and outside the specified threshold.</li>
+</ul>
+</section></div></div></div></div><script src="/sbt-hood/highlight/highlight.pack.js"></script><script>
+// For all code blocks, copy the language from the containing div
+// to the inner code tag (where hljs expects it to be)
+const langPrefix = 'language-';
+document.querySelectorAll(`div[class^='${langPrefix}']`).forEach(function(div) {
+  div.classList.forEach(function(cssClass) {
+    if (cssClass.startsWith(langPrefix)) {
+      const lang = cssClass.substring(langPrefix.length);
+      div.querySelectorAll('pre code').forEach(function(code) {
+        code.classList.add(lang);
+      });
+    }
+  });
+});
+
+hljs.configure({languages:['scala','java','bash']});
+hljs.initHighlightingOnLoad();
+      </script><script>console.info('\x57\x65\x62\x73\x69\x74\x65\x20\x62\x75\x69\x6c\x74\x20\x77\x69\x74\x68\x3a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x5f\x5f\x0a\x20\x20\x20\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x5f\x20\x20\x2f\x20\x2f\x5f\x20\x20\x20\x20\x20\x20\x5f\x5f\x5f\x5f\x20\x5f\x5f\x5f\x20\x20\x28\x5f\x29\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x28\x5f\x29\x20\x2f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x0a\x20\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x60\x5f\x5f\x20\x5c\x2f\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x20\x2f\x20\x5f\x5f\x2f\x20\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x0a\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x5f\x2f\x20\x2f\x20\x2f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x5f\x5f\x2f\x20\x2f\x20\x20\x2f\x20\x2f\x5f\x2f\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x20\x2f\x5f\x2f\x20\x20\x5f\x5f\x28\x5f\x5f\x20\x20\x29\x0a\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2e\x5f\x5f\x5f\x2f\x5c\x5f\x5f\x2f\x20\x20\x20\x20\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x2f\x20\x20\x20\x5c\x5f\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x0a\x0a\x68\x74\x74\x70\x73\x3a\x2f\x2f\x34\x37\x64\x65\x67\x2e\x67\x69\x74\x68\x75\x62\x2e\x69\x6f\x2f\x73\x62\x74\x2d\x6d\x69\x63\x72\x6f\x73\x69\x74\x65\x73')</script><script>((window.gitter = {}).chat = {}).options = {
+room: '47deg/sbthood'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/sbt-hood/js/docs.js"></script></body></html>
