@@ -31,7 +31,6 @@ stages:
 - test
 - plugin
 - deploy
-- microsite
 jobs:
   include:
     - stage: plugin
@@ -52,12 +51,5 @@ jobs:
             git pull origin master;
             sbt ";project sbt-hood-plugin;release";
             sbt release;
-          fi
-    - stage: microsite
-      if: branch = master AND type != pull_request
-      script:
-        - if grep -q "SNAPSHOT" version.sbt; then
-            echo "Skipping microsite publication, snapshot version";
-          else
-            echo "Not ready yet! (sbt docs/publishMicrosite)";
+            sbt docs/publishMicrosite;
           fi

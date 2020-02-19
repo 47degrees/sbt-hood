@@ -34,3 +34,6 @@ project/plugins/project/
 .bloop/
 .metals/
 project/.bloop/
+
+# sbt-microsite specific
+_site/
