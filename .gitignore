@@ -29,6 +29,7 @@ project/plugins/project/
 .DS_Store
 
 /secring.gpg
+secret_key.asc
 
 # Metals Specific
 .bloop/
