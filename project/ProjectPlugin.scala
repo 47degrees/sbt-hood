@@ -56,7 +56,7 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
-      micrositeName := "Sbt-hood",
+      micrositeName := "SBT-Hood",
       micrositeBaseUrl := "/sbt-hood",
       micrositeDescription := "A SBT plugin for comparing benchmarks in your PRs",
       micrositeGithubOwner := "47deg",

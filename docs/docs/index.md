@@ -22,7 +22,7 @@ In order to use *sbt-hood* you simply have to specify what benchmark files do yo
 sbt variables:
 
 * `previousBenchmarkPath`: path to the previous JMH benchmark in CSV/Json format. By default: `{project_root}/master.csv`.
-* `currentBenchmarkPath`: path to the current JMH benchmark in CSV/Json format.  By default: ``{project_root}/current.csv`.
+* `currentBenchmarkPath`: path to the current JMH benchmark in CSV/Json format.  By default: `{project_root}/current.csv`.
 * `keyColumnName`: column name to distinguish each benchmark on the comparison. By default: `Benchmark`.
 * `include`: regular expression to include only the benchmarks with a matching key. Optional.
 * `exclude`: regular expression to exclude the benchmarks with a matching key. Optional.
