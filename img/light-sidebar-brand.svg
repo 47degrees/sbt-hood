@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 60 (88103) - https://sketch.com -->
+    <title>sidebar-brand</title>
+    <desc>Created with Sketch.</desc>
+    <g id="sidebar-brand" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="path" fill="#82E6B9" points="20 8 1.8189894e-12 8 1.8189894e-12 28"></polygon>
+        <polygon id="path" fill="#212D3A" points="15 13 1.81676896e-12 28 -1.77635684e-15 32 4.01397705 32 17 19 26 19 26 32 31.9984741 32 31.9984741 0 26 0 26 13"></polygon>
+        <polygon id="path" fill="#25BC77" points="20 0 1.8189894e-12 0 1.8189894e-12 20"></polygon>
+    </g>
+</svg>
