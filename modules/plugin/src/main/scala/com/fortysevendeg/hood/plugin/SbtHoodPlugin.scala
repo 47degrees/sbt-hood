@@ -129,7 +129,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       .merge
   }
 
-  def uploadBenchmarkTask: Def.Initialize[Task[Unit]] = Def.task {
+  def uploadBenchmarksTask: Def.Initialize[Task[Unit]] = Def.task {
     (if (benchmarkFiles.value.isEmpty) {
        logger.error(s"`benchmarkFiles` is empty. Stopping task.")
      } else {

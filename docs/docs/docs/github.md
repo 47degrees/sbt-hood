@@ -48,7 +48,7 @@ GitHub settings are also required for uploads to work):
 Once configured you can set up your CI to upload your report files by calling the following command:
 
 ```
-uploadBenchmark
+uploadBenchmarks
 ```
 
 By keeping these reports in your repository you can track the performance of key aspects of your code as it continues to evolve.
