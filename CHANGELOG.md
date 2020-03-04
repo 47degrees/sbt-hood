@@ -1,5 +1,14 @@
 # Changelog
 
+## 03/04/2020 - Version 0.2.0
+
+Release changes:
+
+* Update CHANGELOG.md ([#30](https://github.com/47deg/sbt-hood/pull/30))
+* Use plural for upload task name ([#31](https://github.com/47deg/sbt-hood/pull/31))
+* Bumping version up to reflect changes in tasks naming ([#32](https://github.com/47deg/sbt-hood/pull/32))
+
+
 ## 02/20/2020 - Version 0.1.0
 
 Release changes:
