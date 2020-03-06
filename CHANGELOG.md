@@ -1,5 +1,12 @@
 # Changelog
 
+## 03/06/2020 - Version 0.2.1
+
+Release changes:
+
+* Trying to fix issues with artifact publishing ([#33](https://github.com/47deg/sbt-hood/pull/33))
+
+
 ## 03/04/2020 - Version 0.2.0
 
 Release changes:
