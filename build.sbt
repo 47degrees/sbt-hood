@@ -1,7 +1,6 @@
 import sbtorgpolicies.model.scalac
 
 pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
-Global / gpgCommand := "gpg"
 
 lazy val `sbt-hood-core` = project
   .in(file("modules/core"))

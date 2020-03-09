@@ -47,12 +47,7 @@ object ProjectPlugin extends AutoPlugin {
             "-XX:+UseConcMarkSweepGC",
             "-Dversion=" + version.value
           )
-      },
-      // Custom release process for the plugin:
-      releaseProcess := Seq[ReleaseStep](
-        releaseStepCommandAndRemaining("^ publishSigned"),
-        ReleaseStep(action = "sonatypeReleaseAll" :: _)
-      )
+      }
     )
 
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
