@@ -34,7 +34,6 @@ script:
   - bash <(curl -s https://codecov.io/bash)
 stages:
 - test
-- plugin
 - deploy
 jobs:
   include:
