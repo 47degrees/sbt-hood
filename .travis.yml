@@ -38,10 +38,6 @@ stages:
 - deploy
 jobs:
   include:
-    - stage: plugin
-      script:
-        - sbt ++$TRAVIS_SCALA_VERSION sbt-hood-plugin/test
-        - sbt ++$TRAVIS_SCALA_VERSION sbt-hood-plugin/scripted
     - stage: deploy
       if: branch = master AND type != pull_request
       script:
