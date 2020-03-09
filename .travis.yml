@@ -5,11 +5,13 @@ dist: xenial
 scala:
   - 2.12.8
 before_cache:
-  - du -h -d 1 $HOME/.ivy2/
   - du -h -d 2 $HOME/.sbt/
+  - du -h -d 1 $HOME/.ivy2/
   - du -h -d 4 $HOME/.coursier/
   - find $HOME/.sbt -name "*.lock" -type f -delete
   - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
+  - find $HOME/.coursier/cache -name "*.lock" -type f -delete
+
 cache:
   directories:
   - "$HOME/.sbt/cache"
@@ -44,15 +46,13 @@ jobs:
       if: branch = master AND type != pull_request
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
-            sbt +publish;
-            sbt sbt-hood-plugin/publish;
+            sbt ^^$SBT_VERSION publish;
           else
-            sbt orgUpdateDocFiles;
+            sbt ^^$SBT_VERSION orgUpdateDocFiles;
             git reset --hard HEAD;
             git clean -f;
             git checkout master;
             git pull origin master;
-            sbt ";project sbt-hood-plugin;release";
-            sbt release;
+            sbt ^^$SBT_VERSION release;
             sbt docs/publishMicrosite;
           fi
