@@ -22,7 +22,7 @@ lazy val `sbt-hood-plugin` = project
   .settings(sbtPlugin := true)
   .enablePlugins(SbtPlugin)
 
-lazy val allModules: Seq[ProjectReference] = Seq(`sbt-hood-core`)
+lazy val allModules: Seq[ProjectReference] = Seq(`sbt-hood-core`, `sbt-hood-plugin`)
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =
   allModules.map(ClasspathDependency(_, None))
