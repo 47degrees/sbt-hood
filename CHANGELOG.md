@@ -1,5 +1,17 @@
 # Changelog
 
+## 03/10/2020 - Version 0.2.4
+
+Release changes:
+
+* Try to fix publication ([#34](https://github.com/47deg/sbt-hood/pull/34))
+* Fix travis.yml bad characters ([#35](https://github.com/47deg/sbt-hood/pull/35))
+* Adding plugin to allModules ([#36](https://github.com/47deg/sbt-hood/pull/36))
+* Bumps up version for attempting publication ([#37](https://github.com/47deg/sbt-hood/pull/37))
+* Attempting to fix encryption keys ([#38](https://github.com/47deg/sbt-hood/pull/38))
+* Bringing new key through travis encrypt-file ([#39](https://github.com/47deg/sbt-hood/pull/39))
+
+
 ## 03/10/2020 - Version 0.2.3
 
 Release changes:
