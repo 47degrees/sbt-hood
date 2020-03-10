@@ -1,48 +1,53 @@
 language: scala
 jdk:
-- openjdk8
+  - openjdk8
 dist: xenial
 scala:
-- 2.12.8
+  - 2.12.8
 before_cache:
-- du -h -d 2 $HOME/.sbt/
-- du -h -d 1 $HOME/.ivy2/
-- du -h -d 4 $HOME/.coursier/
-- find $HOME/.sbt -name "*.lock" -type f -delete
-- find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
-- find $HOME/.coursier/cache -name "*.lock" -type f -delete
+  - du -h -d 2 $HOME/.sbt/
+  - du -h -d 1 $HOME/.ivy2/
+  - du -h -d 4 $HOME/.coursier/
+  - find $HOME/.sbt -name "*.lock" -type f -delete
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
+  - find $HOME/.coursier/cache -name "*.lock" -type f -delete
+
 cache:
   directories:
-  - "$HOME/.sbt/cache"
-  - "$HOME/.sbt/1.0"
-  - "$HOME/.sbt/boot/"
-  - "$HOME/.sbt/boot/scala*"
-  - "$HOME/.sbt/launchers"
-  - "$HOME/.ivy2/cache"
-  - "$HOME/.ivy2"
+    - "$HOME/.sbt/cache"
+    - "$HOME/.sbt/1.0"
+    - "$HOME/.sbt/boot/"
+    - "$HOME/.sbt/boot/scala*"
+    - "$HOME/.sbt/launchers"
+    - "$HOME/.ivy2/cache"
+    - "$HOME/.ivy2"
 before_install:
-- if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
+  - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
     openssl aes-256-cbc -K $encrypted_9a2bc499d686_key -iv $encrypted_9a2bc499d686_iv -in secret_key.asc.enc -out secret_key.asc -d;
     gpg --import --batch --passphrase "$PGP_PASSPHRASE" secret_key.asc;
-  fi
+    fi
 install:
-- rvm use 2.6.5 --install --fuzzy
-- gem install jekyll -v 4
+  - rvm use 2.6.5 --install --fuzzy
+  - gem install jekyll -v 4
 script:
-- sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate
-  docs/tut
-- bash <(curl -s https://codecov.io/bash)
+  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut
+  - bash <(curl -s https://codecov.io/bash)
 stages:
-- test
-- deploy
+  - test
+  - deploy
 jobs:
   include:
-  - stage: deploy
-    if: branch = master AND type != pull_request
-    script:
-    - if grep -q "SNAPSHOT" version.sbt; then sbt publish; else sbt orgUpdateDocFiles;
-      git reset --hard HEAD; git clean -f; git checkout master; git pull origin master;
-      sbt release; sbt docs/publishMicrosite; fi
-env:
-  global:
-    secure: beKyIQZ77piYqim9A/QJQG4bImttvA0IPoIalPBa2ygnGYcKoM5gDfY/xnoKIG8pzNsleJ3qH7pj4UJ0eGFbNhdhC8Z2GqyuSbPPuz9xyaa6A2IbePp90i8dc14XEMOeHpgfSmADeVqQA1tgCNchH76WlwRKgJO/O0fMtyUvmSlyieKV/jPWFlP47KBX5NSOwfEa9o6xInHqLbAL9wK8cdfEEyNL4+4ZpYIOjVhCKpn6kECLCeABZUnybdDjwrZtO/8RY4CYFKaHaaJvw8JbQRksS+vwVenQKw3dY6l2F+F8KifhU0wjJA8ZFvnk+H7R0S91G35P6sNVrAY4wN0ZDUjHiJ9pQbOsZZ6HrlmMBYkD2pFNMF/+ymKqOIMtz1Bj0J0jgvZ8QpjHkS/Njdra0b2ZLVEPRwv2KQHRM8tCHHB5Xv/Ctw4QHMUOZWHQB8QK3n3+B6K132y17IYKTrburUkcc/JuPlJNZo0U+eXDl1srM1M7dtHuzmneyFANzqNV1chVwnv72lWejOrI/vQcUWXD4cUKcD7IfrS4z/hwM/p5ElXn81kjsAimEGT5ht936pi/ToUBgtxEqZxQVMhxgwXu1NFe5aRw81hN1FriLRtrae8Zqamvlp93DieUZ+KBr7E8ZR9xR38p2QiUZZz8ZFWs1wiGE7eZIPbSJ2U/D3c=
+    - stage: deploy
+      if: branch = master AND type != pull_request
+      script:
+        - if grep -q "SNAPSHOT" version.sbt; then
+          sbt publish;
+          else
+          sbt orgUpdateDocFiles;
+          git reset --hard HEAD;
+          git clean -f;
+          git checkout master;
+          git pull origin master;
+          sbt release;
+          sbt docs/publishMicrosite;
+          fi
