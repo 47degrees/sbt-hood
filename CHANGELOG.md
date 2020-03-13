@@ -1,5 +1,18 @@
 # Changelog
 
+## 03/13/2020 - Version 0.2.5
+
+Release changes:
+
+* Adjustments before launch ([#41](https://github.com/47degrees/sbt-hood/pull/41))
+* Adds /hood/sbt prefix in the micrositeBaseUrl setting ([#42](https://github.com/47degrees/sbt-hood/pull/42))
+* Migrates from 47deg to 47degrees GH organization ([#43](https://github.com/47degrees/sbt-hood/pull/43))
+* Updating README file ([#44](https://github.com/47degrees/sbt-hood/pull/44))
+* Adding metadata to README file ([#46](https://github.com/47degrees/sbt-hood/pull/46))
+* Release 0.2.5 ([#45](https://github.com/47degrees/sbt-hood/pull/45))
+* Adding GitHub organization info ([#47](https://github.com/47degrees/sbt-hood/pull/47))
+
+
 ## 03/10/2020 - Version 0.2.4
 
 Release changes:
