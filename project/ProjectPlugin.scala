@@ -54,7 +54,7 @@ object ProjectPlugin extends AutoPlugin {
       micrositeName := "SBT-Hood",
       micrositeBaseUrl := "/hood/sbt",
       micrositeDescription := "A SBT plugin for comparing benchmarks in your PRs",
-      micrositeGithubOwner := "47deg",
+      micrositeGithubOwner := "47degrees",
       micrositeGithubRepo := "sbt-hood",
       micrositeDocumentationUrl := "docs",
       micrositeGitterChannelUrl := "47deg/sbthood",
