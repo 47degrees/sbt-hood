@@ -13,7 +13,7 @@
 To get started with *sbt-hood* simply add the following to your `plugins.sbt` file:
 
 ```
-addSbtPlugin("com.47deg" %% "sbt-hood-plugin" % "0.0.1")
+addSbtPlugin("com.47deg" %% "sbt-hood-plugin" % "0.2.5")
 ```
 
 [comment]: # (Start Copyright)
