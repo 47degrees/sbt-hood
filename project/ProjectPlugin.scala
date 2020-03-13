@@ -82,6 +82,14 @@ object ProjectPlugin extends AutoPlugin {
   override def projectSettings: Seq[Def.Setting[_]] =
     sharedReleaseProcess ++ warnUnusedImport ++ Seq(
       description := "A SBT plugin for comparing benchmarks in your PRs",
+      orgGithubSetting := GitHubSettings(
+        organization = "47degrees",
+        project = (name in LocalRootProject).value,
+        organizationName = "47 Degrees",
+        groupId = "com.47deg",
+        organizationHomePage = url("http://47deg.com"),
+        organizationEmail = "hello@47deg.com"
+      ),
       startYear := Some(2019),
       orgProjectName := "sbt-hood",
       scalaVersion := V.scala,
