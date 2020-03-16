@@ -27,14 +27,14 @@ object ProjectPlugin extends AutoPlugin {
       val paradise: String        = "2.1.1"
       val scala: String           = "2.12.8"
       val scalatest: String       = "3.0.6"
-      val slf4j: String           = "1.7.26"
+      val slf4j: String           = "1.7.30"
       val circe: String           = "0.11.1"
-      val github4s: String        = "0.20.1"
+      val github4s: String        = "0.23.0"
       val cats: String            = "2.0.0-M1"
       val log4cats: String        = "0.4.0-M1"
       val logbackClassic: String  = "1.2.3"
-      val kantan: String          = "0.5.1"
-      val console4cats: String    = "0.8.1"
+      val kantan: String          = "0.6.0"
+      val console4cats: String    = "0.8.0-M1"
       val lightbendEmoji: String  = "1.2.1"
     }
 
@@ -52,7 +52,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
       micrositeName := "SBT-Hood",
-      micrositeBaseUrl := "/hood/sbt",
+      micrositeBaseUrl := "/sbt-hood",
       micrositeDescription := "A SBT plugin for comparing benchmarks in your PRs",
       micrositeGithubOwner := "47degrees",
       micrositeGithubRepo := "sbt-hood",
