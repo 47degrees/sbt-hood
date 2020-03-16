@@ -33,7 +33,7 @@ object ProjectPlugin extends AutoPlugin {
       val cats: String            = "2.0.0-M1"
       val log4cats: String        = "0.4.0-M1"
       val logbackClassic: String  = "1.2.3"
-      val kantan: String          = "0.5.1"
+      val kantan: String          = "0.6.0"
       val console4cats: String    = "0.8.0-M1"
       val lightbendEmoji: String  = "1.2.1"
     }
