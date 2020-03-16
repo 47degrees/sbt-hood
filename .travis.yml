@@ -1,44 +1,32 @@
 language: scala
+dist: xenial
 jdk:
   - openjdk8
-dist: xenial
 scala:
-  - 2.12.8
-before_cache:
-  - du -h -d 2 $HOME/.sbt/
-  - du -h -d 1 $HOME/.ivy2/
-  - du -h -d 4 $HOME/.coursier/
-  - find $HOME/.sbt -name "*.lock" -type f -delete
-  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
-  - find $HOME/.coursier/cache -name "*.lock" -type f -delete
+  - 2.12.10
 
-cache:
-  directories:
-  - "$HOME/.sbt/cache"
-  - "$HOME/.sbt/1.0"
-  - "$HOME/.sbt/boot/"
-  - "$HOME/.sbt/boot/scala*"
-  - "$HOME/.sbt/launchers"
-  - "$HOME/.ivy2/cache"
-  - "$HOME/.ivy2"
 before_install:
   - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
       openssl aes-256-cbc -K $encrypted_9a2bc499d686_key -iv $encrypted_9a2bc499d686_iv -in secret_key.asc.enc -out secret_key.asc -d;
       gpg --import --batch --passphrase "$PGP_PASSPHRASE" secret_key.asc;
     fi
+
 install:
   - rvm use 2.6.5 --install --fuzzy
   - gem install jekyll -v 4
+
 script:
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut
   - bash <(curl -s https://codecov.io/bash)
+
 stages:
-- test
-- deploy
+  - name: test
+  - name: deploy
+    if: branch = master AND type != pull_request
+
 jobs:
   include:
     - stage: deploy
-      if: branch = master AND type != pull_request
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
             sbt publish;
