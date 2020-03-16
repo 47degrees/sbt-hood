@@ -17,16 +17,15 @@
 package com.fortysevendeg.hood.github
 
 import cats.data.{EitherT, NonEmptyList}
-import cats.effect.Sync
+import cats.effect.ConcurrentEffect
 import cats.implicits._
+import com.fortysevendeg.hood.github.instances._
 import com.github.marklister.base64.Base64._
-import instances._
 import github4s.Github
-import github4s.Github._
-import github4s.cats.effect.jvm.Implicits._
-import github4s.GithubResponses._
-import github4s.free.domain._
+import github4s.domain._
 import io.chrisdavenport.log4cats.Logger
+
+import scala.concurrent.ExecutionContext
 
 trait GithubService[F[_]] {
 
@@ -36,7 +35,7 @@ trait GithubService[F[_]] {
       repository: String,
       pullRequestNumber: Int,
       comment: String
-  ): F[GHResponse[Comment]]
+  ): Github4sResponse[F, Comment]
 
   def editComment(
       accessToken: String,
@@ -44,14 +43,14 @@ trait GithubService[F[_]] {
       repository: String,
       commentId: Int,
       comment: String
-  ): F[GHResponse[Comment]]
+  ): Github4sResponse[F, Comment]
 
   def listComments(
       accessToken: String,
       owner: String,
       repository: String,
       pullRequestNumber: Int
-  ): F[GHResponse[List[Comment]]]
+  ): Github4sResponse[F, List[Comment]]
 
   def createStatus(
       accessToken: String,
@@ -62,7 +61,7 @@ trait GithubService[F[_]] {
       targetUrl: Option[String],
       description: String,
       context: String
-  ): F[GHResponse[Status]]
+  ): Github4sResponse[F, Status]
 
   def commitFilesAndContents(
       accessToken: String,
@@ -71,14 +70,18 @@ trait GithubService[F[_]] {
       branch: String,
       message: String,
       filesAndContents: List[(String, String)]
-  ): F[GHResponse[Option[Ref]]]
+  ): Github4sResponse[F, Option[Ref]]
 }
 
 object GithubService {
 
-  def build[F[_]: Sync: Logger]: GithubService[F] = new GithubServiceImpl[F]
+  def build[F[_]: ConcurrentEffect: Logger](clientEC: ExecutionContext): GithubService[F] =
+    new GithubServiceImpl[F](clientEC)
 
-  class GithubServiceImpl[F[_]: Sync](implicit L: Logger[F]) extends GithubService[F] {
+  class GithubServiceImpl[F[_]](clientEC: ExecutionContext)(
+      implicit E: ConcurrentEffect[F],
+      L: Logger[F]
+  ) extends GithubService[F] {
 
     def publishComment(
         accessToken: String,
@@ -86,14 +89,13 @@ object GithubService {
         repository: String,
         pullRequestNumber: Int,
         comment: String
-    ): F[GHResponse[Comment]] =
-      for {
-        result <- Github(Some(accessToken)).issues
+    ): Github4sResponse[F, Comment] =
+      toResponse(for {
+        result <- Github[F](Some(accessToken))(E, clientEC).issues
           .createComment(owner, repository, pullRequestNumber, comment)
-          .exec()
           .onError { case e => L.error(e)("Found error while accessing GitHub API.") }
         _ <- L.info("Comment sent to GitHub successfully.")
-      } yield result
+      } yield result)
 
     def editComment(
         accessToken: String,
@@ -101,27 +103,25 @@ object GithubService {
         repository: String,
         commentId: Int,
         comment: String
-    ): F[GHResponse[Comment]] =
-      for {
-        result <- Github(Some(accessToken)).issues
+    ): Github4sResponse[F, Comment] =
+      toResponse(for {
+        result <- Github(Some(accessToken))(E, clientEC).issues
           .editComment(owner, repository, commentId, comment)
-          .exec()
           .onError { case e => L.error(e)("Found error while accessing GitHub API.") }
         _ <- L.info("Comment edited successfully.")
-      } yield result
+      } yield result)
 
     def listComments(
         accessToken: String,
         owner: String,
         repository: String,
         pullRequestNumber: Int
-    ): F[GHResponse[List[Comment]]] =
-      for {
-        result <- Github(Some(accessToken)).issues
+    ): Github4sResponse[F, List[Comment]] =
+      toResponse(
+        Github(Some(accessToken))(E, clientEC).issues
           .listComments(owner, repository, pullRequestNumber)
-          .exec()
           .onError { case e => L.error(e)("Found error while accessing GitHub API.") }
-      } yield result
+      )
 
     def createStatus(
         accessToken: String,
@@ -132,17 +132,17 @@ object GithubService {
         targetUrl: Option[String],
         description: String,
         context: String
-    ): F[GHResponse[Status]] = {
-      val gh = Github(Some(accessToken))
+    ): Github4sResponse[F, Status] = {
+      val gh = Github(Some(accessToken))(E, clientEC)
 
       (for {
-        pr <- EitherT(gh.pullRequests.get(owner, repository, pullRequestNumber).exec())
+        pr <- toResponse(gh.pullRequests.getPullRequest(owner, repository, pullRequestNumber))
         head <- EitherT.fromOption[F](
-          pr.result.head,
-          UnexpectedException("Couldn't find a head SHA for the specified pull request.")
+          pr.head,
+          Github4sUnexpectedError("Couldn't find a head SHA for the specified pull request.")
         )
         sha = head.sha
-        result <- EitherT(
+        result <- toResponse(
           gh.repos
             .createStatus(
               owner,
@@ -153,10 +153,12 @@ object GithubService {
               description.some,
               context.some
             )
-            .exec()
         )
-      } yield result).value.onError {
-        case e => L.error(e)("Found error while accessing GitHub API.")
+      } yield result).onError {
+        case Github4sLibError(e) =>
+          EitherT.liftF(L.error(e)("Found error while accessing GitHub API."))
+        case Github4sUnexpectedError(msg) =>
+          EitherT.liftF(L.error(msg))
       }
     }
 
@@ -167,25 +169,24 @@ object GithubService {
         branch: String,
         message: String,
         filesAndContents: List[(String, String)]
-    ): F[GHResponse[Option[Ref]]] = {
-      val gh = Github(Some(accessToken))
+    ): Github4sResponse[F, Option[Ref]] = {
+      val gh = Github(Some(accessToken))(E, clientEC)
 
-      def fetchBaseTreeSha(commitSha: String): Github4sResponse[RefCommit] =
-        EitherT(gh.gitData.getCommit(owner, repository, commitSha))
+      def fetchBaseTreeSha(commitSha: String): Github4sResponse[F, RefCommit] =
+        toResponse(gh.gitData.getCommit(owner, repository, commitSha))
 
       def fetchFilesContents(
           commitSha: String
-      ): Github4sResponse[List[(String, Option[String])]] = {
+      ): Github4sResponse[F, List[(String, Option[String])]] = {
 
         def fetchFileContents(
             path: String,
             commitSha: String
-        ): Github4sResponse[(String, Option[String])] =
-          EitherT(
+        ): Github4sResponse[F, (String, Option[String])] =
+          toResponse(
             gh.repos
               .getContents(owner = owner, repo = repository, path = path, ref = Some(commitSha))
-          ).map(ghRes => ghRes.map(contents => path -> contents.head.content))
-            .orElse((path, none[String]).pure[Github4sResponse])
+          ).map(contents => path -> contents.head.content)
 
         filesAndContents.map(_._1).traverse(fetchFileContents(_, commitSha))
       }
@@ -205,30 +206,33 @@ object GithubService {
       def createTree(
           baseTreeSha: String,
           filteredFilesContent: List[(String, String)]
-      ): Github4sResponse[TreeResult] = {
+      ): Github4sResponse[F, TreeResult] = {
 
         def treeData: List[TreeDataBlob] = filteredFilesContent.map {
           case (path, content) => TreeDataBlob(path, "100644", "blob", content)
         }
 
-        EitherT(gh.gitData.createTree(owner, repository, Some(baseTreeSha), treeData))
+        toResponse(gh.gitData.createTree(owner, repository, Some(baseTreeSha), treeData))
       }
 
-      def createCommit(treeSha: String, baseCommitSha: String): Github4sResponse[RefCommit] =
-        EitherT(gh.gitData.createCommit(owner, repository, message, treeSha, List(baseCommitSha)))
+      def createCommit(treeSha: String, baseCommitSha: String): Github4sResponse[F, RefCommit] =
+        toResponse(
+          gh.gitData.createCommit(owner, repository, message, treeSha, List(baseCommitSha), None)
+        )
 
-      def updateHead(branch: String, commitSha: String): Github4sResponse[Ref] =
-        EitherT(gh.gitData.updateReference(owner, repository, s"heads/$branch", commitSha))
+      def updateHead(branch: String, commitSha: String): Github4sResponse[F, Ref] =
+        toResponse(
+          gh.gitData.updateReference(owner, repository, s"heads/$branch", commitSha, force = false)
+        )
 
-      def fetchHeadCommit(branch: String): Github4sResponse[Ref] = {
+      def fetchHeadCommit(branch: String): Github4sResponse[F, Ref] = {
 
-        def findReference(gHResult: GHResult[NonEmptyList[Ref]]): GHResponse[Ref] =
-          gHResult.result.toList.find(_.ref == s"refs/heads/$branch") match {
-            case Some(ref) => Right(gHResult.map(_ => ref))
-            case None      => Left(UnexpectedException(s"Branch $branch not found"))
-          }
+        def findReference(result: NonEmptyList[Ref]): Either[Github4sError, Ref] =
+          result.toList
+            .find(_.ref == s"refs/heads/$branch")
+            .toRight(Github4sUnexpectedError(s"Branch $branch not found"))
 
-        EitherT(gh.gitData.getReference(owner, repository, s"heads/$branch"))
+        toResponse(gh.gitData.getReference(owner, repository, s"heads/$branch"))
           .subflatMap(findReference)
       }
 
@@ -236,32 +240,30 @@ object GithubService {
           baseTreeSha: String,
           parentCommitSha: String,
           filteredFilesContent: List[(String, String)]
-      ): Github4sResponse[Option[Ref]] =
+      ): Github4sResponse[F, Option[Ref]] =
         filteredFilesContent match {
           case Nil =>
-            none[Ref].pure[Github4sResponse]
+            EitherT.pure[F, Github4sError](none[Ref])
           case list =>
             for {
               ghResultTree   <- createTree(baseTreeSha, list)
-              ghResultCommit <- createCommit(ghResultTree.result.sha, parentCommitSha)
-              ghResultUpdate <- updateHead(branch, ghResultCommit.result.sha)
-            } yield ghResultUpdate.map(Option(_))
+              ghResultCommit <- createCommit(ghResultTree.sha, parentCommitSha)
+              ghResultUpdate <- updateHead(branch, ghResultCommit.sha)
+            } yield ghResultUpdate.some
         }
 
-      val op = for {
+      for {
         gHResultParentCommit <- fetchHeadCommit(branch)
-        parentCommitSha = gHResultParentCommit.result.`object`.sha
+        parentCommitSha = gHResultParentCommit.`object`.sha
         gHResultBaseTree <- fetchBaseTreeSha(parentCommitSha)
-        baseTreeSha = gHResultBaseTree.result.tree.sha
+        baseTreeSha = gHResultBaseTree.tree.sha
         ghResultFilesContent <- fetchFilesContents(parentCommitSha)
         ghResultUpdate <- commitFilesIfChanged(
           baseTreeSha,
           parentCommitSha,
-          filterNonChangedFiles(ghResultFilesContent.result)
+          filterNonChangedFiles(ghResultFilesContent)
         )
       } yield ghResultUpdate
-
-      op.value.exec()
     }
 
   }

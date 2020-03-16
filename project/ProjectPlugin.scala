@@ -107,7 +107,6 @@ object ProjectPlugin extends AutoPlugin {
         "io.circe"                   %% "circe-core"             % V.circe,
         "io.circe"                   %% "circe-parser"           % V.circe,
         "com.47deg"                  %% "github4s"               % V.github4s,
-        "com.47deg"                  %% "github4s-cats-effect"   % V.github4s,
         "org.typelevel"              %% "cats-effect"            % V.cats,
         "io.chrisdavenport"          %% "log4cats-slf4j"         % V.log4cats,
         "ch.qos.logback"              % "logback-classic"        % V.logbackClassic,

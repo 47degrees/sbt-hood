@@ -18,41 +18,20 @@ package com.fortysevendeg.hood.github
 
 import cats.Monad
 import cats.data.EitherT
-import cats.free.Free
+import cats.implicits._
 import github4s.GithubResponses._
 
 object instances {
-  type Github4sResponse[A] = EitherT[GHIO, GHException, GHResult[A]]
+  type Github4sResponse[F[_], A] = EitherT[F, Github4sError, A]
 
-  implicit val ghResponseMonad: Monad[Github4sResponse] = new Monad[Github4sResponse] {
-
-    override def flatMap[A, B](
-        fa: Github4sResponse[A]
-    )(f: A => Github4sResponse[B]): Github4sResponse[B] =
-      fa.flatMap(ghResult => f(ghResult.result))
-
-    override def tailRecM[A, B](
-        a: A
-    )(f: A => Github4sResponse[Either[A, B]]): Github4sResponse[B] = {
-      f(a).flatMap { ghResult =>
-        ghResult.result match {
-          case Right(v) =>
-            val ghio: GHIO[GHResponse[B]] =
-              Free.pure(Right(GHResult(v, ghResult.statusCode, ghResult.headers)))
-            EitherT(ghio)
-          case Left(e) => tailRecM(e)(f)
-        }
-      }
-    }
-
-    override def pure[A](x: A): Github4sResponse[A] = EitherT.pure(GHResult(x, 200, Map.empty))
+  sealed trait Github4sError extends Product with Serializable {
+    def getMessage: String
   }
-
-  implicit def ghResultSyntax[A](gHResult: GHResult[A]): GHResultOps[A] =
-    new GHResultOps[A](gHResult)
-
-  final class GHResultOps[A](gHResult: GHResult[A]) {
-    def map[B](f: A => B): GHResult[B] =
-      gHResult.copy(result = f(gHResult.result))
+  final case class Github4sLibError(inner: GHException) extends Github4sError {
+    override def getMessage: String = inner.getMessage
   }
+  final case class Github4sUnexpectedError(getMessage: String) extends Github4sError
+
+  def toResponse[F[_]: Monad, A](resp: F[GHResponse[A]]): EitherT[F, Github4sError, A] =
+    EitherT(resp.map(_.result)).leftMap(Github4sLibError.apply)
 }

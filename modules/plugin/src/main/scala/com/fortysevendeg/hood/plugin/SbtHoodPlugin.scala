@@ -20,7 +20,7 @@ import java.io.File
 
 import cats.data.{EitherT, NonEmptyChain}
 import cats.implicits._
-import cats.effect.{Console, IO, Sync}
+import cats.effect.{ConcurrentEffect, Console, ContextShift, IO, Sync}
 import com.fortysevendeg.hood.benchmark.{BenchmarkComparisonResult, BenchmarkService, Warning}
 import com.fortysevendeg.hood.csv.{BenchmarkColumns, CsvService}
 import com.fortysevendeg.hood.model._
@@ -33,16 +33,18 @@ import com.fortysevendeg.hood.github._
 import com.fortysevendeg.hood.benchmark.Error
 import com.fortysevendeg.hood.json.JsonService
 import com.fortysevendeg.hood.utils._
-import github4s.GithubResponses.GHException
 import Benchmark._
+import com.fortysevendeg.hood.github.instances.Github4sResponse
 import com.lightbend.emoji.ShortCodes.Implicits._
 import com.lightbend.emoji.ShortCodes.Defaults._
 
-object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHoodKeys {
+import scala.concurrent.ExecutionContext
 
-  sealed trait OutputFileFormat
-  case object OutputFileFormatMd   extends OutputFileFormat
-  case object OutputFileFormatJson extends OutputFileFormat
+sealed trait OutputFileFormat
+case object OutputFileFormatMd   extends OutputFileFormat
+case object OutputFileFormatJson extends OutputFileFormat
+
+object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHoodKeys {
 
   private[this] def parseOutputFormat(source: String): OutputFileFormat =
     source.toLowerCase match {
@@ -51,40 +53,18 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
     }
 
   override def projectSettings: Seq[Def.Setting[_]] = defaultSettings
-  override val trigger: PluginTrigger               = noTrigger
 
-  implicit lazy val logger                = Slf4jLogger.getLogger[IO]
-  implicit lazy val gh: GithubService[IO] = GithubService.build[IO]
+  override val trigger: PluginTrigger = noTrigger
+
+  implicit lazy val logger                   = Slf4jLogger.getLogger[IO]
+  implicit lazy val CS: ContextShift[IO]     = IO.contextShift(ExecutionContext.global)
+  implicit lazy val CE: ConcurrentEffect[IO] = IO.ioConcurrentEffect
+  implicit lazy val gh: GithubService[IO]    = GithubService.build[IO](ExecutionContext.global)
 
   def compareBenchmarksTask: Def.Initialize[Task[Unit]] = Def.task {
 
-    benchmarkTask(
-      previousBenchmarkPath.value,
-      currentBenchmarkPath.value,
-      keyColumnName.value,
-      compareColumnName.value,
-      thresholdColumnName.value,
-      modeColumnName.value,
-      unitsColumnName.value,
-      generalThreshold.value,
-      benchmarkThreshold.value,
-      include.value,
-      exclude.value,
-      outputToFile.value,
-      outputPath.value,
-      parseOutputFormat(outputFormat.value)
-    ).leftFlatMap(e =>
-        EitherT.left[List[BenchmarkComparisonResult]](logger.error(s"There was an error: $e"))
-      )
-      .void
-      .value
-      .unsafeRunSync()
-      .merge
-  }
-
-  def compareBenchmarksCITask: Def.Initialize[Task[Unit]] = Def.task {
-    (for {
-      basicBenchmark <- benchmarkTask(
+    TaskAlgebra
+      .benchmarkTask(
         previousBenchmarkPath.value,
         currentBenchmarkPath.value,
         keyColumnName.value,
@@ -99,7 +79,36 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         outputToFile.value,
         outputPath.value,
         parseOutputFormat(outputFormat.value)
-      ).leftMap(NonEmptyChain.one)
+      )
+      .leftFlatMap(e =>
+        EitherT.left[List[BenchmarkComparisonResult]](logger.error(s"There was an error: $e"))
+      )
+      .void
+      .value
+      .unsafeRunSync()
+      .merge
+  }
+
+  def compareBenchmarksCITask: Def.Initialize[Task[Unit]] = Def.task {
+    (for {
+      basicBenchmark <- TaskAlgebra
+        .benchmarkTask(
+          previousBenchmarkPath.value,
+          currentBenchmarkPath.value,
+          keyColumnName.value,
+          compareColumnName.value,
+          thresholdColumnName.value,
+          modeColumnName.value,
+          unitsColumnName.value,
+          generalThreshold.value,
+          benchmarkThreshold.value,
+          include.value,
+          exclude.value,
+          outputToFile.value,
+          outputPath.value,
+          parseOutputFormat(outputFormat.value)
+        )
+        .leftMap(NonEmptyChain.one)
       params <- EitherT.fromEither[IO](
         GitHubParameters.fromParams(
           token.value,
@@ -111,12 +120,14 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
           commitMessage.value
         )
       )
-      _ <- submitResultsToGitHub(
-        basicBenchmark,
-        previousBenchmarkPath.value,
-        currentBenchmarkPath.value,
-        params
-      ).leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
+      _ <- TaskAlgebra
+        .submitResultsToGitHub(
+          basicBenchmark,
+          previousBenchmarkPath.value,
+          currentBenchmarkPath.value,
+          params
+        )
+        .leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
     } yield basicBenchmark)
       .leftFlatMap(e =>
         EitherT.left[List[BenchmarkComparisonResult]](
@@ -150,7 +161,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
              commitMessage.value
            )
          )
-         _ <- uploadFilesToGitHub[IO](files, params)
+         _ <- TaskAlgebra
+           .uploadFilesToGitHub[IO](files, params)
            .leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
        } yield ())
          .leftFlatMap(e =>
@@ -162,6 +174,9 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
      }).void.unsafeRunSync()
 
   }
+}
+
+object TaskAlgebra {
   def benchmarkTask[F[_]](
       previousPath: File,
       currentPath: File,
@@ -226,43 +241,38 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
 
   }
 
-  private def submitResultsToGitHub[F[_]](
+  def submitResultsToGitHub[F[_]](
       benchmarkResult: List[BenchmarkComparisonResult],
       previousPath: File,
       currentPath: File,
       params: GitHubParameters
-  )(implicit L: Logger[F], S: Sync[F], G: GithubService[F]): EitherT[F, GHException, Unit] =
+  )(implicit L: Logger[F], S: Sync[F], G: GithubService[F]): Github4sResponse[F, Unit] =
     for {
-      _ <- EitherT(
-        G.publishComment(
-          params.accessToken,
-          params.repositoryOwner,
-          params.repositoryName,
-          params.pullRequestNumber,
-          s"*sbt-hood* benchmark result:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
-        )
+      _ <- G.publishComment(
+        params.accessToken,
+        params.repositoryOwner,
+        params.repositoryName,
+        params.pullRequestNumber,
+        s"*sbt-hood* benchmark result:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
       )
       comparison = gitHubStateFromBenchmarks(benchmarkResult)
-      _ <- EitherT(
-        G.createStatus(
-          params.accessToken,
-          params.repositoryOwner,
-          params.repositoryName,
-          params.pullRequestNumber,
-          comparison.state,
-          params.targetUrl,
-          comparison.description,
-          GithubModel.githubStatusContext
-        )
+      _ <- G.createStatus(
+        params.accessToken,
+        params.repositoryOwner,
+        params.repositoryName,
+        params.pullRequestNumber,
+        comparison.state,
+        params.targetUrl,
+        comparison.description,
+        GithubModel.githubStatusContext
       )
     } yield ()
 
-  private[this] def uploadFilesToGitHub[F[_]](
+  def uploadFilesToGitHub[F[_]](
       files: List[(String, String)],
       params: GitHubParameters
-  )(implicit L: Logger[F], S: Sync[F], G: GithubService[F]): EitherT[F, GHException, Unit] =
-    EitherT(
-      G.commitFilesAndContents(
+  )(implicit L: Logger[F], S: Sync[F], G: GithubService[F]): Github4sResponse[F, Unit] =
+    G.commitFilesAndContents(
         params.accessToken,
         params.repositoryOwner,
         params.repositoryName,
@@ -270,7 +280,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         params.commitMessage,
         files
       )
-    ).void
+      .void
 
   def buildBenchmarkMap(benchmarks: List[Benchmark]): Map[String, Benchmark] =
     benchmarks.map(b => (b.benchmark, b)).toMap
@@ -291,7 +301,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
     benchmarksAfterExcludes
   }
 
-  private[this] def performBenchmarkComparison[F[_]](
+  def performBenchmarkComparison[F[_]](
       currentBenchmarks: Map[String, Benchmark],
       previousBenchmarks: Map[String, Benchmark],
       generalThreshold: Option[Double],
@@ -315,7 +325,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
             )(current => S.delay(BenchmarkService.compare(current, previous, threshold)))
       }
 
-  private[this] def writeOutputFile[F[_]](
+  def writeOutputFile[F[_]](
       shouldOutputToFile: Boolean,
       outputPath: File,
       outputFileFormat: OutputFileFormat,
@@ -394,7 +404,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
     benchmarks.map(outputComparisonResult).mkString("")
   }
 
-  private[this] def gitHubStateFromBenchmarks(
+  def gitHubStateFromBenchmarks(
       benchmarks: List[BenchmarkComparisonResult]
   ): GithubStatusDescription =
     if (benchmarks.exists(_.result == Error)) {
@@ -403,7 +413,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       GithubStatusDescription(GithubStatusSuccess, "Successful benchmark comparison")
     }
 
-  private[this] def parseBenchmark[F[_]](
+  def parseBenchmark[F[_]](
       columns: BenchmarkColumns,
       file: File,
       csvService: CsvService[F],

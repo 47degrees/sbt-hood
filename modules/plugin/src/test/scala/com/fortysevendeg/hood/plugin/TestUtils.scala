@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package scala.com.fortysevendeg.hood.plugin
+package com.fortysevendeg.hood.plugin
 
 import com.fortysevendeg.hood.benchmark._
 import com.fortysevendeg.hood.model.{Benchmark, PrimaryMetric}
