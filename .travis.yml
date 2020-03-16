@@ -15,18 +15,14 @@ install:
   - rvm use 2.6.5 --install --fuzzy
   - gem install jekyll -v 4
 
-script:
-  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut
-  - bash <(curl -s https://codecov.io/bash)
-
-stages:
-  - name: test
-  - name: deploy
-    if: branch = master AND type != pull_request
-
 jobs:
   include:
+    - stage: test
+      script:
+        - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut
+        - bash <(curl -s https://codecov.io/bash)
     - stage: deploy
+      if: branch = master AND type != pull_request
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
             sbt publish;
