@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package scala.com.fortysevendeg.hood.plugin
+package com.fortysevendeg.hood.plugin
 
 import java.io.File
 
@@ -22,13 +22,11 @@ import cats.data.EitherT
 import cats.effect.IO
 import cats.effect._
 import com.fortysevendeg.hood.benchmark.BenchmarkComparisonResult
-import com.fortysevendeg.hood.plugin.SbtHoodPlugin
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.scalatest.{FlatSpec, Matchers}
 import cats.effect.Console.implicits._
 import com.fortysevendeg.hood.json.JsonService
 import com.fortysevendeg.hood.model.{Benchmark, HoodError}
-import com.fortysevendeg.hood.plugin.SbtHoodPlugin.OutputFileFormatJson
 
 class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
 
@@ -92,7 +90,7 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
     val grouping = (for {
       previousBenchmarks <- loadBenchmarkJson(jsonService, previousFileJson)
       currentBenchmarks  <- loadBenchmarkJson(jsonService, currentFile)
-      comparisonResult <- SbtHoodPlugin
+      comparisonResult <- TaskAlgebra
         .benchmarkTask(
           previousFileJson,
           currentFile,
@@ -109,7 +107,7 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
           new File("output.json"),
           outputFileFormat = OutputFileFormatJson
         )
-      result = SbtHoodPlugin.collectBenchmarks(
+      result = TaskAlgebra.collectBenchmarks(
         previousFileJson.getName,
         currentFile.getName,
         previousBenchmarks,
@@ -136,7 +134,7 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
 
     val filteredBenchmarks = (for {
       previousBenchmarks <- loadBenchmarkJson(jsonService, previousFileJson)
-      result = SbtHoodPlugin.filterBenchmarks(
+      result = TaskAlgebra.filterBenchmarks(
         previousBenchmarks,
         None,
         Some("test.decoding")
@@ -156,7 +154,7 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
 
     val filteredBenchmarks = (for {
       previousBenchmarks <- loadBenchmarkJson(jsonService, previousFileJson)
-      result = SbtHoodPlugin.filterBenchmarks(
+      result = TaskAlgebra.filterBenchmarks(
         previousBenchmarks,
         Some("test.decoding"),
         None
@@ -176,7 +174,7 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
       currentFile: File,
       expected: List[BenchmarkComparisonResult]
   ) = {
-    val result = SbtHoodPlugin
+    val result = TaskAlgebra
       .benchmarkTask(
         previousFile,
         currentFile,
@@ -208,6 +206,6 @@ class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
       jsonService: JsonService[IO],
       file: File
   ): EitherT[IO, HoodError, Map[String, Benchmark]] =
-    EitherT(jsonService.parseBenchmark(file)).map(SbtHoodPlugin.buildBenchmarkMap)
+    EitherT(jsonService.parseBenchmark(file)).map(TaskAlgebra.buildBenchmarkMap)
 
 }
