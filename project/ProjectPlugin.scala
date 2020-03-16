@@ -26,7 +26,7 @@ object ProjectPlugin extends AutoPlugin {
       val kindProjector: String   = "0.11.0"
       val paradise: String        = "2.1.1"
       val scala: String           = "2.12.8"
-      val scalatest: String       = "3.0.6"
+      val scalatest: String       = "3.0.8"
       val slf4j: String           = "1.7.26"
       val circe: String           = "0.11.1"
       val github4s: String        = "0.20.1"
