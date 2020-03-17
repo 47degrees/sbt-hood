@@ -30,7 +30,7 @@ object ProjectPlugin extends AutoPlugin {
       val slf4j: String           = "1.7.30"
       val circe: String           = "0.13.0"
       val github4s: String        = "0.23.0"
-      val cats: String            = "2.0.0"
+      val cats: String            = "2.1.2"
       val log4cats: String        = "1.0.1"
       val logbackClassic: String  = "1.2.3"
       val kantan: String          = "0.6.0"
