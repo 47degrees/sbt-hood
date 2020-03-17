@@ -23,12 +23,13 @@ import cats.effect.IO
 import cats.effect._
 import com.fortysevendeg.hood.benchmark.BenchmarkComparisonResult
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-import org.scalatest.{FlatSpec, Matchers}
 import cats.effect.Console.implicits._
 import com.fortysevendeg.hood.json.JsonService
 import com.fortysevendeg.hood.model.{Benchmark, HoodError}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SbtHoodPluginTests extends FlatSpec with Matchers with TestUtils {
+class SbtHoodPluginTests extends AnyFlatSpec with Matchers with TestUtils {
 
   implicit val logger = Slf4jLogger.getLogger[IO]
 
