@@ -17,9 +17,10 @@
 package com.fortysevendeg.hood.benchmark
 
 import com.fortysevendeg.hood.TestValues._
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class BenchmarkServiceTests extends FlatSpec with Matchers {
+class BenchmarkServiceTests extends AnyFlatSpec with Matchers {
 
   "BenchmarkService" should "return an OK status if current benchmark exceeds the previous" in {
     val benchmarkResult = BenchmarkService
