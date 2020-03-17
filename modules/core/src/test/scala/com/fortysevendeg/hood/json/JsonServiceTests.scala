@@ -22,9 +22,10 @@ import cats.effect.IO
 import com.fortysevendeg.hood.TestValues.{badBenchmark, mehBenchmark}
 import com.fortysevendeg.hood.model.InvalidJson
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class JsonServiceTests extends FlatSpec with Matchers {
+class JsonServiceTests extends AnyFlatSpec with Matchers {
 
   implicit val logger = Slf4jLogger.getLogger[IO]
 

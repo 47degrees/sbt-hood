@@ -26,15 +26,15 @@ object ProjectPlugin extends AutoPlugin {
       val kindProjector: String   = "0.11.0"
       val paradise: String        = "2.1.1"
       val scala: String           = "2.12.8"
-      val scalatest: String       = "3.0.6"
+      val scalatest: String       = "3.1.1"
       val slf4j: String           = "1.7.30"
-      val circe: String           = "0.11.1"
+      val circe: String           = "0.13.0"
       val github4s: String        = "0.23.0"
       val cats: String            = "2.0.0"
-      val log4cats: String        = "0.4.0-M1"
+      val log4cats: String        = "1.0.1"
       val logbackClassic: String  = "1.2.3"
       val kantan: String          = "0.6.0"
-      val console4cats: String    = "0.8.0-M1"
+      val console4cats: String    = "0.8.1"
       val lightbendEmoji: String  = "1.2.1"
     }
 
@@ -107,7 +107,6 @@ object ProjectPlugin extends AutoPlugin {
         "io.circe"                   %% "circe-core"             % V.circe,
         "io.circe"                   %% "circe-parser"           % V.circe,
         "com.47deg"                  %% "github4s"               % V.github4s,
-        "com.47deg"                  %% "github4s-cats-effect"   % V.github4s,
         "org.typelevel"              %% "cats-effect"            % V.cats,
         "io.chrisdavenport"          %% "log4cats-slf4j"         % V.log4cats,
         "ch.qos.logback"              % "logback-classic"        % V.logbackClassic,
