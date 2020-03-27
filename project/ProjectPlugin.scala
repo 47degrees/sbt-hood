@@ -23,19 +23,19 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val kindProjector: String   = "0.11.0"
-      val paradise: String        = "2.1.1"
-      val scala: String           = "2.12.8"
-      val scalatest: String       = "3.1.1"
-      val slf4j: String           = "1.7.30"
-      val circe: String           = "0.13.0"
-      val github4s: String        = "0.23.0"
-      val cats: String            = "2.1.2"
-      val log4cats: String        = "1.0.1"
-      val logbackClassic: String  = "1.2.3"
-      val kantan: String          = "0.6.0"
-      val console4cats: String    = "0.8.1"
-      val lightbendEmoji: String  = "1.2.1"
+      val kindProjector: String  = "0.11.0"
+      val paradise: String       = "2.1.1"
+      val scala: String          = "2.12.8"
+      val scalatest: String      = "3.1.1"
+      val slf4j: String          = "1.7.30"
+      val circe: String          = "0.13.0"
+      val github4s: String       = "0.23.0"
+      val cats: String           = "2.1.2"
+      val log4cats: String       = "1.0.1"
+      val logbackClassic: String = "1.2.3"
+      val kantan: String         = "0.6.0"
+      val console4cats: String   = "0.8.1"
+      val lightbendEmoji: String = "1.2.1"
     }
 
     lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
@@ -64,9 +64,9 @@ object ProjectPlugin extends AutoPlugin {
       micrositeHighlightTheme := "atom-one-light",
       micrositeGithubToken := sys.env.get(orgGithubTokenSetting.value),
       micrositePalette := Map(
-        "brand-primary"     -> "#25bc77",
-        "brand-secondary"   -> "#25bc77",
-        "white-color"       -> "#FFF"
+        "brand-primary"   -> "#25bc77",
+        "brand-secondary" -> "#25bc77",
+        "white-color"     -> "#FFF"
       )
     )
 
@@ -96,24 +96,28 @@ object ProjectPlugin extends AutoPlugin {
       crossScalaVersions := Seq(V.scala),
       scalacOptions ++= scalacAdvancedOptions,
       scalacOptions ~= (_ filterNot Set("-Yliteral-types", "-Xlint").contains),
-        Test / fork := true,
+      Test / fork := true,
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
-      resolvers ++= Seq(Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots"), Resolver.typesafeIvyRepo("releases")),
+      resolvers ++= Seq(
+        Resolver.sonatypeRepo("releases"),
+        Resolver.sonatypeRepo("snapshots"),
+        Resolver.typesafeIvyRepo("releases")
+      ),
       addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
       addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.full),
       libraryDependencies ++= Seq(
-        "io.circe"                   %% "circe-generic"          % V.circe,
-        "io.circe"                   %% "circe-core"             % V.circe,
-        "io.circe"                   %% "circe-parser"           % V.circe,
-        "com.47deg"                  %% "github4s"               % V.github4s,
-        "org.typelevel"              %% "cats-effect"            % V.cats,
-        "io.chrisdavenport"          %% "log4cats-slf4j"         % V.log4cats,
-        "ch.qos.logback"              % "logback-classic"        % V.logbackClassic,
-        "com.nrinaudo"               %% "kantan.csv"             % V.kantan,
-        "com.nrinaudo"               %% "kantan.csv-generic"     % V.kantan,
-        "dev.profunktor"             %% "console4cats"           % V.console4cats,
-        "com.lightbend"              %% "emoji"                  % V.lightbendEmoji,
+        "io.circe"                   %% "circe-generic" % V.circe,
+        "io.circe"                   %% "circe-core" % V.circe,
+        "io.circe"                   %% "circe-parser" % V.circe,
+        "com.47deg"                  %% "github4s" % V.github4s,
+        "org.typelevel"              %% "cats-effect" % V.cats,
+        "io.chrisdavenport"          %% "log4cats-slf4j" % V.log4cats,
+        "ch.qos.logback"             % "logback-classic" % V.logbackClassic,
+        "com.nrinaudo"               %% "kantan.csv" % V.kantan,
+        "com.nrinaudo"               %% "kantan.csv-generic" % V.kantan,
+        "dev.profunktor"             %% "console4cats" % V.console4cats,
+        "com.lightbend"              %% "emoji" % V.lightbendEmoji,
         %%("scalatest", V.scalatest) % "test",
         %("slf4j-nop", V.slf4j)      % Test
       )

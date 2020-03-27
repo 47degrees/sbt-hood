@@ -42,9 +42,7 @@ class CsvServiceTests extends AnyFlatSpec with Matchers {
       .unsafeRunSync()
 
     result.isRight shouldBe true
-    result.map { list =>
-      list shouldBe (List(mehBenchmark, badBenchmark))
-    }
+    result.map(list => list shouldBe (List(mehBenchmark, badBenchmark)))
   }
 
   it should "return an error when loading an invalid CSV file" in {
