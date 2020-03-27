@@ -16,9 +16,11 @@ lazy val `sbt-hood-plugin` = project
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
   .settings(buildInfoPackage := "com.fortysevendeg.hood")
   // See https://github.com/sbt/sbt/issues/3248
-  .settings(publishLocal := publishLocal
-    .dependsOn(`sbt-hood-core` / publishLocal)
-    .value)
+  .settings(
+    publishLocal := publishLocal
+      .dependsOn(`sbt-hood-core` / publishLocal)
+      .value
+  )
   .settings(sbtPlugin := true)
   .enablePlugins(SbtPlugin)
 
@@ -42,3 +44,6 @@ lazy val docs = project
   .settings(micrositeSettings: _*)
   .settings(noPublishSettings: _*)
   .enablePlugins(MicrositesPlugin)
+
+addCommandAlias("ci-test", "scalafmtCheck; scalafmtSbtCheck; docs/tut; test")
+addCommandAlias("ci-docs", "docs/tut")

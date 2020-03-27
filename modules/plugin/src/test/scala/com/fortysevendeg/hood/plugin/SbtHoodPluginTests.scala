@@ -196,9 +196,7 @@ class SbtHoodPluginTests extends AnyFlatSpec with Matchers with TestUtils {
       .unsafeRunSync()
 
     result.isRight shouldBe true
-    result.map { resultList =>
-      resultList.sortBy(_.previous.benchmark) shouldBe expected
-    }
+    result.map(resultList => resultList.sortBy(_.previous.benchmark) shouldBe expected)
 
     result
   }

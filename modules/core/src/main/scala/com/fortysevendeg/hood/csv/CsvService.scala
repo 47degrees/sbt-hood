@@ -86,9 +86,7 @@ object CsvService {
         .map(result =>
           result
             .map(_.toBenchmark())
-            .leftMap[HoodError] { e =>
-              InvalidCsv(e.getMessage)
-            }
+            .leftMap[HoodError](e => InvalidCsv(e.getMessage))
         )
         .toList
         .sequence
