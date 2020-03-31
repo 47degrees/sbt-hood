@@ -56,6 +56,7 @@
 - Migrates from 47deg to 47degrees GH organization [\#43](https://github.com/47degrees/sbt-hood/pull/43) ([franciscodr](https://github.com/franciscodr))
 - Adds /hood/sbt prefix in the micrositeBaseUrl setting [\#42](https://github.com/47degrees/sbt-hood/pull/42) ([AntonioMateoGomez](https://github.com/AntonioMateoGomez))
 - Adjustments before launch [\#41](https://github.com/47degrees/sbt-hood/pull/41) ([AntonioMateoGomez](https://github.com/AntonioMateoGomez))
+- Adding plugin to allModules [\#36](https://github.com/47degrees/sbt-hood/pull/36) ([jdesiloniz](https://github.com/jdesiloniz))
 
 ## [v0.2.4](https://github.com/47degrees/sbt-hood/tree/v0.2.4) (2020-03-10)
 
@@ -64,6 +65,7 @@
 **Merged pull requests:**
 
 - Bringing new key through travis encrypt-file [\#39](https://github.com/47degrees/sbt-hood/pull/39) ([jdesiloniz](https://github.com/jdesiloniz))
+- Attempting to fix encryption keys [\#38](https://github.com/47degrees/sbt-hood/pull/38) ([jdesiloniz](https://github.com/jdesiloniz))
 
 ## [v0.2.3](https://github.com/47degrees/sbt-hood/tree/v0.2.3) (2020-03-09)
 
@@ -71,9 +73,7 @@
 
 **Merged pull requests:**
 
-- Attempting to fix encryption keys [\#38](https://github.com/47degrees/sbt-hood/pull/38) ([jdesiloniz](https://github.com/jdesiloniz))
 - Bumps up version for attempting publication [\#37](https://github.com/47degrees/sbt-hood/pull/37) ([jdesiloniz](https://github.com/jdesiloniz))
-- Adding plugin to allModules [\#36](https://github.com/47degrees/sbt-hood/pull/36) ([jdesiloniz](https://github.com/jdesiloniz))
 - Fix travis.yml bad characters [\#35](https://github.com/47degrees/sbt-hood/pull/35) ([jdesiloniz](https://github.com/jdesiloniz))
 - Try to fix publication [\#34](https://github.com/47degrees/sbt-hood/pull/34) ([fedefernandez](https://github.com/fedefernandez))
 
