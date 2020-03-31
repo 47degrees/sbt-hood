@@ -75,7 +75,7 @@ jobs:
         uses: juliangruber/approve-pull-request-action@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          number: 1
+          number: ${{ env.PULL_REQUEST_NUMBER }}
       - name: Merge Changelog Pull Request
         if: env.PULL_REQUEST_NUMBER != null
         uses: juliangruber/merge-pull-request-action@v1
