@@ -9,6 +9,7 @@
 - Add poster image [\#74](https://github.com/47degrees/sbt-hood/pull/74) ([calvellido](https://github.com/calvellido))
 - Update sbt-microsites to 1.1.5 [\#73](https://github.com/47degrees/sbt-hood/pull/73) ([scala-steward](https://github.com/scala-steward))
 - Update sbt-microsites to 1.1.4 [\#71](https://github.com/47degrees/sbt-hood/pull/71) ([scala-steward](https://github.com/scala-steward))
+- Update scalatest to 3.1.1 [\#65](https://github.com/47degrees/sbt-hood/pull/65) ([scala-steward](https://github.com/scala-steward))
 
 ## [v0.2.6](https://github.com/47degrees/sbt-hood/tree/v0.2.6) (2020-03-17)
 
@@ -21,7 +22,6 @@
 - Release 0.2.6 [\#68](https://github.com/47degrees/sbt-hood/pull/68) ([franciscodr](https://github.com/franciscodr))
 - Update circe-core, circe-generic, ... to 0.13.0 [\#67](https://github.com/47degrees/sbt-hood/pull/67) ([scala-steward](https://github.com/scala-steward))
 - Update log4cats-slf4j to 1.0.1 [\#66](https://github.com/47degrees/sbt-hood/pull/66) ([scala-steward](https://github.com/scala-steward))
-- Update scalatest to 3.1.1 [\#65](https://github.com/47degrees/sbt-hood/pull/65) ([scala-steward](https://github.com/scala-steward))
 - Updating Travis configuration [\#64](https://github.com/47degrees/sbt-hood/pull/64) ([franciscodr](https://github.com/franciscodr))
 - Mergify: configuration update [\#63](https://github.com/47degrees/sbt-hood/pull/63) ([fedefernandez](https://github.com/fedefernandez))
 - Update sbt-jmh to 0.3.7 [\#62](https://github.com/47degrees/sbt-hood/pull/62) ([scala-steward](https://github.com/scala-steward))
@@ -56,7 +56,6 @@
 - Migrates from 47deg to 47degrees GH organization [\#43](https://github.com/47degrees/sbt-hood/pull/43) ([franciscodr](https://github.com/franciscodr))
 - Adds /hood/sbt prefix in the micrositeBaseUrl setting [\#42](https://github.com/47degrees/sbt-hood/pull/42) ([AntonioMateoGomez](https://github.com/AntonioMateoGomez))
 - Adjustments before launch [\#41](https://github.com/47degrees/sbt-hood/pull/41) ([AntonioMateoGomez](https://github.com/AntonioMateoGomez))
-- Adding plugin to allModules [\#36](https://github.com/47degrees/sbt-hood/pull/36) ([jdesiloniz](https://github.com/jdesiloniz))
 
 ## [v0.2.4](https://github.com/47degrees/sbt-hood/tree/v0.2.4) (2020-03-10)
 
@@ -74,6 +73,7 @@
 **Merged pull requests:**
 
 - Bumps up version for attempting publication [\#37](https://github.com/47degrees/sbt-hood/pull/37) ([jdesiloniz](https://github.com/jdesiloniz))
+- Adding plugin to allModules [\#36](https://github.com/47degrees/sbt-hood/pull/36) ([jdesiloniz](https://github.com/jdesiloniz))
 - Fix travis.yml bad characters [\#35](https://github.com/47degrees/sbt-hood/pull/35) ([jdesiloniz](https://github.com/jdesiloniz))
 - Try to fix publication [\#34](https://github.com/47degrees/sbt-hood/pull/34) ([fedefernandez](https://github.com/fedefernandez))
 
