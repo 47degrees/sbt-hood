@@ -75,6 +75,7 @@
 - Bumps up version for attempting publication [\#37](https://github.com/47degrees/sbt-hood/pull/37) ([jdesiloniz](https://github.com/jdesiloniz))
 - Adding plugin to allModules [\#36](https://github.com/47degrees/sbt-hood/pull/36) ([jdesiloniz](https://github.com/jdesiloniz))
 - Fix travis.yml bad characters [\#35](https://github.com/47degrees/sbt-hood/pull/35) ([jdesiloniz](https://github.com/jdesiloniz))
+- Try to fix publication [\#34](https://github.com/47degrees/sbt-hood/pull/34) ([fedefernandez](https://github.com/fedefernandez))
 
 ## [v0.2.1](https://github.com/47degrees/sbt-hood/tree/v0.2.1) (2020-03-06)
 
@@ -90,7 +91,6 @@
 
 **Merged pull requests:**
 
-- Try to fix publication [\#34](https://github.com/47degrees/sbt-hood/pull/34) ([fedefernandez](https://github.com/fedefernandez))
 - Bumping version up to reflect changes in tasks naming [\#32](https://github.com/47degrees/sbt-hood/pull/32) ([jdesiloniz](https://github.com/jdesiloniz))
 - Use plural for upload task name [\#31](https://github.com/47degrees/sbt-hood/pull/31) ([AdrianRaFo](https://github.com/AdrianRaFo))
 - Update CHANGELOG.md [\#30](https://github.com/47degrees/sbt-hood/pull/30) ([juanpedromoreno](https://github.com/juanpedromoreno))
