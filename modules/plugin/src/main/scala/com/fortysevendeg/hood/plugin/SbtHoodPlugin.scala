@@ -35,6 +35,7 @@ import com.fortysevendeg.hood.json.JsonService
 import com.fortysevendeg.hood.utils._
 import Benchmark._
 import com.fortysevendeg.hood.github.instances.Github4sResponse
+import com.fortysevendeg.hood.github.instances.Github4sError
 import com.lightbend.emoji.ShortCodes.Implicits._
 import com.lightbend.emoji.ShortCodes.Defaults._
 
@@ -125,7 +126,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
           basicBenchmark,
           previousBenchmarkPath.value,
           currentBenchmarkPath.value,
-          params
+          params,
+          shouldBlockMerge.value
         )
         .leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
     } yield basicBenchmark)
@@ -245,7 +247,8 @@ object TaskAlgebra {
       benchmarkResult: List[BenchmarkComparisonResult],
       previousPath: File,
       currentPath: File,
-      params: GitHubParameters
+      params: GitHubParameters,
+      shouldCreateStatus: Boolean
   )(implicit L: Logger[F], S: Sync[F], G: GithubService[F]): Github4sResponse[F, Unit] =
     for {
       _ <- G.publishComment(
@@ -256,16 +259,21 @@ object TaskAlgebra {
         s"*sbt-hood* benchmark result:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
       )
       comparison = gitHubStateFromBenchmarks(benchmarkResult)
-      _ <- G.createStatus(
-        params.accessToken,
-        params.repositoryOwner,
-        params.repositoryName,
-        params.pullRequestNumber,
-        comparison.state,
-        params.targetUrl,
-        comparison.description,
-        GithubModel.githubStatusContext
-      )
+      _ <- if (shouldCreateStatus) {
+        G.createStatus(
+            params.accessToken,
+            params.repositoryOwner,
+            params.repositoryName,
+            params.pullRequestNumber,
+            comparison.state,
+            params.targetUrl,
+            comparison.description,
+            GithubModel.githubStatusContext
+          )
+          .map(_ => ())
+      } else {
+        EitherT.liftF[F, Github4sError, Unit](S.pure(()))
+      }
     } yield ()
 
   def uploadFilesToGitHub[F[_]](

@@ -74,8 +74,6 @@ object CsvService {
       implicit val decoder: HeaderDecoder[JmhResult] = HeaderDecoder.decoder(
         columns.keyCol,
         columns.modeCol,
-        "Threads",
-        "Samples",
         columns.compareCol,
         columns.thresholdCol,
         columns.unitsCol
