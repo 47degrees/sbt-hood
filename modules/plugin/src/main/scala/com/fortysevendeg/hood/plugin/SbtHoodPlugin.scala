@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 47 Degrees Open Source <https://www.47deg.com>
+ * Copyright 2019-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import com.fortysevendeg.hood.benchmark.{BenchmarkComparisonResult, BenchmarkSer
 import com.fortysevendeg.hood.csv.{BenchmarkColumns, CsvService}
 import com.fortysevendeg.hood.model._
 import sbt.{AutoPlugin, Def, PluginTrigger, Task}
-import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import io.circe.syntax._
 import cats.effect.Console.implicits._
@@ -35,8 +34,10 @@ import com.fortysevendeg.hood.json.JsonService
 import com.fortysevendeg.hood.utils._
 import Benchmark._
 import com.fortysevendeg.hood.github.instances.Github4sResponse
+import com.fortysevendeg.hood.github.instances.Github4sError
 import com.lightbend.emoji.ShortCodes.Implicits._
 import com.lightbend.emoji.ShortCodes.Defaults._
+import io.chrisdavenport.log4cats.Logger
 
 import scala.concurrent.ExecutionContext
 
@@ -125,7 +126,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
           basicBenchmark,
           previousBenchmarkPath.value,
           currentBenchmarkPath.value,
-          params
+          params,
+          shouldBlockMerge.value
         )
         .leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
     } yield basicBenchmark)
@@ -245,7 +247,8 @@ object TaskAlgebra {
       benchmarkResult: List[BenchmarkComparisonResult],
       previousPath: File,
       currentPath: File,
-      params: GitHubParameters
+      params: GitHubParameters,
+      shouldCreateStatus: Boolean
   )(implicit S: Sync[F], G: GithubService[F]): Github4sResponse[F, Unit] =
     for {
       _ <- G.publishComment(
@@ -253,19 +256,24 @@ object TaskAlgebra {
         params.repositoryOwner,
         params.repositoryName,
         params.pullRequestNumber,
-        s"*sbt-hood* benchmark result:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
+        s"## sbt-hood benchmark result:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
       )
       comparison = gitHubStateFromBenchmarks(benchmarkResult)
-      _ <- G.createStatus(
-        params.accessToken,
-        params.repositoryOwner,
-        params.repositoryName,
-        params.pullRequestNumber,
-        comparison.state,
-        params.targetUrl,
-        comparison.description,
-        GithubModel.githubStatusContext
-      )
+      _ <- if (shouldCreateStatus) {
+        G.createStatus(
+            params.accessToken,
+            params.repositoryOwner,
+            params.repositoryName,
+            params.pullRequestNumber,
+            comparison.state,
+            params.targetUrl,
+            comparison.description,
+            GithubModel.githubStatusContext
+          )
+          .as(())
+      } else {
+        EitherT.pure[F, Github4sError](())
+      }
     } yield ()
 
   def uploadFilesToGitHub[F[_]](
@@ -393,7 +401,7 @@ object TaskAlgebra {
   ): String = {
     def outputComparisonResult(result: BenchmarkComparisonResult): String =
       s"""
-         |# ${result.icon} ${result.previous.benchmark} (Threshold: ${result.threshold})
+         |### ${result.icon} ${result.previous.benchmark} (Threshold: ${result.threshold})
          |
          ||Benchmark|Value|
          ||---------|-----|

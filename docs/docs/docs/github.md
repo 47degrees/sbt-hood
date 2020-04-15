@@ -17,6 +17,7 @@ In order to allow *sbt-hood* to communicate with GitHub you'll need to set these
 * `repositoryName`: name of the repository where the plugin will post updates.
 * `pullRequestNumber`: pull request number where the plugin will post updates.
 * `targetUrl`: optional URL to the CI job, allowing GitHub to show a link to your CI job besides the mergeability status (i.e.: `TRAVIS_JOB_WEB_URL` under TravisCI).
+* `shouldBlockMerge`: if set to `true`, *sbt-hood* will ask GitHub to block the current PR in case a benchmark has produced errors. Defaults to `true`.
 
 Once these are set up, you can configure your CI scripts to call the following *sbt-hood* command:
 

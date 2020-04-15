@@ -72,7 +72,6 @@ trait SbtHoodKeys {
   val outputFormat: SettingKey[String] = settingKey(
     "Output file format. `MD` and `JSON` are supported. By default: `MD`"
   )
-
   val token: SettingKey[Option[String]] = settingKey(
     "GitHub access token required by `compareBenchmarksCI`."
   )
@@ -87,6 +86,9 @@ trait SbtHoodKeys {
   )
   val targetUrl: SettingKey[Option[String]] = settingKey(
     "URL to the CI job, used by `compareBenchmarksCI`."
+  )
+  val shouldBlockMerge: SettingKey[Boolean] = settingKey(
+    "If set to `true`, blocks the mergeability of the current PR if any of the benchmarks fail. By default: `true`."
   )
   val benchmarkFiles: SettingKey[List[File]] = settingKey(
     "Files to be uploaded, used by `uploadBenchmarks`. Default: empty list."
@@ -126,6 +128,7 @@ trait SbtHoodDefaultSettings extends SbtHoodKeys {
     repositoryName := None,
     pullRequestNumber := None,
     targetUrl := None,
+    shouldBlockMerge := true,
     benchmarkFiles := List.empty,
     uploadDirectory := "benchmarks",
     commitMessage := "Upload benchmark",
