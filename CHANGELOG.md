@@ -38,7 +38,6 @@
 - Update sbt-org-policies to 0.13.2 [\#52](https://github.com/47degrees/sbt-hood/pull/52) ([scala-steward](https://github.com/scala-steward))
 - Update sbt-microsites to 1.1.3 [\#51](https://github.com/47degrees/sbt-hood/pull/51) ([scala-steward](https://github.com/scala-steward))
 - Update github4s to 0.23.0 [\#49](https://github.com/47degrees/sbt-hood/pull/49) ([scala-steward](https://github.com/scala-steward))
-- Setts the microsite base url [\#48](https://github.com/47degrees/sbt-hood/pull/48) ([AntonioMateoGomez](https://github.com/AntonioMateoGomez))
 
 ## [v0.2.5](https://github.com/47degrees/sbt-hood/tree/v0.2.5) (2020-03-13)
 
@@ -50,6 +49,7 @@
 
 **Merged pull requests:**
 
+- Setts the microsite base url [\#48](https://github.com/47degrees/sbt-hood/pull/48) ([AntonioMateoGomez](https://github.com/AntonioMateoGomez))
 - Adding GitHub organization info [\#47](https://github.com/47degrees/sbt-hood/pull/47) ([franciscodr](https://github.com/franciscodr))
 - Adding metadata to README file [\#46](https://github.com/47degrees/sbt-hood/pull/46) ([franciscodr](https://github.com/franciscodr))
 - Release 0.2.5 [\#45](https://github.com/47degrees/sbt-hood/pull/45) ([franciscodr](https://github.com/franciscodr))
