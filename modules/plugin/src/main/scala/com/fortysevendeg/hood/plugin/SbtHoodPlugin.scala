@@ -270,9 +270,9 @@ object TaskAlgebra {
             comparison.description,
             GithubModel.githubStatusContext
           )
-          .map(_ => ())
+          .as(())
       } else {
-        EitherT.liftF[F, Github4sError, Unit](S.pure(()))
+        EitherT.pure[F, Github4sError](())
       }
     } yield ()
 
