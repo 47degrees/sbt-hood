@@ -25,7 +25,6 @@ import com.fortysevendeg.hood.benchmark.{BenchmarkComparisonResult, BenchmarkSer
 import com.fortysevendeg.hood.csv.{BenchmarkColumns, CsvService}
 import com.fortysevendeg.hood.model._
 import sbt.{AutoPlugin, Def, PluginTrigger, Task}
-import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import io.circe.syntax._
 import cats.effect.Console.implicits._
@@ -38,6 +37,7 @@ import com.fortysevendeg.hood.github.instances.Github4sResponse
 import com.fortysevendeg.hood.github.instances.Github4sError
 import com.lightbend.emoji.ShortCodes.Implicits._
 import com.lightbend.emoji.ShortCodes.Defaults._
+import io.chrisdavenport.log4cats.Logger
 
 import scala.concurrent.ExecutionContext
 
@@ -249,7 +249,7 @@ object TaskAlgebra {
       currentPath: File,
       params: GitHubParameters,
       shouldCreateStatus: Boolean
-  )(implicit L: Logger[F], S: Sync[F], G: GithubService[F]): Github4sResponse[F, Unit] =
+  )(implicit S: Sync[F], G: GithubService[F]): Github4sResponse[F, Unit] =
     for {
       _ <- G.publishComment(
         params.accessToken,
@@ -279,7 +279,7 @@ object TaskAlgebra {
   def uploadFilesToGitHub[F[_]](
       files: List[(String, String)],
       params: GitHubParameters
-  )(implicit L: Logger[F], S: Sync[F], G: GithubService[F]): Github4sResponse[F, Unit] =
+  )(implicit S: Sync[F], G: GithubService[F]): Github4sResponse[F, Unit] =
     G.commitFilesAndContents(
         params.accessToken,
         params.repositoryOwner,
