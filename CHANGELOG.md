@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/47degrees/sbt-hood/tree/HEAD)
+## [v0.2.7](https://github.com/47degrees/sbt-hood/tree/v0.2.7) (2020-04-15)
 
-[Full Changelog](https://github.com/47degrees/sbt-hood/compare/v0.2.6...HEAD)
+[Full Changelog](https://github.com/47degrees/sbt-hood/compare/v0.2.6...v0.2.7)
 
 🐛 **Bug Fixes**
 
