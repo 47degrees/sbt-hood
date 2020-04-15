@@ -18,8 +18,8 @@ The maintainers of the project are:
 
 These are the people that have contributed to the _sbt-hood_ project:
 
-- [![jdesiloniz](https://avatars2.githubusercontent.com/u/2835739?v=4&s=20) **jdesiloniz**](https://github.com/jdesiloniz)
 - [![developer47deg](https://avatars1.githubusercontent.com/u/24799081?v=4&s=20) **developer47deg**](https://github.com/developer47deg)
+- [![jdesiloniz](https://avatars2.githubusercontent.com/u/2835739?v=4&s=20) **jdesiloniz**](https://github.com/jdesiloniz)
 - [![47degdev](https://avatars3.githubusercontent.com/u/5580770?v=4&s=20) **47degdev**](https://github.com/47degdev)
 - [![juanpedromoreno](https://avatars2.githubusercontent.com/u/4879373?v=4&s=20) **juanpedromoreno**](https://github.com/juanpedromoreno)
 - [![AntonioMateoGomez](https://avatars0.githubusercontent.com/u/25897490?v=4&s=20) **AntonioMateoGomez**](https://github.com/AntonioMateoGomez)
