@@ -38,6 +38,7 @@
 - Update sbt-org-policies to 0.13.2 [\#52](https://github.com/47degrees/sbt-hood/pull/52) ([scala-steward](https://github.com/scala-steward))
 - Update sbt-microsites to 1.1.3 [\#51](https://github.com/47degrees/sbt-hood/pull/51) ([scala-steward](https://github.com/scala-steward))
 - Update github4s to 0.23.0 [\#49](https://github.com/47degrees/sbt-hood/pull/49) ([scala-steward](https://github.com/scala-steward))
+- Setts the microsite base url [\#48](https://github.com/47degrees/sbt-hood/pull/48) ([AntonioMateoGomez](https://github.com/AntonioMateoGomez))
 
 ## [v0.2.5](https://github.com/47degrees/sbt-hood/tree/v0.2.5) (2020-03-13)
 
@@ -49,7 +50,6 @@
 
 **Merged pull requests:**
 
-- Setts the microsite base url [\#48](https://github.com/47degrees/sbt-hood/pull/48) ([AntonioMateoGomez](https://github.com/AntonioMateoGomez))
 - Adding GitHub organization info [\#47](https://github.com/47degrees/sbt-hood/pull/47) ([franciscodr](https://github.com/franciscodr))
 - Adding metadata to README file [\#46](https://github.com/47degrees/sbt-hood/pull/46) ([franciscodr](https://github.com/franciscodr))
 - Release 0.2.5 [\#45](https://github.com/47degrees/sbt-hood/pull/45) ([franciscodr](https://github.com/franciscodr))
@@ -119,6 +119,7 @@
 - Output comparison report to a file [\#21](https://github.com/47degrees/sbt-hood/pull/21) ([jdesiloniz](https://github.com/jdesiloniz))
 - Adding JSON support [\#19](https://github.com/47degrees/sbt-hood/pull/19) ([jdesiloniz](https://github.com/jdesiloniz))
 - Draft of microsite contents [\#17](https://github.com/47degrees/sbt-hood/pull/17) ([jdesiloniz](https://github.com/jdesiloniz))
+- Algebra to post GitHub comments [\#9](https://github.com/47degrees/sbt-hood/pull/9) ([jdesiloniz](https://github.com/jdesiloniz))
 
 ## [v0.0.1](https://github.com/47degrees/sbt-hood/tree/v0.0.1) (2019-10-24)
 
@@ -140,7 +141,6 @@
 - Sbt-hood plugin keys and main task [\#13](https://github.com/47degrees/sbt-hood/pull/13) ([jdesiloniz](https://github.com/jdesiloniz))
 - Adding methods to edit/list comments from GitHub repos [\#11](https://github.com/47degrees/sbt-hood/pull/11) ([jdesiloniz](https://github.com/jdesiloniz))
 - Algebras for JMH deserialization from CSV and benchmark comparisons [\#10](https://github.com/47degrees/sbt-hood/pull/10) ([jdesiloniz](https://github.com/jdesiloniz))
-- Algebra to post GitHub comments [\#9](https://github.com/47degrees/sbt-hood/pull/9) ([jdesiloniz](https://github.com/jdesiloniz))
 - Models and decoders [\#8](https://github.com/47degrees/sbt-hood/pull/8) ([fedefernandez](https://github.com/fedefernandez))
 - Triggers CI [\#2](https://github.com/47degrees/sbt-hood/pull/2) ([fedefernandez](https://github.com/fedefernandez))
 - Base project [\#1](https://github.com/47degrees/sbt-hood/pull/1) ([fedefernandez](https://github.com/fedefernandez))
