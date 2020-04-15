@@ -26,7 +26,6 @@ import kantan.csv.ops._
 import kantan.csv.generic._
 import cats.implicits._
 import com.fortysevendeg.hood.utils.FileUtils
-import io.chrisdavenport.log4cats.Logger
 
 final case class BenchmarkColumns(
     keyCol: String,
@@ -47,7 +46,7 @@ trait CsvService[F[_]] {
 
 object CsvService {
 
-  def build[F[_]: Sync: Logger]: CsvService[F] = new CsvServiceImpl[F]
+  def build[F[_]: Sync]: CsvService[F] = new CsvServiceImpl[F]
 
   class CsvServiceImpl[F[_]](implicit S: Sync[F]) extends CsvService[F] {
 

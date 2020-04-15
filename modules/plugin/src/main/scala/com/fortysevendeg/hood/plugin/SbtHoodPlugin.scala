@@ -246,7 +246,7 @@ object TaskAlgebra {
       previousPath: File,
       currentPath: File,
       params: GitHubParameters
-  )(implicit L: Logger[F], S: Sync[F], G: GithubService[F]): Github4sResponse[F, Unit] =
+  )(implicit S: Sync[F], G: GithubService[F]): Github4sResponse[F, Unit] =
     for {
       _ <- G.publishComment(
         params.accessToken,
@@ -271,7 +271,7 @@ object TaskAlgebra {
   def uploadFilesToGitHub[F[_]](
       files: List[(String, String)],
       params: GitHubParameters
-  )(implicit L: Logger[F], S: Sync[F], G: GithubService[F]): Github4sResponse[F, Unit] =
+  )(implicit S: Sync[F], G: GithubService[F]): Github4sResponse[F, Unit] =
     G.commitFilesAndContents(
         params.accessToken,
         params.repositoryOwner,

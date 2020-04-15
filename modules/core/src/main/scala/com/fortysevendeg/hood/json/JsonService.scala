@@ -23,7 +23,6 @@ import cats.implicits._
 import com.fortysevendeg.hood.model.{Benchmark, BenchmarkLoadingError, HoodError}
 import com.fortysevendeg.hood.model.Benchmark._
 import com.fortysevendeg.hood.utils.FileUtils
-import io.chrisdavenport.log4cats.Logger
 import io.circe.parser._
 import com.fortysevendeg.hood.model.InvalidJson
 
@@ -35,7 +34,7 @@ trait JsonService[F[_]] {
 
 object JsonService {
 
-  def build[F[_]: Sync: Logger]: JsonService[F] = new JsonServiceImpl[F]
+  def build[F[_]: Sync]: JsonService[F] = new JsonServiceImpl[F]
 
   class JsonServiceImpl[F[_]](implicit S: Sync[F]) extends JsonService[F] {
 
