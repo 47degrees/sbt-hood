@@ -43,6 +43,7 @@
 - Update sbt-microsites to 1.1.3 [\#51](https://github.com/47degrees/sbt-hood/pull/51) ([scala-steward](https://github.com/scala-steward))
 - Update github4s to 0.23.0 [\#49](https://github.com/47degrees/sbt-hood/pull/49) ([scala-steward](https://github.com/scala-steward))
 - Setts the microsite base url [\#48](https://github.com/47degrees/sbt-hood/pull/48) ([AntonioMateoGomez](https://github.com/AntonioMateoGomez))
+- Adding metadata to README file [\#46](https://github.com/47degrees/sbt-hood/pull/46) ([franciscodr](https://github.com/franciscodr))
 
 ## [v0.2.5](https://github.com/47degrees/sbt-hood/tree/v0.2.5) (2020-03-13)
 
@@ -55,10 +56,10 @@
 **Merged pull requests:**
 
 - Adding GitHub organization info [\#47](https://github.com/47degrees/sbt-hood/pull/47) ([franciscodr](https://github.com/franciscodr))
-- Adding metadata to README file [\#46](https://github.com/47degrees/sbt-hood/pull/46) ([franciscodr](https://github.com/franciscodr))
 - Release 0.2.5 [\#45](https://github.com/47degrees/sbt-hood/pull/45) ([franciscodr](https://github.com/franciscodr))
 - Updating README file [\#44](https://github.com/47degrees/sbt-hood/pull/44) ([franciscodr](https://github.com/franciscodr))
 - Migrates from 47deg to 47degrees GH organization [\#43](https://github.com/47degrees/sbt-hood/pull/43) ([franciscodr](https://github.com/franciscodr))
+- Adds /hood/sbt prefix in the micrositeBaseUrl setting [\#42](https://github.com/47degrees/sbt-hood/pull/42) ([AntonioMateoGomez](https://github.com/AntonioMateoGomez))
 - Adjustments before launch [\#41](https://github.com/47degrees/sbt-hood/pull/41) ([AntonioMateoGomez](https://github.com/AntonioMateoGomez))
 
 ## [v0.2.4](https://github.com/47degrees/sbt-hood/tree/v0.2.4) (2020-03-10)
@@ -67,7 +68,6 @@
 
 **Merged pull requests:**
 
-- Adds /hood/sbt prefix in the micrositeBaseUrl setting [\#42](https://github.com/47degrees/sbt-hood/pull/42) ([AntonioMateoGomez](https://github.com/AntonioMateoGomez))
 - Bringing new key through travis encrypt-file [\#39](https://github.com/47degrees/sbt-hood/pull/39) ([jdesiloniz](https://github.com/jdesiloniz))
 - Attempting to fix encryption keys [\#38](https://github.com/47degrees/sbt-hood/pull/38) ([jdesiloniz](https://github.com/jdesiloniz))
 
