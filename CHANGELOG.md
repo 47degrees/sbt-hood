@@ -6,6 +6,7 @@
 
 **Merged pull requests:**
 
+- Simplifies Build [\#106](https://github.com/47degrees/sbt-hood/pull/106) ([juanpedromoreno](https://github.com/juanpedromoreno))
 - Add poster image [\#74](https://github.com/47degrees/sbt-hood/pull/74) ([calvellido](https://github.com/calvellido))
 - Update sbt-microsites to 1.1.5 [\#73](https://github.com/47degrees/sbt-hood/pull/73) ([scala-steward](https://github.com/scala-steward))
 - Update sbt-microsites to 1.1.4 [\#71](https://github.com/47degrees/sbt-hood/pull/71) ([scala-steward](https://github.com/scala-steward))
@@ -53,7 +54,6 @@
 - Adding metadata to README file [\#46](https://github.com/47degrees/sbt-hood/pull/46) ([franciscodr](https://github.com/franciscodr))
 - Release 0.2.5 [\#45](https://github.com/47degrees/sbt-hood/pull/45) ([franciscodr](https://github.com/franciscodr))
 - Updating README file [\#44](https://github.com/47degrees/sbt-hood/pull/44) ([franciscodr](https://github.com/franciscodr))
-- Migrates from 47deg to 47degrees GH organization [\#43](https://github.com/47degrees/sbt-hood/pull/43) ([franciscodr](https://github.com/franciscodr))
 - Adds /hood/sbt prefix in the micrositeBaseUrl setting [\#42](https://github.com/47degrees/sbt-hood/pull/42) ([AntonioMateoGomez](https://github.com/AntonioMateoGomez))
 - Adjustments before launch [\#41](https://github.com/47degrees/sbt-hood/pull/41) ([AntonioMateoGomez](https://github.com/AntonioMateoGomez))
 
@@ -83,6 +83,7 @@
 
 **Merged pull requests:**
 
+- Migrates from 47deg to 47degrees GH organization [\#43](https://github.com/47degrees/sbt-hood/pull/43) ([franciscodr](https://github.com/franciscodr))
 - Trying to fix issues with artifact publishing [\#33](https://github.com/47degrees/sbt-hood/pull/33) ([jdesiloniz](https://github.com/jdesiloniz))
 
 ## [v0.2.0](https://github.com/47degrees/sbt-hood/tree/v0.2.0) (2020-03-04)
@@ -91,7 +92,6 @@
 
 **Merged pull requests:**
 
-- Bumping version up to reflect changes in tasks naming [\#32](https://github.com/47degrees/sbt-hood/pull/32) ([jdesiloniz](https://github.com/jdesiloniz))
 - Use plural for upload task name [\#31](https://github.com/47degrees/sbt-hood/pull/31) ([AdrianRaFo](https://github.com/AdrianRaFo))
 - Update CHANGELOG.md [\#30](https://github.com/47degrees/sbt-hood/pull/30) ([juanpedromoreno](https://github.com/juanpedromoreno))
 
@@ -107,6 +107,7 @@
 
 **Merged pull requests:**
 
+- Bumping version up to reflect changes in tasks naming [\#32](https://github.com/47degrees/sbt-hood/pull/32) ([jdesiloniz](https://github.com/jdesiloniz))
 - Minor fix for GPG process [\#29](https://github.com/47degrees/sbt-hood/pull/29) ([jdesiloniz](https://github.com/jdesiloniz))
 - Updating sbt-org-policies to fix issues while publishing artifacts [\#28](https://github.com/47degrees/sbt-hood/pull/28) ([jdesiloniz](https://github.com/jdesiloniz))
 - Bumping up Jekyll version [\#27](https://github.com/47degrees/sbt-hood/pull/27) ([jdesiloniz](https://github.com/jdesiloniz))

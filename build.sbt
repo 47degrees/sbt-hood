@@ -1,6 +1,6 @@
-import sbtorgpolicies.model.scalac
-
-pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
+addCommandAlias("ci-test", "+scalafmtCheck; +scalafmtSbtCheck; +docs/mdoc; +test")
+addCommandAlias("ci-docs", "project-docs/mdoc; headerCreateAll")
+addCommandAlias("ci-microsite", "docs/publishMicrosite")
 
 lazy val `sbt-hood-core` = project
   .in(file("modules/core"))
@@ -10,7 +10,6 @@ lazy val `sbt-hood-plugin` = project
   .in(file("modules/plugin"))
   .dependsOn(`sbt-hood-core`)
   .settings(moduleName := "sbt-hood-plugin")
-  .settings(crossScalaVersions := Seq(scalac.`2.12`))
   .settings(sbtPluginSettings: _*)
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
@@ -32,18 +31,22 @@ lazy val allModulesDeps: Seq[ClasspathDependency] =
 lazy val root = project
   .in(file("."))
   .settings(name := "sbt-hood")
-  .settings(noPublishSettings)
+  .settings(skip in publish := true)
   .aggregate(allModules: _*)
   .dependsOn(allModulesDeps: _*)
 
 lazy val docs = project
-  .in(file("docs"))
   .dependsOn(allModulesDeps: _*)
   .settings(name := "sbt-hood-docs")
-  .settings(docsSettings: _*)
   .settings(micrositeSettings: _*)
-  .settings(noPublishSettings: _*)
+  .settings(skip in publish := true)
   .enablePlugins(MicrositesPlugin)
 
-addCommandAlias("ci-test", "scalafmtCheck; scalafmtSbtCheck; docs/tut; test")
-addCommandAlias("ci-docs", "docs/tut")
+lazy val `project-docs` = (project in file(".docs"))
+  .aggregate(allModules: _*)
+  .dependsOn(allModulesDeps: _*)
+  .settings(moduleName := "sbt-hood-project-docs")
+  .settings(mdocIn := file(".docs"))
+  .settings(mdocOut := file("."))
+  .settings(skip in publish := true)
+  .enablePlugins(MdocPlugin)

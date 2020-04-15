@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2019-2020 47 Degrees Open Source <https://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import kantan.csv.ops._
 import kantan.csv.generic._
 import cats.implicits._
 import com.fortysevendeg.hood.utils.FileUtils
-import io.chrisdavenport.log4cats.Logger
 
 final case class BenchmarkColumns(
     keyCol: String,
@@ -47,7 +46,7 @@ trait CsvService[F[_]] {
 
 object CsvService {
 
-  def build[F[_]: Sync: Logger]: CsvService[F] = new CsvServiceImpl[F]
+  def build[F[_]: Sync]: CsvService[F] = new CsvServiceImpl[F]
 
   class CsvServiceImpl[F[_]](implicit S: Sync[F]) extends CsvService[F] {
 

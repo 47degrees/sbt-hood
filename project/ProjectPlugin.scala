@@ -3,28 +3,20 @@ import microsites.MicrositeKeys._
 import sbt.Keys._
 import sbt.ScriptedPlugin.autoImport._
 import sbt._
-import sbtorgpolicies.OrgPoliciesPlugin
-import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
-import sbtorgpolicies.model._
-import sbtorgpolicies.templates._
-import sbtorgpolicies.templates.badges._
-import sbtorgpolicies.runnable.syntax._
-import sbtrelease.ReleasePlugin.autoImport._
 import scoverage.ScoverageKeys._
+import com.alejandrohdezma.sbt.github.SbtGithubPlugin
 
 import scala.language.reflectiveCalls
 
 object ProjectPlugin extends AutoPlugin {
 
-  override def requires: Plugins = OrgPoliciesPlugin
-
   override def trigger: PluginTrigger = allRequirements
+
+  override def requires: Plugins = SbtGithubPlugin
 
   object autoImport {
 
     lazy val V = new {
-      val kindProjector: String  = "0.11.0"
-      val paradise: String       = "2.1.1"
       val scala: String          = "2.12.8"
       val scalatest: String      = "3.1.1"
       val slf4j: String          = "1.7.30"
@@ -62,16 +54,12 @@ object ProjectPlugin extends AutoPlugin {
       includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md" | "*.svg",
       micrositePushSiteWith := GitHub4s,
       micrositeHighlightTheme := "atom-one-light",
-      micrositeGithubToken := sys.env.get(orgGithubTokenSetting.value),
+      micrositeGithubToken := Option(System.getenv().get("GITHUB_TOKEN")),
       micrositePalette := Map(
         "brand-primary"   -> "#25bc77",
         "brand-secondary" -> "#25bc77",
         "white-color"     -> "#FFF"
-      )
-    )
-
-    lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies += %%("scalatest", V.scalatest),
+      ),
       scalacOptions ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
     )
 
@@ -80,22 +68,10 @@ object ProjectPlugin extends AutoPlugin {
   import autoImport._
 
   override def projectSettings: Seq[Def.Setting[_]] =
-    sharedReleaseProcess ++ warnUnusedImport ++ Seq(
-      description := "A SBT plugin for comparing benchmarks in your PRs",
-      orgGithubSetting := GitHubSettings(
-        organization = "47degrees",
-        project = (name in LocalRootProject).value,
-        organizationName = "47 Degrees",
-        groupId = "com.47deg",
-        organizationHomePage = url("http://47deg.com"),
-        organizationEmail = "hello@47deg.com"
-      ),
-      startYear := Some(2019),
-      orgProjectName := "sbt-hood",
+    Seq(
+      organization := "com.47deg",
       scalaVersion := V.scala,
       crossScalaVersions := Seq(V.scala),
-      scalacOptions ++= scalacAdvancedOptions,
-      scalacOptions ~= (_ filterNot Set("-Yliteral-types", "-Xlint").contains),
       Test / fork := true,
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
@@ -104,36 +80,20 @@ object ProjectPlugin extends AutoPlugin {
         Resolver.sonatypeRepo("snapshots"),
         Resolver.typesafeIvyRepo("releases")
       ),
-      addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
-      addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.full),
       libraryDependencies ++= Seq(
-        "io.circe"                   %% "circe-generic" % V.circe,
-        "io.circe"                   %% "circe-core" % V.circe,
-        "io.circe"                   %% "circe-parser" % V.circe,
-        "com.47deg"                  %% "github4s" % V.github4s,
-        "org.typelevel"              %% "cats-effect" % V.cats,
-        "io.chrisdavenport"          %% "log4cats-slf4j" % V.log4cats,
-        "ch.qos.logback"             % "logback-classic" % V.logbackClassic,
-        "com.nrinaudo"               %% "kantan.csv" % V.kantan,
-        "com.nrinaudo"               %% "kantan.csv-generic" % V.kantan,
-        "dev.profunktor"             %% "console4cats" % V.console4cats,
-        "com.lightbend"              %% "emoji" % V.lightbendEmoji,
-        %%("scalatest", V.scalatest) % "test",
-        %("slf4j-nop", V.slf4j)      % Test
-      )
-    ) ++ Seq(
-      // sbt-org-policies settings:
-      // format: OFF
-      orgMaintainersSetting := List(Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
-      orgBadgeListSetting := List(
-          GitterBadge.apply,
-          TravisBadge.apply,
-          CodecovBadge.apply,
-          MavenCentralBadge.apply,
-          LicenseBadge.apply,
-          ScalaLangBadge.apply,
-          GitHubIssuesBadge.apply
+        "io.circe"          %% "circe-generic"      % V.circe,
+        "io.circe"          %% "circe-core"         % V.circe,
+        "io.circe"          %% "circe-parser"       % V.circe,
+        "com.47deg"         %% "github4s"           % V.github4s,
+        "org.typelevel"     %% "cats-effect"        % V.cats,
+        "io.chrisdavenport" %% "log4cats-slf4j"     % V.log4cats,
+        "ch.qos.logback"    % "logback-classic"     % V.logbackClassic,
+        "com.nrinaudo"      %% "kantan.csv"         % V.kantan,
+        "com.nrinaudo"      %% "kantan.csv-generic" % V.kantan,
+        "dev.profunktor"    %% "console4cats"       % V.console4cats,
+        "com.lightbend"     %% "emoji"              % V.lightbendEmoji,
+        "org.scalatest"     %% "scalatest"          % V.scalatest % Test,
+        "org.slf4j"         % "slf4j-nop"           % V.slf4j % Test
       )
     )
-  // format: ON
 }
