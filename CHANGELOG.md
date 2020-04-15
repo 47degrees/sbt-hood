@@ -4,6 +4,10 @@
 
 [Full Changelog](https://github.com/47degrees/sbt-hood/compare/v0.2.6...HEAD)
 
+🐛 **Bug Fixes**
+
+- \[BUGFIX\] Remove unrequired csv columns [\#102](https://github.com/47degrees/sbt-hood/pull/102) ([jdesiloniz](https://github.com/jdesiloniz))
+
 **Merged pull requests:**
 
 - Simplifies Build [\#106](https://github.com/47degrees/sbt-hood/pull/106) ([juanpedromoreno](https://github.com/juanpedromoreno))
