@@ -92,6 +92,7 @@
 **Merged pull requests:**
 
 - Bumping version up to reflect changes in tasks naming [\#32](https://github.com/47degrees/sbt-hood/pull/32) ([jdesiloniz](https://github.com/jdesiloniz))
+- Use plural for upload task name [\#31](https://github.com/47degrees/sbt-hood/pull/31) ([AdrianRaFo](https://github.com/AdrianRaFo))
 - Update CHANGELOG.md [\#30](https://github.com/47degrees/sbt-hood/pull/30) ([juanpedromoreno](https://github.com/juanpedromoreno))
 
 ## [v0.1.0](https://github.com/47degrees/sbt-hood/tree/v0.1.0) (2020-02-20)
@@ -106,7 +107,6 @@
 
 **Merged pull requests:**
 
-- Use plural for upload task name [\#31](https://github.com/47degrees/sbt-hood/pull/31) ([AdrianRaFo](https://github.com/AdrianRaFo))
 - Minor fix for GPG process [\#29](https://github.com/47degrees/sbt-hood/pull/29) ([jdesiloniz](https://github.com/jdesiloniz))
 - Updating sbt-org-policies to fix issues while publishing artifacts [\#28](https://github.com/47degrees/sbt-hood/pull/28) ([jdesiloniz](https://github.com/jdesiloniz))
 - Bumping up Jekyll version [\#27](https://github.com/47degrees/sbt-hood/pull/27) ([jdesiloniz](https://github.com/jdesiloniz))
