@@ -256,7 +256,7 @@ object TaskAlgebra {
         params.repositoryOwner,
         params.repositoryName,
         params.pullRequestNumber,
-        s"*sbt-hood* benchmark result:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
+        s"## sbt-hood benchmark result:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
       )
       comparison = gitHubStateFromBenchmarks(benchmarkResult)
       _ <- if (shouldCreateStatus) {
@@ -401,7 +401,7 @@ object TaskAlgebra {
   ): String = {
     def outputComparisonResult(result: BenchmarkComparisonResult): String =
       s"""
-         |# ${result.icon} ${result.previous.benchmark} (Threshold: ${result.threshold})
+         |### ${result.icon} ${result.previous.benchmark} (Threshold: ${result.threshold})
          |
          ||Benchmark|Value|
          ||---------|-----|
