@@ -119,7 +119,6 @@
 - Output comparison report to a file [\#21](https://github.com/47degrees/sbt-hood/pull/21) ([jdesiloniz](https://github.com/jdesiloniz))
 - Adding JSON support [\#19](https://github.com/47degrees/sbt-hood/pull/19) ([jdesiloniz](https://github.com/jdesiloniz))
 - Draft of microsite contents [\#17](https://github.com/47degrees/sbt-hood/pull/17) ([jdesiloniz](https://github.com/jdesiloniz))
-- Algebra to post GitHub comments [\#9](https://github.com/47degrees/sbt-hood/pull/9) ([jdesiloniz](https://github.com/jdesiloniz))
 
 ## [v0.0.1](https://github.com/47degrees/sbt-hood/tree/v0.0.1) (2019-10-24)
 
@@ -141,6 +140,7 @@
 - Sbt-hood plugin keys and main task [\#13](https://github.com/47degrees/sbt-hood/pull/13) ([jdesiloniz](https://github.com/jdesiloniz))
 - Adding methods to edit/list comments from GitHub repos [\#11](https://github.com/47degrees/sbt-hood/pull/11) ([jdesiloniz](https://github.com/jdesiloniz))
 - Algebras for JMH deserialization from CSV and benchmark comparisons [\#10](https://github.com/47degrees/sbt-hood/pull/10) ([jdesiloniz](https://github.com/jdesiloniz))
+- Algebra to post GitHub comments [\#9](https://github.com/47degrees/sbt-hood/pull/9) ([jdesiloniz](https://github.com/jdesiloniz))
 - Models and decoders [\#8](https://github.com/47degrees/sbt-hood/pull/8) ([fedefernandez](https://github.com/fedefernandez))
 - Triggers CI [\#2](https://github.com/47degrees/sbt-hood/pull/2) ([fedefernandez](https://github.com/fedefernandez))
 - Base project [\#1](https://github.com/47degrees/sbt-hood/pull/1) ([fedefernandez](https://github.com/fedefernandez))
