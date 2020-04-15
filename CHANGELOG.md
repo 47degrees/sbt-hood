@@ -6,6 +6,7 @@
 
 **Merged pull requests:**
 
+- Simplifies Build [\#106](https://github.com/47degrees/sbt-hood/pull/106) ([juanpedromoreno](https://github.com/juanpedromoreno))
 - Add poster image [\#74](https://github.com/47degrees/sbt-hood/pull/74) ([calvellido](https://github.com/calvellido))
 - Update sbt-microsites to 1.1.5 [\#73](https://github.com/47degrees/sbt-hood/pull/73) ([scala-steward](https://github.com/scala-steward))
 - Update sbt-microsites to 1.1.4 [\#71](https://github.com/47degrees/sbt-hood/pull/71) ([scala-steward](https://github.com/scala-steward))
@@ -115,7 +116,6 @@
 - Missing features: include/exclude keys, benchmark reports uploads [\#24](https://github.com/47degrees/sbt-hood/pull/24) ([jdesiloniz](https://github.com/jdesiloniz))
 - Microsite design update [\#23](https://github.com/47degrees/sbt-hood/pull/23) ([AntonioMateoGomez](https://github.com/AntonioMateoGomez))
 - Update dependencies + scalafmt [\#22](https://github.com/47degrees/sbt-hood/pull/22) ([jdesiloniz](https://github.com/jdesiloniz))
-- Output comparison report to a file [\#21](https://github.com/47degrees/sbt-hood/pull/21) ([jdesiloniz](https://github.com/jdesiloniz))
 - Adding JSON support [\#19](https://github.com/47degrees/sbt-hood/pull/19) ([jdesiloniz](https://github.com/jdesiloniz))
 - Draft of microsite contents [\#17](https://github.com/47degrees/sbt-hood/pull/17) ([jdesiloniz](https://github.com/jdesiloniz))
 
@@ -134,6 +134,7 @@
 
 **Merged pull requests:**
 
+- Output comparison report to a file [\#21](https://github.com/47degrees/sbt-hood/pull/21) ([jdesiloniz](https://github.com/jdesiloniz))
 - Releases 0.0.1 version [\#16](https://github.com/47degrees/sbt-hood/pull/16) ([fedefernandez](https://github.com/fedefernandez))
 - 14 - GitHub integration [\#15](https://github.com/47degrees/sbt-hood/pull/15) ([jdesiloniz](https://github.com/jdesiloniz))
 - Sbt-hood plugin keys and main task [\#13](https://github.com/47degrees/sbt-hood/pull/13) ([jdesiloniz](https://github.com/jdesiloniz))
