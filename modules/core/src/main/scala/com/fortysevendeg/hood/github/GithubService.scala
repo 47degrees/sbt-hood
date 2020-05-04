@@ -78,8 +78,8 @@ object GithubService {
   def build[F[_]: ConcurrentEffect: Logger](clientEC: ExecutionContext): GithubService[F] =
     new GithubServiceImpl[F](clientEC)
 
-  class GithubServiceImpl[F[_]](clientEC: ExecutionContext)(
-      implicit E: ConcurrentEffect[F],
+  class GithubServiceImpl[F[_]](clientEC: ExecutionContext)(implicit
+      E: ConcurrentEffect[F],
       L: Logger[F]
   ) extends GithubService[F] {
 
@@ -91,9 +91,10 @@ object GithubService {
         comment: String
     ): Github4sResponse[F, Comment] =
       toResponse(for {
-        result <- Github[F](Some(accessToken))(E, clientEC).issues
-          .createComment(owner, repository, pullRequestNumber, comment)
-          .onError { case e => L.error(e)("Found error while accessing GitHub API.") }
+        result <-
+          Github[F](Some(accessToken))(E, clientEC).issues
+            .createComment(owner, repository, pullRequestNumber, comment)
+            .onError { case e => L.error(e)("Found error while accessing GitHub API.") }
         _ <- L.info("Comment sent to GitHub successfully.")
       } yield result)
 
@@ -105,9 +106,10 @@ object GithubService {
         comment: String
     ): Github4sResponse[F, Comment] =
       toResponse(for {
-        result <- Github(Some(accessToken))(E, clientEC).issues
-          .editComment(owner, repository, commentId, comment)
-          .onError { case e => L.error(e)("Found error while accessing GitHub API.") }
+        result <-
+          Github(Some(accessToken))(E, clientEC).issues
+            .editComment(owner, repository, commentId, comment)
+            .onError { case e => L.error(e)("Found error while accessing GitHub API.") }
         _ <- L.info("Comment edited successfully.")
       } yield result)
 
@@ -208,9 +210,10 @@ object GithubService {
           filteredFilesContent: List[(String, String)]
       ): Github4sResponse[F, TreeResult] = {
 
-        def treeData: List[TreeDataBlob] = filteredFilesContent.map {
-          case (path, content) => TreeDataBlob(path, "100644", "blob", content)
-        }
+        def treeData: List[TreeDataBlob] =
+          filteredFilesContent.map {
+            case (path, content) => TreeDataBlob(path, "100644", "blob", content)
+          }
 
         toResponse(gh.gitData.createTree(owner, repository, Some(baseTreeSha), treeData))
       }

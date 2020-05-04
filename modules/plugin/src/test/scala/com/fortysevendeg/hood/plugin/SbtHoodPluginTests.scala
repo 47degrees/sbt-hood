@@ -91,23 +91,24 @@ class SbtHoodPluginTests extends AnyFlatSpec with Matchers with TestUtils {
     val grouping = (for {
       previousBenchmarks <- loadBenchmarkJson(jsonService, previousFileJson)
       currentBenchmarks  <- loadBenchmarkJson(jsonService, currentFile)
-      comparisonResult <- TaskAlgebra
-        .benchmarkTask(
-          previousFileJson,
-          currentFile,
-          "Benchmark",
-          "Score",
-          "Score Error (99.9%)",
-          "Mode",
-          "Unit",
-          None,
-          Map.empty,
-          None,
-          None,
-          shouldOutputToFile = false,
-          new File("output.json"),
-          outputFileFormat = OutputFileFormatJson
-        )
+      comparisonResult <-
+        TaskAlgebra
+          .benchmarkTask(
+            previousFileJson,
+            currentFile,
+            "Benchmark",
+            "Score",
+            "Score Error (99.9%)",
+            "Mode",
+            "Unit",
+            None,
+            Map.empty,
+            None,
+            None,
+            shouldOutputToFile = false,
+            new File("output.json"),
+            outputFileFormat = OutputFileFormatJson
+          )
       result = TaskAlgebra.collectBenchmarks(
         previousFileJson.getName,
         currentFile.getName,

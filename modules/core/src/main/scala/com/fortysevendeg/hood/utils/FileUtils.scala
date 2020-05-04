@@ -41,14 +41,14 @@ object FileUtils {
     })
 
   def fileType(file: File): FileType =
-    if (Csv.extensions.contains(fileExtension(file))) {
+    if (Csv.extensions.contains(fileExtension(file)))
       Csv
-    } else if (Json.extensions.contains(fileExtension(file))) {
+    else if (Json.extensions.contains(fileExtension(file)))
       Json
-    } else Unknown
+    else Unknown
 
-  def writeFile[F[_]](file: File, contents: String)(
-      implicit S: Sync[F]
+  def writeFile[F[_]](file: File, contents: String)(implicit
+      S: Sync[F]
   ): F[Either[Throwable, Unit]] =
     S.attempt(
       S.bracket(S.delay(new PrintWriter(file)))(writer => S.delay(writer.write(contents)))(writer =>
