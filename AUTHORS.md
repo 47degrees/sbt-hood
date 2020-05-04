@@ -9,6 +9,7 @@
 The maintainers of the project are:
 
 - [![anamariamv](https://avatars0.githubusercontent.com/u/2183589?v=4&s=20) **Ana Mª Marquez (anamariamv)**](https://github.com/anamariamv)
+- [![BenFradet](https://avatars2.githubusercontent.com/u/1737211?v=4&s=20) **Ben Fradet (BenFradet)**](https://github.com/BenFradet)
 - [![fedefernandez](https://avatars0.githubusercontent.com/u/720923?v=4&s=20) **Fede Fernández (fedefernandez)**](https://github.com/fedefernandez)
 - [![franciscodr](https://avatars1.githubusercontent.com/u/1200151?v=4&s=20) **Francisco Diaz (franciscodr)**](https://github.com/franciscodr)
 - [![jdesiloniz](https://avatars2.githubusercontent.com/u/2835739?v=4&s=20) **Javier de Silóniz Sandino (jdesiloniz)**](https://github.com/jdesiloniz)
@@ -27,4 +28,5 @@ These are the people that have contributed to the _sbt-hood_ project:
 - [![fedefernandez](https://avatars0.githubusercontent.com/u/720923?v=4&s=20) **fedefernandez**](https://github.com/fedefernandez)
 - [![anamariamv](https://avatars0.githubusercontent.com/u/2183589?v=4&s=20) **anamariamv**](https://github.com/anamariamv)
 - [![AdrianRaFo](https://avatars0.githubusercontent.com/u/15971742?v=4&s=20) **AdrianRaFo**](https://github.com/AdrianRaFo)
+- [![BenFradet](https://avatars2.githubusercontent.com/u/1737211?v=4&s=20) **BenFradet**](https://github.com/BenFradet)
 - [![calvellido](https://avatars0.githubusercontent.com/u/7753447?v=4&s=20) **calvellido**](https://github.com/calvellido)
