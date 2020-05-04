@@ -87,13 +87,13 @@ object ProjectPlugin extends AutoPlugin {
         "com.47deg"         %% "github4s"           % V.github4s,
         "org.typelevel"     %% "cats-effect"        % V.cats,
         "io.chrisdavenport" %% "log4cats-slf4j"     % V.log4cats,
-        "ch.qos.logback"    % "logback-classic"     % V.logbackClassic,
+        "ch.qos.logback"     % "logback-classic"    % V.logbackClassic,
         "com.nrinaudo"      %% "kantan.csv"         % V.kantan,
         "com.nrinaudo"      %% "kantan.csv-generic" % V.kantan,
         "dev.profunktor"    %% "console4cats"       % V.console4cats,
         "com.lightbend"     %% "emoji"              % V.lightbendEmoji,
         "org.scalatest"     %% "scalatest"          % V.scalatest % Test,
-        "org.slf4j"         % "slf4j-nop"           % V.slf4j % Test
+        "org.slf4j"          % "slf4j-nop"          % V.slf4j     % Test
       )
     )
 }

@@ -62,37 +62,10 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
   implicit lazy val CE: ConcurrentEffect[IO] = IO.ioConcurrentEffect
   implicit lazy val gh: GithubService[IO]    = GithubService.build[IO](ExecutionContext.global)
 
-  def compareBenchmarksTask: Def.Initialize[Task[Unit]] = Def.task {
+  def compareBenchmarksTask: Def.Initialize[Task[Unit]] =
+    Def.task {
 
-    TaskAlgebra
-      .benchmarkTask(
-        previousBenchmarkPath.value,
-        currentBenchmarkPath.value,
-        keyColumnName.value,
-        compareColumnName.value,
-        thresholdColumnName.value,
-        modeColumnName.value,
-        unitsColumnName.value,
-        generalThreshold.value,
-        benchmarkThreshold.value,
-        include.value,
-        exclude.value,
-        outputToFile.value,
-        outputPath.value,
-        parseOutputFormat(outputFormat.value)
-      )
-      .leftFlatMap(e =>
-        EitherT.left[List[BenchmarkComparisonResult]](logger.error(s"There was an error: $e"))
-      )
-      .void
-      .value
-      .unsafeRunSync()
-      .merge
-  }
-
-  def compareBenchmarksCITask: Def.Initialize[Task[Unit]] = Def.task {
-    (for {
-      basicBenchmark <- TaskAlgebra
+      TaskAlgebra
         .benchmarkTask(
           previousBenchmarkPath.value,
           currentBenchmarkPath.value,
@@ -109,73 +82,106 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
           outputPath.value,
           parseOutputFormat(outputFormat.value)
         )
-        .leftMap(NonEmptyChain.one)
-      params <- EitherT.fromEither[IO](
-        GitHubParameters.fromParams(
-          token.value,
-          repositoryOwner.value,
-          repositoryName.value,
-          pullRequestNumber.value,
-          targetUrl.value,
-          branch.value,
-          commitMessage.value
+        .leftFlatMap(e =>
+          EitherT.left[List[BenchmarkComparisonResult]](logger.error(s"There was an error: $e"))
         )
-      )
-      _ <- TaskAlgebra
-        .submitResultsToGitHub(
-          basicBenchmark,
-          previousBenchmarkPath.value,
-          currentBenchmarkPath.value,
-          params,
-          shouldBlockMerge.value
-        )
-        .leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
-    } yield basicBenchmark)
-      .leftFlatMap(e =>
-        EitherT.left[List[BenchmarkComparisonResult]](
-          logger.error(s"Error(s) found: \n${e.toList.mkString("\n")}")
-        )
-      )
-      .void
-      .value
-      .unsafeRunSync()
-      .merge
-  }
+        .void
+        .value
+        .unsafeRunSync()
+        .merge
+    }
 
-  def uploadBenchmarksTask: Def.Initialize[Task[Unit]] = Def.task {
-    (if (benchmarkFiles.value.isEmpty) {
-       logger.error(s"`benchmarkFiles` is empty. Stopping task.")
-     } else {
-       (for {
-         files <- benchmarkFiles.value.traverse(file =>
-           EitherT(FileUtils.readFile[IO](file))
-             .map(content => (s"${uploadDirectory.value}/${file.getName}", content))
-             .leftMap(e => NonEmptyChain.one[HoodError](InputFileError(e.getMessage)))
-         )
-         params <- EitherT.fromEither[IO](
-           GitHubParameters.fromParams(
-             token.value,
-             repositoryOwner.value,
-             repositoryName.value,
-             pullRequestNumber.value,
-             targetUrl.value,
-             branch.value,
-             commitMessage.value
-           )
-         )
-         _ <- TaskAlgebra
-           .uploadFilesToGitHub[IO](files, params)
-           .leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
-       } yield ())
-         .leftFlatMap(e =>
-           EitherT.left[Unit](
-             logger.error(s"Error(s) found: \n${e.toList.mkString("\n")}")
-           )
-         )
-         .value
-     }).void.unsafeRunSync()
+  def compareBenchmarksCITask: Def.Initialize[Task[Unit]] =
+    Def.task {
+      (for {
+        basicBenchmark <-
+          TaskAlgebra
+            .benchmarkTask(
+              previousBenchmarkPath.value,
+              currentBenchmarkPath.value,
+              keyColumnName.value,
+              compareColumnName.value,
+              thresholdColumnName.value,
+              modeColumnName.value,
+              unitsColumnName.value,
+              generalThreshold.value,
+              benchmarkThreshold.value,
+              include.value,
+              exclude.value,
+              outputToFile.value,
+              outputPath.value,
+              parseOutputFormat(outputFormat.value)
+            )
+            .leftMap(NonEmptyChain.one)
+        params <- EitherT.fromEither[IO](
+          GitHubParameters.fromParams(
+            token.value,
+            repositoryOwner.value,
+            repositoryName.value,
+            pullRequestNumber.value,
+            targetUrl.value,
+            branch.value,
+            commitMessage.value
+          )
+        )
+        _ <-
+          TaskAlgebra
+            .submitResultsToGitHub(
+              basicBenchmark,
+              previousBenchmarkPath.value,
+              currentBenchmarkPath.value,
+              params,
+              shouldBlockMerge.value
+            )
+            .leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
+      } yield basicBenchmark)
+        .leftFlatMap(e =>
+          EitherT.left[List[BenchmarkComparisonResult]](
+            logger.error(s"Error(s) found: \n${e.toList.mkString("\n")}")
+          )
+        )
+        .void
+        .value
+        .unsafeRunSync()
+        .merge
+    }
 
-  }
+  def uploadBenchmarksTask: Def.Initialize[Task[Unit]] =
+    Def.task {
+      (if (benchmarkFiles.value.isEmpty)
+         logger.error(s"`benchmarkFiles` is empty. Stopping task.")
+       else {
+         (for {
+           files <- benchmarkFiles.value.traverse(file =>
+             EitherT(FileUtils.readFile[IO](file))
+               .map(content => (s"${uploadDirectory.value}/${file.getName}", content))
+               .leftMap(e => NonEmptyChain.one[HoodError](InputFileError(e.getMessage)))
+           )
+           params <- EitherT.fromEither[IO](
+             GitHubParameters.fromParams(
+               token.value,
+               repositoryOwner.value,
+               repositoryName.value,
+               pullRequestNumber.value,
+               targetUrl.value,
+               branch.value,
+               commitMessage.value
+             )
+           )
+           _ <-
+             TaskAlgebra
+               .uploadFilesToGitHub[IO](files, params)
+               .leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
+         } yield ())
+           .leftFlatMap(e =>
+             EitherT.left[Unit](
+               logger.error(s"Error(s) found: \n${e.toList.mkString("\n")}")
+             )
+           )
+           .value
+       }).void.unsafeRunSync()
+
+    }
 }
 
 object TaskAlgebra {
@@ -194,8 +200,8 @@ object TaskAlgebra {
       shouldOutputToFile: Boolean,
       outputFilePath: File,
       outputFileFormat: OutputFileFormat
-  )(
-      implicit L: Logger[F],
+  )(implicit
+      L: Logger[F],
       S: Sync[F],
       C: Console[F]
   ): EitherT[F, HoodError, List[BenchmarkComparisonResult]] = {
@@ -259,21 +265,21 @@ object TaskAlgebra {
         s"## sbt-hood benchmark result:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
       )
       comparison = gitHubStateFromBenchmarks(benchmarkResult)
-      _ <- if (shouldCreateStatus) {
-        G.createStatus(
-            params.accessToken,
-            params.repositoryOwner,
-            params.repositoryName,
-            params.pullRequestNumber,
-            comparison.state,
-            params.targetUrl,
-            comparison.description,
-            GithubModel.githubStatusContext
-          )
-          .as(())
-      } else {
-        EitherT.pure[F, Github4sError](())
-      }
+      _ <-
+        if (shouldCreateStatus) {
+          G.createStatus(
+              params.accessToken,
+              params.repositoryOwner,
+              params.repositoryName,
+              params.pullRequestNumber,
+              comparison.state,
+              params.targetUrl,
+              comparison.description,
+              GithubModel.githubStatusContext
+            )
+            .as(())
+        } else
+          EitherT.pure[F, Github4sError](())
     } yield ()
 
   def uploadFilesToGitHub[F[_]](
@@ -415,11 +421,10 @@ object TaskAlgebra {
   def gitHubStateFromBenchmarks(
       benchmarks: List[BenchmarkComparisonResult]
   ): GithubStatusDescription =
-    if (benchmarks.exists(_.result == Error)) {
+    if (benchmarks.exists(_.result == Error))
       GithubStatusDescription(GithubStatusError, "Failed benchmark comparison")
-    } else {
+    else
       GithubStatusDescription(GithubStatusSuccess, "Successful benchmark comparison")
-    }
 
   def parseBenchmark[F[_]](
       columns: BenchmarkColumns,

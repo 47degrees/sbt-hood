@@ -59,8 +59,9 @@ object CsvService {
         .attempt
         .use(fileData =>
           S.pure(for {
-            data <- fileData
-              .leftMap[HoodError](e => BenchmarkLoadingError(e.getMessage))
+            data <-
+              fileData
+                .leftMap[HoodError](e => BenchmarkLoadingError(e.getMessage))
             result <- parseCsvLinesHeaders(data.mkString, columns)
           } yield result)
         )

@@ -1,6 +1,6 @@
 addCommandAlias(
   "ci-test",
-  "+scalafmtCheck; +scalafmtSbtCheck; +docs/mdoc; +coverage; +test; +coverageReport; +coverageAggregate"
+  "+scalafmtCheckAll; +scalafmtSbtCheck; +docs/mdoc; +coverage; +test; +coverageReport; +coverageAggregate"
 )
 addCommandAlias("ci-docs", "project-docs/mdoc; headerCreateAll")
 addCommandAlias("ci-microsite", "docs/publishMicrosite")

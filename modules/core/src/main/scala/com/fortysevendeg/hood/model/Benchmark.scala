@@ -31,12 +31,13 @@ object Benchmark {
 
   implicit val benchmarkDecoder: Decoder[Benchmark] = deriveDecoder[Benchmark]
   implicit val benchmarkEncoder: Encoder[Benchmark] = new Encoder[Benchmark] {
-    final def apply(a: Benchmark): Json = Json.obj(
-      ("benchmark", Json.fromString(a.benchmark)),
-      ("mode", Json.fromString(a.mode)),
-      ("primaryMetric", primaryMetricToJson(a.primaryMetric)),
-      ("secondaryMetrics", Json.fromFields(List.empty))
-    )
+    final def apply(a: Benchmark): Json =
+      Json.obj(
+        ("benchmark", Json.fromString(a.benchmark)),
+        ("mode", Json.fromString(a.mode)),
+        ("primaryMetric", primaryMetricToJson(a.primaryMetric)),
+        ("secondaryMetrics", Json.fromFields(List.empty))
+      )
   }
   implicit val benchmarkOrdering: Ordering[Benchmark] = new Ordering[Benchmark] {
     override def compare(x: Benchmark, y: Benchmark): Int =
