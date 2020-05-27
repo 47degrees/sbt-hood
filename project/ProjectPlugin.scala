@@ -25,7 +25,7 @@ object ProjectPlugin extends AutoPlugin {
       val cats: String           = "2.1.3"
       val log4cats: String       = "1.1.1"
       val logbackClassic: String = "1.2.3"
-      val kantan: String         = "0.6.0"
+      val kantan: String         = "0.6.1"
       val console4cats: String   = "0.8.1"
       val lightbendEmoji: String = "1.2.1"
     }
