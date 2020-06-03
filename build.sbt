@@ -1,10 +1,7 @@
 ThisBuild / scalaVersion := "2.12.8"
 ThisBuild / organization := "com.47deg"
 
-addCommandAlias(
-  "ci-test",
-  "scalafmtCheckAll; scalafmtSbtCheck; mdoc; coverage; test; coverageReport; coverageAggregate"
-)
+addCommandAlias("ci-test", "scalafmtCheckAll; scalafmtSbtCheck; mdoc; testCovered")
 addCommandAlias("ci-docs", "mdoc; headerCreateAll")
 addCommandAlias("ci-microsite", "publishMicrosite")
 
