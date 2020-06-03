@@ -35,8 +35,6 @@ object ProjectPlugin extends AutoPlugin {
       micrositeName := "SBT-Hood",
       micrositeBaseUrl := "/sbt-hood",
       micrositeDescription := "A SBT plugin for comparing benchmarks in your PRs",
-      micrositeGithubOwner := "47degrees",
-      micrositeGithubRepo := "sbt-hood",
       micrositeDocumentationUrl := "docs",
       micrositeGitterChannelUrl := "47deg/sbthood",
       micrositeOrganizationHomepage := "http://www.47deg.com",
@@ -60,10 +58,8 @@ object ProjectPlugin extends AutoPlugin {
     Seq(
       organization := "com.47deg",
       scalaVersion := V.scala,
-      crossScalaVersions := Seq(V.scala),
       Test / fork := true,
       compileOrder in Compile := CompileOrder.JavaThenScala,
-      coverageFailOnMinimum := false,
       resolvers ++= Seq(
         Resolver.sonatypeRepo("releases"),
         Resolver.sonatypeRepo("snapshots"),

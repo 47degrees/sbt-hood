@@ -7,14 +7,11 @@ addCommandAlias("ci-microsite", "docs/publishMicrosite")
 
 lazy val `sbt-hood-core` = project
   .in(file("modules/core"))
-  .settings(moduleName := "sbt-hood-core")
 
 lazy val `sbt-hood-plugin` = project
   .in(file("modules/plugin"))
   .dependsOn(`sbt-hood-core`)
-  .settings(moduleName := "sbt-hood-plugin")
   .enablePlugins(BuildInfoPlugin)
-  .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
   .settings(buildInfoPackage := "com.fortysevendeg.hood")
   .enablePlugins(SbtPlugin)
 
