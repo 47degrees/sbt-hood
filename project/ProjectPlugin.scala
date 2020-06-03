@@ -1,18 +1,13 @@
 import com.typesafe.sbt.site.jekyll.JekyllPlugin.autoImport._
 import microsites.MicrositeKeys._
 import sbt.Keys._
-import sbt.ScriptedPlugin.autoImport._
 import sbt._
-import scoverage.ScoverageKeys._
-import com.alejandrohdezma.sbt.github.SbtGithubPlugin
 
 import scala.language.reflectiveCalls
 
 object ProjectPlugin extends AutoPlugin {
 
   override def trigger: PluginTrigger = allRequirements
-
-  override def requires: Plugins = SbtGithubPlugin
 
   object autoImport {
 
@@ -45,8 +40,7 @@ object ProjectPlugin extends AutoPlugin {
         "brand-primary"   -> "#25bc77",
         "brand-secondary" -> "#25bc77",
         "white-color"     -> "#FFF"
-      ),
-      scalacOptions ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
+      )
     )
 
   }
@@ -55,13 +49,7 @@ object ProjectPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] =
     Seq(
-      Test / fork := true,
-      compileOrder in Compile := CompileOrder.JavaThenScala,
-      resolvers ++= Seq(
-        Resolver.sonatypeRepo("releases"),
-        Resolver.sonatypeRepo("snapshots"),
-        Resolver.typesafeIvyRepo("releases")
-      ),
+      resolvers += Resolver.typesafeIvyRepo("releases"),
       libraryDependencies ++= Seq(
         "io.circe"          %% "circe-generic"       % V.circe,
         "io.circe"          %% "circe-core"          % V.circe,
