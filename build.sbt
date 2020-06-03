@@ -5,6 +5,8 @@ addCommandAlias(
 addCommandAlias("ci-docs", "project-docs/mdoc; headerCreateAll")
 addCommandAlias("ci-microsite", "docs/publishMicrosite")
 
+skip in publish := true
+
 lazy val `sbt-hood-core` = project
   .in(file("modules/core"))
 
@@ -19,13 +21,6 @@ lazy val allModules: Seq[ProjectReference] = Seq(`sbt-hood-core`, `sbt-hood-plug
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =
   allModules.map(ClasspathDependency(_, None))
-
-lazy val root = project
-  .in(file("."))
-  .settings(name := "sbt-hood")
-  .settings(skip in publish := true)
-  .aggregate(allModules: _*)
-  .dependsOn(allModulesDeps: _*)
 
 lazy val docs = project
   .dependsOn(allModulesDeps: _*)
