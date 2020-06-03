@@ -3,10 +3,10 @@ ThisBuild / organization := "com.47deg"
 
 addCommandAlias(
   "ci-test",
-  "scalafmtCheckAll; scalafmtSbtCheck; docs/mdoc; coverage; test; coverageReport; coverageAggregate"
+  "scalafmtCheckAll; scalafmtSbtCheck; mdoc; coverage; test; coverageReport; coverageAggregate"
 )
-addCommandAlias("ci-docs", "project-docs/mdoc; headerCreateAll")
-addCommandAlias("ci-microsite", "docs/publishMicrosite")
+addCommandAlias("ci-docs", "mdoc; headerCreateAll")
+addCommandAlias("ci-microsite", "publishMicrosite")
 
 skip in publish := true
 
