@@ -14,8 +14,6 @@ lazy val `sbt-hood-plugin` = project
   .in(file("modules/plugin"))
   .enablePlugins(SbtPlugin)
   .dependsOn(`sbt-hood-core`)
-  .enablePlugins(BuildInfoPlugin)
-  .settings(buildInfoPackage := "com.fortysevendeg.hood")
 
 lazy val microsite = project
   .enablePlugins(MicrositesPlugin)
