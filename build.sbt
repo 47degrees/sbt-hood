@@ -3,7 +3,7 @@ ThisBuild / organization := "com.47deg"
 
 addCommandAlias(
   "ci-test",
-  "+scalafmtCheckAll; +scalafmtSbtCheck; +docs/mdoc; +coverage; +test; +coverageReport; +coverageAggregate"
+  "scalafmtCheckAll; scalafmtSbtCheck; docs/mdoc; coverage; test; coverageReport; coverageAggregate"
 )
 addCommandAlias("ci-docs", "project-docs/mdoc; headerCreateAll")
 addCommandAlias("ci-microsite", "docs/publishMicrosite")
@@ -15,10 +15,10 @@ lazy val `sbt-hood-core` = project
 
 lazy val `sbt-hood-plugin` = project
   .in(file("modules/plugin"))
+  .enablePlugins(SbtPlugin)
   .dependsOn(`sbt-hood-core`)
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoPackage := "com.fortysevendeg.hood")
-  .enablePlugins(SbtPlugin)
 
 lazy val microsite = project
   .enablePlugins(MicrositesPlugin)
