@@ -17,15 +17,12 @@ lazy val `sbt-hood-plugin` = project
   .settings(buildInfoPackage := "com.fortysevendeg.hood")
   .enablePlugins(SbtPlugin)
 
-lazy val docs = project
-  .settings(name := "sbt-hood-docs")
+lazy val microsite = project
+  .enablePlugins(MicrositesPlugin)
   .settings(micrositeSettings: _*)
   .settings(skip in publish := true)
-  .enablePlugins(MicrositesPlugin)
 
-lazy val `project-docs` = (project in file(".docs"))
-  .settings(moduleName := "sbt-hood-project-docs")
-  .settings(mdocIn := file(".docs"))
+lazy val documentation = project
+  .enablePlugins(MdocPlugin)
   .settings(mdocOut := file("."))
   .settings(skip in publish := true)
-  .enablePlugins(MdocPlugin)
