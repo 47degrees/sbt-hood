@@ -13,16 +13,9 @@ lazy val `sbt-hood-plugin` = project
   .in(file("modules/plugin"))
   .dependsOn(`sbt-hood-core`)
   .settings(moduleName := "sbt-hood-plugin")
-  .settings(sbtPluginSettings: _*)
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
   .settings(buildInfoPackage := "com.fortysevendeg.hood")
-  // See https://github.com/sbt/sbt/issues/3248
-  .settings(
-    publishLocal := publishLocal
-      .dependsOn(`sbt-hood-core` / publishLocal)
-      .value
-  )
   .settings(sbtPlugin := true)
   .enablePlugins(SbtPlugin)
 

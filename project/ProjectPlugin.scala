@@ -31,18 +31,6 @@ object ProjectPlugin extends AutoPlugin {
       val lightbendEmoji: String = "1.2.1"
     }
 
-    lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
-      scriptedLaunchOpts := {
-        scriptedLaunchOpts.value ++
-          Seq(
-            "-Xmx2048M",
-            "-XX:ReservedCodeCacheSize=256m",
-            "-XX:+UseConcMarkSweepGC",
-            "-Dversion=" + version.value
-          )
-      }
-    )
-
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
       micrositeName := "SBT-Hood",
       micrositeBaseUrl := "/sbt-hood",
