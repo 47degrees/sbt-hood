@@ -16,7 +16,6 @@ lazy val `sbt-hood-plugin` = project
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
   .settings(buildInfoPackage := "com.fortysevendeg.hood")
-  .settings(sbtPlugin := true)
   .enablePlugins(SbtPlugin)
 
 lazy val allModules: Seq[ProjectReference] = Seq(`sbt-hood-core`, `sbt-hood-plugin`)
