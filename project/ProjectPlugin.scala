@@ -17,7 +17,6 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val scala: String          = "2.12.8"
       val scalatest: String      = "3.1.2"
       val slf4j: String          = "1.7.30"
       val circe: String          = "0.13.0"
@@ -56,8 +55,6 @@ object ProjectPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] =
     Seq(
-      organization := "com.47deg",
-      scalaVersion := V.scala,
       Test / fork := true,
       compileOrder in Compile := CompileOrder.JavaThenScala,
       resolvers ++= Seq(

@@ -1,3 +1,6 @@
+ThisBuild / scalaVersion := "2.12.8"
+ThisBuild / organization := "com.47deg"
+
 addCommandAlias(
   "ci-test",
   "+scalafmtCheckAll; +scalafmtSbtCheck; +docs/mdoc; +coverage; +test; +coverageReport; +coverageAggregate"
