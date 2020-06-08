@@ -21,7 +21,8 @@ object ProjectPlugin extends AutoPlugin {
       val scalatest: String      = "3.1.2"
       val slf4j: String          = "1.7.30"
       val circe: String          = "0.13.0"
-      val github4s: String       = "0.23.0"
+      val http4s: String         = "0.21.4"
+      val github4s: String       = "0.24.1"
       val cats: String           = "2.1.3"
       val log4cats: String       = "1.1.1"
       val logbackClassic: String = "1.2.3"
@@ -81,19 +82,20 @@ object ProjectPlugin extends AutoPlugin {
         Resolver.typesafeIvyRepo("releases")
       ),
       libraryDependencies ++= Seq(
-        "io.circe"          %% "circe-generic"      % V.circe,
-        "io.circe"          %% "circe-core"         % V.circe,
-        "io.circe"          %% "circe-parser"       % V.circe,
-        "com.47deg"         %% "github4s"           % V.github4s,
-        "org.typelevel"     %% "cats-effect"        % V.cats,
-        "io.chrisdavenport" %% "log4cats-slf4j"     % V.log4cats,
-        "ch.qos.logback"     % "logback-classic"    % V.logbackClassic,
-        "com.nrinaudo"      %% "kantan.csv"         % V.kantan,
-        "com.nrinaudo"      %% "kantan.csv-generic" % V.kantan,
-        "dev.profunktor"    %% "console4cats"       % V.console4cats,
-        "com.lightbend"     %% "emoji"              % V.lightbendEmoji,
-        "org.scalatest"     %% "scalatest"          % V.scalatest % Test,
-        "org.slf4j"          % "slf4j-nop"          % V.slf4j     % Test
+        "io.circe"          %% "circe-generic"       % V.circe,
+        "io.circe"          %% "circe-core"          % V.circe,
+        "io.circe"          %% "circe-parser"        % V.circe,
+        "org.http4s"        %% "http4s-blaze-client" % V.http4s,
+        "com.47deg"         %% "github4s"            % V.github4s,
+        "org.typelevel"     %% "cats-effect"         % V.cats,
+        "io.chrisdavenport" %% "log4cats-slf4j"      % V.log4cats,
+        "ch.qos.logback"     % "logback-classic"     % V.logbackClassic,
+        "com.nrinaudo"      %% "kantan.csv"          % V.kantan,
+        "com.nrinaudo"      %% "kantan.csv-generic"  % V.kantan,
+        "dev.profunktor"    %% "console4cats"        % V.console4cats,
+        "com.lightbend"     %% "emoji"               % V.lightbendEmoji,
+        "org.scalatest"     %% "scalatest"           % V.scalatest % Test,
+        "org.slf4j"          % "slf4j-nop"           % V.slf4j     % Test
       )
     )
 }

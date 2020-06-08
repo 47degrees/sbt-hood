@@ -93,7 +93,7 @@ class SbtHoodPluginTests extends AnyFlatSpec with Matchers with TestUtils {
       currentBenchmarks  <- loadBenchmarkJson(jsonService, currentFile)
       comparisonResult <-
         TaskAlgebra
-          .benchmarkTask(
+          .benchmarkTask[IO](
             previousFileJson,
             currentFile,
             "Benchmark",
@@ -177,7 +177,7 @@ class SbtHoodPluginTests extends AnyFlatSpec with Matchers with TestUtils {
       expected: List[BenchmarkComparisonResult]
   ) = {
     val result = TaskAlgebra
-      .benchmarkTask(
+      .benchmarkTask[IO](
         previousFile,
         currentFile,
         "Benchmark",

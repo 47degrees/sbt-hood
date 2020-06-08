@@ -33,7 +33,6 @@ import com.fortysevendeg.hood.benchmark.Error
 import com.fortysevendeg.hood.json.JsonService
 import com.fortysevendeg.hood.utils._
 import Benchmark._
-import com.fortysevendeg.hood.github.instances.Github4sResponse
 import com.fortysevendeg.hood.github.instances.Github4sError
 import com.lightbend.emoji.ShortCodes.Implicits._
 import com.lightbend.emoji.ShortCodes.Defaults._
@@ -57,10 +56,9 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
 
   override val trigger: PluginTrigger = noTrigger
 
-  implicit lazy val logger                   = Slf4jLogger.getLogger[IO]
+  implicit lazy val logger: Logger[IO]       = Slf4jLogger.getLogger[IO]
   implicit lazy val CS: ContextShift[IO]     = IO.contextShift(ExecutionContext.global)
   implicit lazy val CE: ConcurrentEffect[IO] = IO.ioConcurrentEffect
-  implicit lazy val gh: GithubService[IO]    = GithubService.build[IO](ExecutionContext.global)
 
   def compareBenchmarksTask: Def.Initialize[Task[Unit]] =
     Def.task {
@@ -124,7 +122,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
             commitMessage.value
           )
         )
-        _ <-
+        _ <- EitherT(
           TaskAlgebra
             .submitResultsToGitHub(
               basicBenchmark,
@@ -133,17 +131,16 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
               params,
               shouldBlockMerge.value
             )
-            .leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
+        ).leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
       } yield basicBenchmark)
         .leftFlatMap(e =>
           EitherT.left[List[BenchmarkComparisonResult]](
             logger.error(s"Error(s) found: \n${e.toList.mkString("\n")}")
           )
         )
-        .void
         .value
+        .void
         .unsafeRunSync()
-        .merge
     }
 
   def uploadBenchmarksTask: Def.Initialize[Task[Unit]] =
@@ -168,10 +165,10 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
                commitMessage.value
              )
            )
-           _ <-
+           _ <- EitherT(
              TaskAlgebra
                .uploadFilesToGitHub[IO](files, params)
-               .leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
+           ).leftMap(e => NonEmptyChain[HoodError](GitHubConnectionError(e.getMessage)))
          } yield ())
            .leftFlatMap(e =>
              EitherT.left[Unit](
@@ -185,7 +182,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
 }
 
 object TaskAlgebra {
-  def benchmarkTask[F[_]](
+  def benchmarkTask[F[_]: Sync: Logger](
       previousPath: File,
       currentPath: File,
       keyColumnName: String,
@@ -200,11 +197,7 @@ object TaskAlgebra {
       shouldOutputToFile: Boolean,
       outputFilePath: File,
       outputFileFormat: OutputFileFormat
-  )(implicit
-      L: Logger[F],
-      S: Sync[F],
-      C: Console[F]
-  ): EitherT[F, HoodError, List[BenchmarkComparisonResult]] = {
+  )(implicit C: Console[F]): EitherT[F, HoodError, List[BenchmarkComparisonResult]] = {
 
     val columns = BenchmarkColumns(
       keyColumnName,
@@ -249,52 +242,58 @@ object TaskAlgebra {
 
   }
 
-  def submitResultsToGitHub[F[_]](
+  def submitResultsToGitHub[F[_]: ConcurrentEffect: Logger](
       benchmarkResult: List[BenchmarkComparisonResult],
       previousPath: File,
       currentPath: File,
       params: GitHubParameters,
       shouldCreateStatus: Boolean
-  )(implicit S: Sync[F], G: GithubService[F]): Github4sResponse[F, Unit] =
-    for {
-      _ <- G.publishComment(
-        params.accessToken,
-        params.repositoryOwner,
-        params.repositoryName,
-        params.pullRequestNumber,
-        s"## sbt-hood benchmark result:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
-      )
-      comparison = gitHubStateFromBenchmarks(benchmarkResult)
-      _ <-
-        if (shouldCreateStatus) {
-          G.createStatus(
-              params.accessToken,
-              params.repositoryOwner,
-              params.repositoryName,
-              params.pullRequestNumber,
-              comparison.state,
-              params.targetUrl,
-              comparison.description,
-              GithubModel.githubStatusContext
-            )
-            .as(())
-        } else
-          EitherT.pure[F, Github4sError](())
-    } yield ()
+  ): F[Either[Github4sError, Unit]] =
+    GithubService.build[F](ExecutionContext.global).use { service =>
+      (for {
+        _ <- service.publishComment(
+          params.accessToken,
+          params.repositoryOwner,
+          params.repositoryName,
+          params.pullRequestNumber,
+          s"## sbt-hood benchmark result:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
+        )
+        comparison = gitHubStateFromBenchmarks(benchmarkResult)
+        _ <-
+          if (shouldCreateStatus) {
+            service
+              .createStatus(
+                params.accessToken,
+                params.repositoryOwner,
+                params.repositoryName,
+                params.pullRequestNumber,
+                comparison.state,
+                params.targetUrl,
+                comparison.description,
+                GithubModel.githubStatusContext
+              )
+              .as(())
+          } else
+            EitherT.pure[F, Github4sError](())
+      } yield ()).value
+    }
 
-  def uploadFilesToGitHub[F[_]](
+  def uploadFilesToGitHub[F[_]: ConcurrentEffect: Logger](
       files: List[(String, String)],
       params: GitHubParameters
-  )(implicit S: Sync[F], G: GithubService[F]): Github4sResponse[F, Unit] =
-    G.commitFilesAndContents(
-        params.accessToken,
-        params.repositoryOwner,
-        params.repositoryName,
-        params.branch,
-        params.commitMessage,
-        files
+  ): F[Either[Github4sError, Unit]] =
+    GithubService
+      .build[F](ExecutionContext.global)
+      .use(
+        _.commitFilesAndContents(
+          params.accessToken,
+          params.repositoryOwner,
+          params.repositoryName,
+          params.branch,
+          params.commitMessage,
+          files
+        ).void.value
       )
-      .void
 
   def buildBenchmarkMap(benchmarks: List[Benchmark]): Map[String, Benchmark] =
     benchmarks.map(b => (b.benchmark, b)).toMap

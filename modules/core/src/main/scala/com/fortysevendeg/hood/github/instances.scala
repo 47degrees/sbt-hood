@@ -19,7 +19,7 @@ package com.fortysevendeg.hood.github
 import cats.Monad
 import cats.data.EitherT
 import cats.implicits._
-import github4s.GithubResponses._
+import github4s.{GHError, GHResponse}
 
 object instances {
   type Github4sResponse[F[_], A] = EitherT[F, Github4sError, A]
@@ -27,11 +27,11 @@ object instances {
   sealed trait Github4sError extends Product with Serializable {
     def getMessage: String
   }
-  final case class Github4sLibError(inner: GHException) extends Github4sError {
+  final case class Github4sLibError(inner: GHError) extends Github4sError {
     override def getMessage: String = inner.getMessage
   }
   final case class Github4sUnexpectedError(getMessage: String) extends Github4sError
 
-  def toResponse[F[_]: Monad, A](resp: F[GHResponse[A]]): EitherT[F, Github4sError, A] =
+  def toResponse[F[_]: Monad, A](resp: F[GHResponse[A]]): Github4sResponse[F, A] =
     EitherT(resp.map(_.result)).leftMap(Github4sLibError.apply)
 }
