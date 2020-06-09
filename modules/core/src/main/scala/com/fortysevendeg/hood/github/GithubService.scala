@@ -17,13 +17,15 @@
 package com.fortysevendeg.hood.github
 
 import cats.data.{EitherT, NonEmptyList}
-import cats.effect.ConcurrentEffect
+import cats.effect.{ConcurrentEffect, Resource, Sync}
 import cats.implicits._
 import com.fortysevendeg.hood.github.instances._
 import com.github.marklister.base64.Base64._
 import github4s.Github
 import github4s.domain._
 import io.chrisdavenport.log4cats.Logger
+import org.http4s.client.Client
+import org.http4s.client.blaze.BlazeClientBuilder
 
 import scala.concurrent.ExecutionContext
 
@@ -75,13 +77,13 @@ trait GithubService[F[_]] {
 
 object GithubService {
 
-  def build[F[_]: ConcurrentEffect: Logger](clientEC: ExecutionContext): GithubService[F] =
-    new GithubServiceImpl[F](clientEC)
+  def build[F[_]: ConcurrentEffect: Logger](
+      clientEC: ExecutionContext
+  ): Resource[F, GithubService[F]] =
+    BlazeClientBuilder[F](clientEC).resource.map(new GithubServiceImpl[F](_))
 
-  class GithubServiceImpl[F[_]](clientEC: ExecutionContext)(implicit
-      E: ConcurrentEffect[F],
-      L: Logger[F]
-  ) extends GithubService[F] {
+  class GithubServiceImpl[F[_]: Sync](clientEC: Client[F])(implicit L: Logger[F])
+      extends GithubService[F] {
 
     def publishComment(
         accessToken: String,
@@ -92,7 +94,7 @@ object GithubService {
     ): Github4sResponse[F, Comment] =
       toResponse(for {
         result <-
-          Github[F](Some(accessToken))(E, clientEC).issues
+          Github[F](clientEC, Some(accessToken)).issues
             .createComment(owner, repository, pullRequestNumber, comment)
             .onError { case e => L.error(e)("Found error while accessing GitHub API.") }
         _ <- L.info("Comment sent to GitHub successfully.")
@@ -107,7 +109,7 @@ object GithubService {
     ): Github4sResponse[F, Comment] =
       toResponse(for {
         result <-
-          Github(Some(accessToken))(E, clientEC).issues
+          Github[F](clientEC, Some(accessToken)).issues
             .editComment(owner, repository, commentId, comment)
             .onError { case e => L.error(e)("Found error while accessing GitHub API.") }
         _ <- L.info("Comment edited successfully.")
@@ -120,7 +122,7 @@ object GithubService {
         pullRequestNumber: Int
     ): Github4sResponse[F, List[Comment]] =
       toResponse(
-        Github(Some(accessToken))(E, clientEC).issues
+        Github[F](clientEC, Some(accessToken)).issues
           .listComments(owner, repository, pullRequestNumber)
           .onError { case e => L.error(e)("Found error while accessing GitHub API.") }
       )
@@ -135,7 +137,7 @@ object GithubService {
         description: String,
         context: String
     ): Github4sResponse[F, Status] = {
-      val gh = Github(Some(accessToken))(E, clientEC)
+      val gh = Github[F](clientEC, Some(accessToken))
 
       (for {
         pr <- toResponse(gh.pullRequests.getPullRequest(owner, repository, pullRequestNumber))
@@ -172,7 +174,7 @@ object GithubService {
         message: String,
         filesAndContents: List[(String, String)]
     ): Github4sResponse[F, Option[Ref]] = {
-      val gh = Github(Some(accessToken))(E, clientEC)
+      val gh = Github[F](clientEC, Some(accessToken))
 
       def fetchBaseTreeSha(commitSha: String): Github4sResponse[F, RefCommit] =
         toResponse(gh.gitData.getCommit(owner, repository, commitSha))
