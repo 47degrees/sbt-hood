@@ -1,5 +1,25 @@
 # Changelog
 
+## [v0.3.0](https://github.com/47degrees/sbt-hood/tree/v0.3.0) (2020-06-09)
+
+[Full Changelog](https://github.com/47degrees/sbt-hood/compare/v0.2.7...v0.3.0)
+
+📈 **Dependency updates**
+
+- Update kantan.csv, kantan.csv-generic to 0.6.1 [\#142](https://github.com/47degrees/sbt-hood/pull/142) ([scala-steward](https://github.com/scala-steward))
+- Update sbt-updates to 0.5.1 [\#141](https://github.com/47degrees/sbt-hood/pull/141) ([scala-steward](https://github.com/scala-steward))
+- Update sbt-scalafmt to 2.4.0 [\#140](https://github.com/47degrees/sbt-hood/pull/140) ([scala-steward](https://github.com/scala-steward))
+- Update log4cats-slf4j to 1.1.1 [\#139](https://github.com/47degrees/sbt-hood/pull/139) ([scala-steward](https://github.com/scala-steward))
+- Update scalatest to 3.1.2 [\#138](https://github.com/47degrees/sbt-hood/pull/138) ([scala-steward](https://github.com/scala-steward))
+- Update sbt-ci-release to 1.5.3 [\#134](https://github.com/47degrees/sbt-hood/pull/134) ([scala-steward](https://github.com/scala-steward))
+- Update sbt-microsites to 1.2.0 [\#133](https://github.com/47degrees/sbt-hood/pull/133) ([scala-steward](https://github.com/scala-steward))
+- Update cats-effect to 2.1.3 [\#130](https://github.com/47degrees/sbt-hood/pull/130) ([scala-steward](https://github.com/scala-steward))
+
+**Merged pull requests:**
+
+- Bumps Githbu4s [\#145](https://github.com/47degrees/sbt-hood/pull/145) ([fedefernandez](https://github.com/fedefernandez))
+- Update scalafmt-core to 2.5.1 [\#136](https://github.com/47degrees/sbt-hood/pull/136) ([BenFradet](https://github.com/BenFradet))
+
 ## [v0.2.7](https://github.com/47degrees/sbt-hood/tree/v0.2.7) (2020-04-15)
 
 [Full Changelog](https://github.com/47degrees/sbt-hood/compare/v0.2.6...v0.2.7)
