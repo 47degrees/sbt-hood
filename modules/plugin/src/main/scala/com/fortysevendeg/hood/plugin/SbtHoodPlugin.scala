@@ -332,9 +332,8 @@ object TaskAlgebra {
             .get(benchmarkKey)
             .fold(
               L.error(
-                  s"Benchmark $benchmarkKey existing in previous benchmarks is missing from current ones."
-                )
-                .as(BenchmarkComparisonResult(previous, None, Warning, threshold))
+                s"Benchmark $benchmarkKey existing in previous benchmarks is missing from current ones."
+              ).as(BenchmarkComparisonResult(previous, None, Warning, threshold))
             )(current => S.delay(BenchmarkService.compare(current, previous, threshold)))
       }
 
