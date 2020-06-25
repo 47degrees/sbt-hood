@@ -261,7 +261,8 @@ object TaskAlgebra {
         )
 
         earliestHoodComment = commentsList.filter(_.body.contains(commentPrefix)).headOption
-        comment = s"## ${commentPrefix}:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
+        comment =
+          s"## ${commentPrefix}:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
 
         _ <- earliestHoodComment.fold(
           service.publishComment(
@@ -271,7 +272,7 @@ object TaskAlgebra {
             params.pullRequestNumber,
             comment
           )
-        )( ghComment =>
+        )(ghComment =>
           service.editComment(
             params.accessToken,
             params.repositoryOwner,
