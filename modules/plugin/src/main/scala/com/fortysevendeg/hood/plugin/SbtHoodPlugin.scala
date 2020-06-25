@@ -182,6 +182,8 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
 }
 
 object TaskAlgebra {
+  val commentPrefix = "sbt-hood benchmark result"
+
   def benchmarkTask[F[_]: Sync: Logger](
       previousPath: File,
       currentPath: File,
@@ -251,13 +253,35 @@ object TaskAlgebra {
   ): F[Either[Github4sError, Unit]] =
     GithubService.build[F](ExecutionContext.global).use { service =>
       (for {
-        _ <- service.publishComment(
+        commentsList <- service.listComments(
           params.accessToken,
           params.repositoryOwner,
           params.repositoryName,
-          params.pullRequestNumber,
-          s"## sbt-hood benchmark result:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
+          params.pullRequestNumber
         )
+
+        earliestHoodComment = commentsList.filter(_.body.contains(commentPrefix)).headOption
+        comment =
+          s"## ${commentPrefix}:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
+
+        _ <- earliestHoodComment.fold(
+          service.publishComment(
+            params.accessToken,
+            params.repositoryOwner,
+            params.repositoryName,
+            params.pullRequestNumber,
+            comment
+          )
+        )(ghComment =>
+          service.editComment(
+            params.accessToken,
+            params.repositoryOwner,
+            params.repositoryName,
+            ghComment.id,
+            comment
+          )
+        )
+
         comparison = gitHubStateFromBenchmarks(benchmarkResult)
         _ <-
           if (shouldCreateStatus) {
