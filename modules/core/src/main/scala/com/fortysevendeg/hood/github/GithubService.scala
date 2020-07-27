@@ -43,7 +43,7 @@ trait GithubService[F[_]] {
       accessToken: String,
       owner: String,
       repository: String,
-      commentId: Int,
+      commentId: Long,
       comment: String
   ): Github4sResponse[F, Comment]
 
@@ -104,7 +104,7 @@ object GithubService {
         accessToken: String,
         owner: String,
         repository: String,
-        commentId: Int,
+        commentId: Long,
         comment: String
     ): Github4sResponse[F, Comment] =
       toResponse(for {
