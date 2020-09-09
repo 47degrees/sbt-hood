@@ -345,20 +345,19 @@ object TaskAlgebra {
       thresholdMap: Map[String, Double]
   )(implicit L: Logger[F], S: Sync[F]): F[List[BenchmarkComparisonResult]] =
     previousBenchmarks.toList
-      .traverse {
-        case (benchmarkKey, previous) =>
-          val threshold =
-            thresholdMap
-              .get(benchmarkKey)
-              .fold(generalThreshold.getOrElse(previous.primaryMetric.scoreError))(identity)
-
-          currentBenchmarks
+      .traverse { case (benchmarkKey, previous) =>
+        val threshold =
+          thresholdMap
             .get(benchmarkKey)
-            .fold(
-              L.error(
-                s"Benchmark $benchmarkKey existing in previous benchmarks is missing from current ones."
-              ).as(BenchmarkComparisonResult(previous, None, Warning, threshold))
-            )(current => S.delay(BenchmarkService.compare(current, previous, threshold)))
+            .fold(generalThreshold.getOrElse(previous.primaryMetric.scoreError))(identity)
+
+        currentBenchmarks
+          .get(benchmarkKey)
+          .fold(
+            L.error(
+              s"Benchmark $benchmarkKey existing in previous benchmarks is missing from current ones."
+            ).as(BenchmarkComparisonResult(previous, None, Warning, threshold))
+          )(current => S.delay(BenchmarkService.compare(current, previous, threshold)))
       }
 
   def writeOutputFile[F[_]](

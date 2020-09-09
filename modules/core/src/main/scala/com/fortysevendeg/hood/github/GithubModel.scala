@@ -65,9 +65,8 @@ object GitHubParameters {
       checkMandatoryParameter(repositoryOwner, "repositoryOwner"),
       checkMandatoryParameter(repositoryName, "repositoryName"),
       checkMandatoryParameter(pullRequestNumber, "pullRequestNumber")
-    ).mapN {
-      case (token, repoOwner, repoName, pull) =>
-        GitHubParameters(token, repoOwner, repoName, pull, targetUrl, branch, commitMessage)
+    ).mapN { case (token, repoOwner, repoName, pull) =>
+      GitHubParameters(token, repoOwner, repoName, pull, targetUrl, branch, commitMessage)
     }.toEither
 
   private[this] def checkMandatoryParameter[A](
