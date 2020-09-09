@@ -196,14 +196,13 @@ object GithubService {
       }
 
       def filterNonChangedFiles(remote: List[(String, Option[String])]): List[(String, String)] = {
-        val remoteMap = remote.collect {
-          case (path, Some(c)) => path -> c
+        val remoteMap = remote.collect { case (path, Some(c)) =>
+          path -> c
         }.toMap
-        filesAndContents.filterNot {
-          case (path, content) =>
-            remoteMap.get(path).exists { remoteContent =>
-              remoteContent.trim.replaceAll("\n", "") == content.getBytes.toBase64.trim
-            }
+        filesAndContents.filterNot { case (path, content) =>
+          remoteMap.get(path).exists { remoteContent =>
+            remoteContent.trim.replaceAll("\n", "") == content.getBytes.toBase64.trim
+          }
         }
       }
 
@@ -213,8 +212,8 @@ object GithubService {
       ): Github4sResponse[F, TreeResult] = {
 
         def treeData: List[TreeDataBlob] =
-          filteredFilesContent.map {
-            case (path, content) => TreeDataBlob(path, "100644", "blob", content)
+          filteredFilesContent.map { case (path, content) =>
+            TreeDataBlob(path, "100644", "blob", content)
           }
 
         toResponse(gh.gitData.createTree(owner, repository, Some(baseTreeSha), treeData))
