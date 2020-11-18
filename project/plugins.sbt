@@ -1,5 +1,5 @@
 addSbtPlugin("com.47deg"                 % "sbt-microsites"           % "1.2.1")
-addSbtPlugin("com.geirsson"              % "sbt-ci-release"           % "1.5.3")
+addSbtPlugin("com.geirsson"              % "sbt-ci-release"           % "1.5.4")
 addSbtPlugin("pl.project13.scala"        % "sbt-jmh"                  % "0.4.0")
 addSbtPlugin("org.scalameta"             % "sbt-scalafmt"             % "2.4.2")
 addSbtPlugin("org.scoverage"             % "sbt-scoverage"            % "1.6.1")
