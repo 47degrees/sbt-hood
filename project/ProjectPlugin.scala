@@ -47,7 +47,7 @@ object ProjectPlugin extends AutoPlugin {
         "com.nrinaudo"      %% "kantan.csv-generic"  % "0.6.1",
         "dev.profunktor"    %% "console4cats"        % "0.8.1",
         "com.lightbend"     %% "emoji"               % "1.2.1",
-        "org.scalatest"     %% "scalatest"           % "3.2.2"  % Test,
+        "org.scalatest"     %% "scalatest"           % "3.2.3"  % Test,
         "org.slf4j"          % "slf4j-nop"           % "1.7.30" % Test
       )
     )
