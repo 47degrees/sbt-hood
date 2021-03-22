@@ -38,8 +38,8 @@ object ProjectPlugin extends AutoPlugin {
         "io.circe"          %% "circe-generic"       % "0.13.0",
         "io.circe"          %% "circe-core"          % "0.13.0",
         "io.circe"          %% "circe-parser"        % "0.13.0",
-        "org.http4s"        %% "http4s-blaze-client" % "0.21.20",
-        "com.47deg"         %% "github4s"            % "0.28.2",
+        "org.http4s"        %% "http4s-blaze-client" % "0.21.19",
+        "com.47deg"         %% "github4s"            % "0.28.3",
         "org.typelevel"     %% "cats-effect"         % "2.3.3",
         "io.chrisdavenport" %% "log4cats-slf4j"      % "1.1.1",
         "ch.qos.logback"     % "logback-classic"     % "1.2.3",
@@ -47,7 +47,7 @@ object ProjectPlugin extends AutoPlugin {
         "com.nrinaudo"      %% "kantan.csv-generic"  % "0.6.1",
         "dev.profunktor"    %% "console4cats"        % "0.8.1",
         "com.lightbend"     %% "emoji"               % "1.2.1",
-        "org.scalatest"     %% "scalatest"           % "3.2.5"  % Test,
+        "org.scalatest"     %% "scalatest"           % "3.2.6"  % Test,
         "org.slf4j"          % "slf4j-nop"           % "1.7.30" % Test
       )
     )
