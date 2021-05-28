@@ -35,9 +35,9 @@ object ProjectPlugin extends AutoPlugin {
     Seq(
       resolvers += Resolver.typesafeIvyRepo("releases"),
       libraryDependencies ++= Seq(
-        "io.circe"          %% "circe-generic"       % "0.13.0",
-        "io.circe"          %% "circe-core"          % "0.13.0",
-        "io.circe"          %% "circe-parser"        % "0.13.0",
+        "io.circe"          %% "circe-generic"       % "0.14.1",
+        "io.circe"          %% "circe-core"          % "0.14.1",
+        "io.circe"          %% "circe-parser"        % "0.14.1",
         "org.http4s"        %% "http4s-blaze-client" % "0.21.24",
         "com.47deg"         %% "github4s"            % "0.28.4",
         "org.typelevel"     %% "cats-effect"         % "2.5.1",
