@@ -48,7 +48,7 @@ object ProjectPlugin extends AutoPlugin {
         "dev.profunktor"    %% "console4cats"        % "0.8.1",
         "com.lightbend"     %% "emoji"               % "1.2.3",
         "org.scalatest"     %% "scalatest"           % "3.2.9"  % Test,
-        "org.slf4j"          % "slf4j-nop"           % "1.7.30" % Test
+        "org.slf4j"          % "slf4j-nop"           % "1.7.31" % Test
       )
     )
 }
