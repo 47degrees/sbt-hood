@@ -12,16 +12,16 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
-      micrositeName := "SBT-Hood",
-      micrositeBaseUrl := "/sbt-hood",
-      micrositeDescription := "A SBT plugin for comparing benchmarks in your PRs",
-      micrositeDocumentationUrl := "docs",
-      micrositeGitterChannelUrl := "47deg/sbthood",
+      micrositeName                 := "SBT-Hood",
+      micrositeBaseUrl              := "/sbt-hood",
+      micrositeDescription          := "A SBT plugin for comparing benchmarks in your PRs",
+      micrositeDocumentationUrl     := "docs",
+      micrositeGitterChannelUrl     := "47deg/sbthood",
       micrositeOrganizationHomepage := "http://www.47deg.com",
       includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md" | "*.svg",
-      micrositePushSiteWith := GitHub4s,
+      micrositePushSiteWith   := GitHub4s,
       micrositeHighlightTheme := "atom-one-light",
-      micrositeGithubToken := Option(System.getenv().get("GITHUB_TOKEN")),
+      micrositeGithubToken    := Option(System.getenv().get("GITHUB_TOKEN")),
       micrositePalette := Map(
         "brand-primary"   -> "#25bc77",
         "brand-secondary" -> "#25bc77",
