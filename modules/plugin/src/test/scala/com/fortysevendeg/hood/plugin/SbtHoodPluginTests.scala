@@ -124,9 +124,9 @@ class SbtHoodPluginTests extends AnyFlatSpec with Matchers with TestUtils {
       e => fail(s"Failed with error: $e"),
       group => {
         group.exists(_.benchmark == "test.decoding.previous") &&
-          group.exists(_.benchmark == "test.parsing.previous") &&
-          group.exists(_.benchmark == "test.decoding.current_really_bad") &&
-          group.exists(_.benchmark == "test.parsing.current_really_bad")
+        group.exists(_.benchmark == "test.parsing.previous") &&
+        group.exists(_.benchmark == "test.decoding.current_really_bad") &&
+        group.exists(_.benchmark == "test.parsing.current_really_bad")
       }
     )
   }
