@@ -25,7 +25,7 @@ import com.fortysevendeg.hood.benchmark.{BenchmarkComparisonResult, BenchmarkSer
 import com.fortysevendeg.hood.csv.{BenchmarkColumns, CsvService}
 import com.fortysevendeg.hood.model._
 import sbt.{AutoPlugin, Def, PluginTrigger, Task}
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 import io.circe.syntax._
 import cats.effect.Console.implicits._
 import com.fortysevendeg.hood.github._
@@ -36,7 +36,7 @@ import Benchmark._
 import com.fortysevendeg.hood.github.instances.Github4sError
 import com.lightbend.emoji.ShortCodes.Implicits._
 import com.lightbend.emoji.ShortCodes.Defaults._
-import io.chrisdavenport.log4cats.Logger
+import org.typelevel.log4cats.Logger
 
 import scala.concurrent.ExecutionContext
 

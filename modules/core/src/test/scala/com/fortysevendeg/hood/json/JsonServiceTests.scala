@@ -21,7 +21,7 @@ import cats.implicits._
 import cats.effect.IO
 import com.fortysevendeg.hood.TestValues.{badBenchmark, mehBenchmark}
 import com.fortysevendeg.hood.model.InvalidJson
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
