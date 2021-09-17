@@ -22,7 +22,7 @@ import cats.effect.IO
 import cats.syntax.either._
 import com.fortysevendeg.hood.TestValues._
 import com.fortysevendeg.hood.model.InvalidCsv
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 

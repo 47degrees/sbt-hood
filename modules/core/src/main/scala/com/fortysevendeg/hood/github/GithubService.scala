@@ -23,7 +23,7 @@ import com.fortysevendeg.hood.github.instances._
 import com.github.marklister.base64.Base64._
 import github4s.Github
 import github4s.domain._
-import io.chrisdavenport.log4cats.Logger
+import org.typelevel.log4cats.Logger
 import org.http4s.client.Client
 import org.http4s.client.blaze.BlazeClientBuilder
 
