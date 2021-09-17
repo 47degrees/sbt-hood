@@ -22,7 +22,7 @@ import cats.data.EitherT
 import cats.effect.IO
 import cats.effect._
 import com.fortysevendeg.hood.benchmark.BenchmarkComparisonResult
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 import cats.effect.Console.implicits._
 import com.fortysevendeg.hood.json.JsonService
 import com.fortysevendeg.hood.model.{Benchmark, HoodError}
