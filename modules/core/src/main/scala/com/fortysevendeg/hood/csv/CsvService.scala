@@ -19,7 +19,6 @@ package com.fortysevendeg.hood.csv
 import java.io.File
 
 import cats.effect.Sync
-import cats.syntax.either._
 import com.fortysevendeg.hood.model._
 import kantan.csv._
 import kantan.csv.ops._
