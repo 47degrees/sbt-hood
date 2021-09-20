@@ -41,7 +41,7 @@ object ProjectPlugin extends AutoPlugin {
         "org.http4s"     %% "http4s-blaze-client" % "0.21.28",
         "com.47deg"      %% "github4s"            % "0.28.5",
         "org.typelevel"  %% "cats-effect"         % "2.5.3",
-        "org.typelevel"  %% "log4cats-slf4j"      % "1.2.0",
+        "org.typelevel"  %% "log4cats-slf4j"      % "1.2.2",
         "ch.qos.logback"  % "logback-classic"     % "1.2.6",
         "com.nrinaudo"   %% "kantan.csv"          % "0.6.1",
         "com.nrinaudo"   %% "kantan.csv-generic"  % "0.6.1",
