@@ -25,7 +25,7 @@ import github4s.Github
 import github4s.domain._
 import org.typelevel.log4cats.Logger
 import org.http4s.client.Client
-import org.http4s.client.blaze.BlazeClientBuilder
+import org.http4s.blaze.client.BlazeClientBuilder
 
 import scala.concurrent.ExecutionContext
 
