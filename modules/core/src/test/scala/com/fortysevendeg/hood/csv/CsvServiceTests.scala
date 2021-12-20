@@ -30,6 +30,8 @@ class CsvServiceTests extends AnyFlatSpec with Matchers {
 
   implicit val logger = Slf4jLogger.getLogger[IO]
 
+  import cats.effect.unsafe.implicits.global
+
   "CsvService" should "parse a correct CSV file" in {
     val dataFile = new File(getClass.getResource("/jmh.csv").getPath)
 

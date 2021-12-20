@@ -5,7 +5,7 @@ addCommandAlias("ci-test", "scalafmtCheckAll; scalafmtSbtCheck; mdoc; testCovere
 addCommandAlias("ci-docs", "github; mdoc; headerCreateAll; publishMicrosite")
 addCommandAlias("ci-publish", "github; ci-release")
 
-skip in publish := true
+publish / skip := true
 
 lazy val `sbt-hood-core` = project
   .in(file("modules/core"))
@@ -18,9 +18,9 @@ lazy val `sbt-hood-plugin` = project
 lazy val microsite = project
   .enablePlugins(MicrositesPlugin)
   .settings(micrositeSettings: _*)
-  .settings(skip in publish := true)
+  .settings(publish / skip := true)
 
 lazy val documentation = project
   .enablePlugins(MdocPlugin)
   .settings(mdocOut := file("."))
-  .settings(skip in publish := true)
+  .settings(publish / skip := true)
