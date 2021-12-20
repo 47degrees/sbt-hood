@@ -29,6 +29,8 @@ class JsonServiceTests extends AnyFlatSpec with Matchers {
 
   implicit val logger = Slf4jLogger.getLogger[IO]
 
+  import cats.effect.unsafe.implicits.global
+
   "JsonService" should "parse a correct json file" in {
     val dataFile = new File(getClass.getResource("/jmh.json").getPath)
 

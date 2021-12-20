@@ -17,15 +17,15 @@
 package com.fortysevendeg.hood.github
 
 import cats.data.{EitherT, NonEmptyList}
-import cats.effect.{ConcurrentEffect, Resource, Sync}
+import cats.effect.{Async, Resource}
 import cats.implicits._
 import com.fortysevendeg.hood.github.instances._
 import com.github.marklister.base64.Base64._
 import github4s.Github
 import github4s.domain._
 import org.typelevel.log4cats.Logger
+import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.client.Client
-import org.http4s.client.blaze.BlazeClientBuilder
 
 import scala.concurrent.ExecutionContext
 
@@ -77,12 +77,12 @@ trait GithubService[F[_]] {
 
 object GithubService {
 
-  def build[F[_]: ConcurrentEffect: Logger](
+  def build[F[_]: Async: Logger](
       clientEC: ExecutionContext
   ): Resource[F, GithubService[F]] =
-    BlazeClientBuilder[F](clientEC).resource.map(new GithubServiceImpl[F](_))
+    BlazeClientBuilder[F].withExecutionContext(clientEC).resource.map(new GithubServiceImpl[F](_))
 
-  class GithubServiceImpl[F[_]: Sync](clientEC: Client[F])(implicit L: Logger[F])
+  class GithubServiceImpl[F[_]: Async](clientEC: Client[F])(implicit L: Logger[F])
       extends GithubService[F] {
 
     def publishComment(

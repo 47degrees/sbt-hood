@@ -20,10 +20,8 @@ import java.io.File
 
 import cats.data.EitherT
 import cats.effect.IO
-import cats.effect._
 import com.fortysevendeg.hood.benchmark.BenchmarkComparisonResult
 import org.typelevel.log4cats.slf4j.Slf4jLogger
-import cats.effect.Console.implicits._
 import com.fortysevendeg.hood.json.JsonService
 import com.fortysevendeg.hood.model.{Benchmark, HoodError}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -32,6 +30,8 @@ import org.scalatest.matchers.should.Matchers
 class SbtHoodPluginTests extends AnyFlatSpec with Matchers with TestUtils {
 
   implicit val logger = Slf4jLogger.getLogger[IO]
+
+  import cats.effect.unsafe.implicits.global
 
   val previousFileCsv  = new File(getClass.getResource("/previous.csv").getPath)
   val previousFileJson = new File(getClass.getResource("/previous.json").getPath)

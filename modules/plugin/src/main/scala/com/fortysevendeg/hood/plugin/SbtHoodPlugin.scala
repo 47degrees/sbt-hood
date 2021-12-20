@@ -17,22 +17,22 @@
 package com.fortysevendeg.hood.plugin
 
 import java.io.File
-
 import cats.data.{EitherT, NonEmptyChain}
+import cats.effect.{Async, IO}
+import cats.effect.std.Console
 import cats.implicits._
-import cats.effect.{ConcurrentEffect, Console, ContextShift, IO, Sync}
 import com.fortysevendeg.hood.benchmark.{BenchmarkComparisonResult, BenchmarkService, Warning}
 import com.fortysevendeg.hood.csv.{BenchmarkColumns, CsvService}
 import com.fortysevendeg.hood.model._
 import sbt.{AutoPlugin, Def, PluginTrigger, Task}
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import io.circe.syntax._
-import cats.effect.Console.implicits._
 import com.fortysevendeg.hood.github._
 import com.fortysevendeg.hood.benchmark.Error
 import com.fortysevendeg.hood.json.JsonService
 import com.fortysevendeg.hood.utils._
 import Benchmark._
+import cats.Applicative
 import com.fortysevendeg.hood.github.instances.Github4sError
 import com.lightbend.emoji.ShortCodes.Implicits._
 import com.lightbend.emoji.ShortCodes.Defaults._
@@ -56,15 +56,15 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
 
   override val trigger: PluginTrigger = noTrigger
 
-  implicit lazy val logger: Logger[IO]       = Slf4jLogger.getLogger[IO]
-  implicit lazy val CS: ContextShift[IO]     = IO.contextShift(ExecutionContext.global)
-  implicit lazy val CE: ConcurrentEffect[IO] = IO.ioConcurrentEffect
+  implicit lazy val logger: Logger[IO] = Slf4jLogger.getLogger[IO]
+
+  import cats.effect.unsafe.implicits.global
 
   def compareBenchmarksTask: Def.Initialize[Task[Unit]] =
     Def.task {
 
       TaskAlgebra
-        .benchmarkTask(
+        .benchmarkTask[IO](
           previousBenchmarkPath.value,
           currentBenchmarkPath.value,
           keyColumnName.value,
@@ -94,7 +94,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
       (for {
         basicBenchmark <-
           TaskAlgebra
-            .benchmarkTask(
+            .benchmarkTask[IO](
               previousBenchmarkPath.value,
               currentBenchmarkPath.value,
               keyColumnName.value,
@@ -124,7 +124,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
         )
         _ <- EitherT(
           TaskAlgebra
-            .submitResultsToGitHub(
+            .submitResultsToGitHub[IO](
               basicBenchmark,
               previousBenchmarkPath.value,
               currentBenchmarkPath.value,
@@ -184,7 +184,7 @@ object SbtHoodPlugin extends AutoPlugin with SbtHoodDefaultSettings with SbtHood
 object TaskAlgebra {
   val commentPrefix = "sbt-hood benchmark result"
 
-  def benchmarkTask[F[_]: Sync: Logger](
+  def benchmarkTask[F[_]: Async: Logger](
       previousPath: File,
       currentPath: File,
       keyColumnName: String,
@@ -227,7 +227,7 @@ object TaskAlgebra {
         )
       )
       _ <- EitherT(
-        writeOutputFile(
+        writeOutputFile[F](
           shouldOutputToFile,
           outputFilePath,
           outputFileFormat,
@@ -239,12 +239,12 @@ object TaskAlgebra {
         )
       )
       outputMessage = benchmarkOutput(result, previousPath.getName, currentPath.getName)
-      _ <- EitherT.right(C.putStrLn(outputMessage))
+      _ <- EitherT.right(C.println(outputMessage))
     } yield result
 
   }
 
-  def submitResultsToGitHub[F[_]: ConcurrentEffect: Logger](
+  def submitResultsToGitHub[F[_]: Async: Logger](
       benchmarkResult: List[BenchmarkComparisonResult],
       previousPath: File,
       currentPath: File,
@@ -260,7 +260,7 @@ object TaskAlgebra {
           params.pullRequestNumber
         )
 
-        earliestHoodComment = commentsList.filter(_.body.contains(commentPrefix)).headOption
+        earliestHoodComment = commentsList.find(_.body.contains(commentPrefix))
         comment =
           s"## $commentPrefix:\n\n${benchmarkOutput(benchmarkResult, previousPath.getName, currentPath.getName)}"
 
@@ -302,7 +302,7 @@ object TaskAlgebra {
       } yield ()).value
     }
 
-  def uploadFilesToGitHub[F[_]: ConcurrentEffect: Logger](
+  def uploadFilesToGitHub[F[_]: Async: Logger](
       files: List[(String, String)],
       params: GitHubParameters
   ): F[Either[Github4sError, Unit]] =
@@ -343,7 +343,7 @@ object TaskAlgebra {
       previousBenchmarks: Map[String, Benchmark],
       generalThreshold: Option[Double],
       thresholdMap: Map[String, Double]
-  )(implicit L: Logger[F], S: Sync[F]): F[List[BenchmarkComparisonResult]] =
+  )(implicit L: Logger[F], F: Async[F]): F[List[BenchmarkComparisonResult]] =
     previousBenchmarks.toList
       .traverse { case (benchmarkKey, previous) =>
         val threshold =
@@ -357,10 +357,10 @@ object TaskAlgebra {
             L.error(
               s"Benchmark $benchmarkKey existing in previous benchmarks is missing from current ones."
             ).as(BenchmarkComparisonResult(previous, None, Warning, threshold))
-          )(current => S.delay(BenchmarkService.compare(current, previous, threshold)))
+          )(current => F.delay(BenchmarkService.compare(current, previous, threshold)))
       }
 
-  def writeOutputFile[F[_]](
+  def writeOutputFile[F[_]: Async](
       shouldOutputToFile: Boolean,
       outputPath: File,
       outputFileFormat: OutputFileFormat,
@@ -369,7 +369,7 @@ object TaskAlgebra {
       currentFile: String,
       previousBenchmarks: Map[String, Benchmark],
       currentBenchmarks: Map[String, Benchmark]
-  )(implicit S: Sync[F]): F[Either[HoodError, Unit]] =
+  ): F[Either[HoodError, Unit]] =
     if (shouldOutputToFile) {
       val collectedBenchmarks =
         collectBenchmarks(
@@ -389,7 +389,7 @@ object TaskAlgebra {
       EitherT(FileUtils.writeFile(outputPath, fileContents))
         .leftMap[HoodError](e => OutputFileError(e.getMessage))
         .value
-    } else S.pure(Either.right(()))
+    } else ().asRight[HoodError].pure[F]
 
   def collectBenchmarks(
       previousFile: String,
@@ -447,22 +447,18 @@ object TaskAlgebra {
     else
       GithubStatusDescription(GithubStatusSuccess, "Successful benchmark comparison")
 
-  def parseBenchmark[F[_]](
+  def parseBenchmark[F[_]: Applicative](
       columns: BenchmarkColumns,
       file: File,
       csvService: CsvService[F],
       jsonService: JsonService[F]
-  )(implicit S: Sync[F]): F[Either[HoodError, List[Benchmark]]] = {
-
+  ): F[Either[HoodError, List[Benchmark]]] =
     FileUtils.fileType(file) match {
       case Csv  => csvService.parseBenchmark(columns, file)
       case Json => jsonService.parseBenchmark(file)
       case _ =>
-        S.pure(
-          BenchmarkLoadingError(s"Invalid file type for file: ${file.getName}")
-            .asLeft[List[Benchmark]]
-        )
+        (BenchmarkLoadingError(s"Invalid file type for file: ${file.getName}"): HoodError)
+          .asLeft[List[Benchmark]]
+          .pure[F]
     }
-
-  }
 }
