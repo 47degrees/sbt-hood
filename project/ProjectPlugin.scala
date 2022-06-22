@@ -41,14 +41,14 @@ object ProjectPlugin extends AutoPlugin {
         "org.http4s"            %% "http4s-blaze-client" % "0.23.12",
         "com.47deg"             %% "github4s"            % "0.31.0",
         "org.typelevel"         %% "cats-effect"         % "3.3.12",
-        "org.typelevel"         %% "log4cats-slf4j"      % "2.3.1",
+        "org.typelevel"         %% "log4cats-slf4j"      % "2.3.2",
         "ch.qos.logback"         % "logback-classic"     % "1.2.11",
         "com.nrinaudo"          %% "kantan.csv"          % "0.6.2",
         "com.nrinaudo"          %% "kantan.csv-generic"  % "0.6.2",
         "com.lightbend"         %% "emoji"               % "1.2.3",
         "com.github.marklister" %% "base64"              % "0.3.0",
         "org.scalatest"         %% "scalatest"           % "3.2.12" % Test,
-        "org.typelevel"         %% "log4cats-noop"       % "2.3.1"  % Test
+        "org.typelevel"         %% "log4cats-noop"       % "2.3.2"  % Test
       )
     )
 }
