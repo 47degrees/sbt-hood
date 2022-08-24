@@ -39,15 +39,15 @@ object ProjectPlugin extends AutoPlugin {
         "io.circe"              %% "circe-core"          % "0.14.2",
         "io.circe"              %% "circe-parser"        % "0.14.2",
         "org.http4s"            %% "http4s-blaze-client" % "0.23.12",
-        "com.47deg"             %% "github4s"            % "0.31.0",
+        "com.47deg"             %% "github4s"            % "0.31.1",
         "org.typelevel"         %% "cats-effect"         % "3.3.14",
         "org.typelevel"         %% "log4cats-slf4j"      % "2.4.0",
         "ch.qos.logback"         % "logback-classic"     % "1.2.11",
         "com.nrinaudo"          %% "kantan.csv"          % "0.6.2",
         "com.nrinaudo"          %% "kantan.csv-generic"  % "0.6.2",
-        "com.lightbend"         %% "emoji"               % "1.2.3",
+        "com.lightbend"         %% "emoji"               % "1.3.0",
         "com.github.marklister" %% "base64"              % "0.3.0",
-        "org.scalatest"         %% "scalatest"           % "3.2.12" % Test,
+        "org.scalatest"         %% "scalatest"           % "3.2.13" % Test,
         "org.typelevel"         %% "log4cats-noop"       % "2.4.0"  % Test
       )
     )
