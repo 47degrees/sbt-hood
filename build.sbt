@@ -1,4 +1,4 @@
-ThisBuild / scalaVersion := "2.12.17"
+ThisBuild / scalaVersion := "2.13.10"
 ThisBuild / organization := "com.47deg"
 
 addCommandAlias("ci-test", "scalafmtCheckAll; scalafmtSbtCheck; mdoc; testCovered")
