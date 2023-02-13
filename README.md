@@ -9,7 +9,7 @@
 To get started with *sbt-hood* simply add the following to your `plugins.sbt` file:
 
 ```
-addSbtPlugin("com.47deg" %% "sbt-hood-plugin" % "0.2.7")
+addSbtPlugin("com.47deg" %% "sbt-hood-plugin" % "0.4.0")
 ```
 
 For more detailed documentation please check the [sbt-hood microsite](https://47degrees.github.io/sbt-hood/).
@@ -18,4 +18,4 @@ For more detailed documentation please check the [sbt-hood microsite](https://47
 
 sbt-hood is designed and developed by 47 Degrees
 
-Copyright (C) 2019-2020 47 Degrees. <http://47deg.com>
+Copyright (C) 2019-2023 47 Degrees Open Source <https://www.47deg.com>
