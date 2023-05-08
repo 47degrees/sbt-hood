@@ -42,7 +42,7 @@ object ProjectPlugin extends AutoPlugin {
         "com.47deg"             %% "github4s"            % "0.32.0",
         "org.typelevel"         %% "cats-effect"         % "3.4.8",
         "org.typelevel"         %% "log4cats-slf4j"      % "2.5.0",
-        "ch.qos.logback"         % "logback-classic"     % "1.4.5",
+        "ch.qos.logback"         % "logback-classic"     % "1.4.6",
         "com.nrinaudo"          %% "kantan.csv"          % "0.7.0",
         "com.nrinaudo"          %% "kantan.csv-generic"  % "0.7.0",
         "com.lightbend"         %% "emoji"               % "1.3.0",
